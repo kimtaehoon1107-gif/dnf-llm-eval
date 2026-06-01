@@ -1,0 +1,3 @@
+﻿"retriever","questions","factual_proxy_pass_count","factual_proxy_pass_rate","format_proxy_pass_count","format_proxy_pass_rate","meta_reasoning_count","non_korean_cjk_count","refusal_count","avg_gold_token_recall","avg_evidence_token_recall","avg_korean_char_ratio","avg_latency_sec"
+"bge-m3","22","19","0.864","0","0.000","21","1","0","0.563","0.805","0.155","9.063"
+"bm25","22","17","0.773","0","0.000","22","0","0","0.568","0.810","0.110","8.964"
