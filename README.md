@@ -264,6 +264,10 @@ python scripts\run_rag_local_llm_eval.py `
 | Safety gate 일반화 한계 | 규칙 기반 1차 필터를 paraphrase 공격/정상 질문 오탐 세트로 추가 검증 |
 | 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
+| 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set으로 확장 |
+| 운영 로그 미연동 | 질문, 검색 chunk, 답변, latency, safety decision, user feedback을 추적하는 observability layer 추가 |
+
+후속 확장은 두 방향으로 볼 수 있습니다. 첫째, 현재의 offline benchmark를 패치노트가 바뀔 때마다 새 문서 수집, 중요 변경점 추출, 질문/정답 후보 생성, 재평가까지 이어지는 자동 갱신형 평가셋으로 발전시킬 수 있습니다. 둘째, 실제 서비스 적용 단계에서는 RAGAS/DeepEval/LLM-as-a-Judge 같은 자동 평가 도구를 보조 지표로 붙이고, observability layer를 통해 검색 근거, 답변, 지연시간, safety 판단, 사용자 피드백을 기록해 offline 평가와 online 로그를 연결할 수 있습니다.
 
 ## 결론
 
