@@ -1,13 +1,9 @@
 # DNF LLM Evaluation Project
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB)
-![Local LLM](https://img.shields.io/badge/Local%20LLM-Qwen3%204B%20Instruct-6B46C1)
-![Retrieval](https://img.shields.io/badge/Retrieval-BGE--M3%20%2B%20BM25-0F766E)
-![Evaluation](https://img.shields.io/badge/Evaluation-Rubric%20%2B%20Proxy-374151)
-![Safety](https://img.shields.io/badge/Safety-Gate%20%2B%20Paraphrase%20Test-991B1B)
-
 던전앤파이터 공식 업데이트 문서를 기반으로 **로컬 LLM의 답변 품질을 평가**한 포트폴리오 프로젝트입니다.  
 핵심은 챗봇 데모가 아니라 `문서 수집 -> 벤치마크 질문 설계 -> RAG 검색 -> 답변 생성 -> 평가 지표 설계 -> 실패 원인 분석`으로 이어지는 평가 파이프라인입니다.
+
+**Stack:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
 
 ## Project Snapshot
 
