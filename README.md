@@ -47,6 +47,7 @@ flowchart LR
 | [`index.html`](index.html) | GitHub Pages 배포용 HTML 포트폴리오 첫 화면 |
 | [`report/final_closing_review.md`](report/final_closing_review.md) | 제출용 최종 요약과 최신 결과 리뷰 |
 | [`report/final_portfolio_report.md`](report/final_portfolio_report.md) | 전체 실험 과정과 결과를 정리한 통합 보고서 |
+| [`report/README.md`](report/README.md) | 보고서 폴더의 권장 읽기 순서 |
 | [`report/application_summary.md`](report/application_summary.md) | 지원서와 면접에서 바로 설명할 수 있는 요약문 |
 | [`report/model_selection_and_benchmark_rationale.md`](report/model_selection_and_benchmark_rationale.md) | 모델, 검색기, 평가 방법 선택 근거 |
 | [`report/references.md`](report/references.md) | 평가/RAG/모델/safety 설계 참고문헌 |
@@ -109,6 +110,7 @@ dnf-llm-eval/
     representative_manual_scoring.csv
     evaluation_rubric.md
   report/
+    README.md
     final_closing_review.md
     final_portfolio_report.md
     application_summary.md
