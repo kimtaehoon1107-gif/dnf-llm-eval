@@ -156,6 +156,12 @@ BGE-M3는 factual proxy를 개선했지만, `qwen3:4b`는 영어식 추론 과�
 | Safety gate 일반화 한계 | paraphrase 공격과 정상 질문 오탐 세트를 추가해 규칙 기반 필터 보완 |
 | 서비스 호칭 톤 미반영 | `모험가님` 호칭을 명시한 서비스 톤 프롬프트 재실험 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
+| 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문과 기준 정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
+| 운영 로그 미연동 | 질문, 검색 chunk, 답변, latency, safety decision, user feedback을 추적하는 observability layer 추가 |
+
+현재 결과는 미리 구성한 문서 5개와 benchmark 질문 22개를 대상으로 한 offline 평가다. 이 방식은 실험을 통제하기 쉽지만, 라이브 게임처럼 패치노트와 이벤트 조건이 계속 바뀌는 도메인에서는 시간이 지나며 평가셋이 낡을 수 있다. 후속 단계에서는 새 패치노트 수집, 변경점 추출, 질문/정답 후보 생성, 재평가를 하나의 주기로 묶어 dynamic refreshed evaluation set으로 확장할 수 있다.
+
+또한 실제 서비스 적용 단계에서는 RAGAS/DeepEval/LLM-as-a-Judge를 최종 판정자가 아니라 보조 평가자로 활용할 수 있다. 예를 들어 검색 chunk가 질문과 맞는지, 답변이 근거에 충실한지, 문서에 없는 내용을 만들지 않았는지 자동으로 1차 점검한 뒤, 중요한 실패 사례는 수동 rubric으로 다시 확인하는 방식이다. 이때 observability layer를 붙이면 question_id, retrieved_chunk_ids, answer, latency, safety decision, user feedback을 함께 기록할 수 있어 offline benchmark에서 발견한 약점과 실제 유저 로그에서 발생한 문제를 연결해 개선할 수 있다.
 
 ## 9. 결론
 
