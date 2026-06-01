@@ -16,6 +16,12 @@
 - Min, S., Krishna, K., Lyu, X., Lewis, M., Yih, W.-t., Koh, P. W., Iyyer, M., Zettlemoyer, L., & Hajishirzi, H. (2023). *FActScore: Fine-grained Atomic Evaluation of Factual Precision in Long Form Text Generation*. arXiv. https://arxiv.org/abs/2305.14251
   - 답변을 원자적 사실 단위로 나누고 근거 지원 여부를 확인하는 평가 방향의 근거로 사용했다.
 
+- Liu, Y., Iter, D., Xu, Y., Wang, S., Xu, R., & Zhu, C. (2023). *G-Eval: NLG Evaluation using GPT-4 with Better Human Alignment*. arXiv. https://arxiv.org/abs/2303.16634
+  - LLM-as-a-Judge 방식으로 답변 품질을 평가하는 후속 자동 채점 방향의 근거로 참고했다. 본 프로젝트에서는 직접 구현하지 않고 수동 rubric과 proxy 지표를 우선 사용했다.
+
+- Confident AI. (2026). *DeepEval: The LLM Evaluation Framework*. https://github.com/confident-ai/deepeval
+  - RAG/LLM 응답 평가를 테스트 코드처럼 자동화하는 후속 개선 후보로 참고했다. 본 프로젝트에는 DeepEval을 직접 연동하지 않고, 향후 보조 평가 도구로 제안했다.
+
 ## 2. Retrieval and Model Selection
 
 - Chen, J., Xiao, S., Zhang, P., Luo, K., Lian, D., & Liu, Z. (2024). *BGE M3-Embedding: Multi-Lingual, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation*. arXiv. https://arxiv.org/abs/2402.03216
