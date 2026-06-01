@@ -163,6 +163,12 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 | Safety gate 일반화 한계 | paraphrase 공격과 정상 질문 오탐 세트를 추가해 규칙 기반 필터 보완 |
 | 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
+| 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
+| 운영 로그 미연동 | 질문, 검색 chunk, 답변, latency, safety decision, user feedback을 추적하는 observability layer 추가 |
+
+후속 확장의 핵심은 평가셋과 운영 로그를 연결하는 것이다. 현재 프로젝트는 미리 만든 문서와 질문으로 모델을 검증하는 offline benchmark지만, 실제 라이브 게임에서는 패치노트가 바뀔 때마다 정답도 바뀔 수 있다. 따라서 새 문서 수집, 변경점 추출, 질문/정답 후보 생성, 재평가를 자동화하면 dynamic refreshed evaluation set으로 확장할 수 있다.
+
+서비스 적용 단계에서는 RAGAS/DeepEval/LLM-as-a-Judge를 보조 평가자로 두고, 검색 근거 적합성, 답변 근거 충실성, 질문 관련성, 환각 여부를 자동으로 1차 점검할 수 있다. 여기에 observability layer를 붙여 question_id, retrieved_chunk_ids, answer, latency, safety decision, user feedback을 기록하면, offline 평가에서 만든 기준과 실제 유저 로그를 연결해 지속적으로 취약 질문을 보강할 수 있다.
 
 ## 10. 최종 결론
 
