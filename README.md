@@ -3,7 +3,9 @@
 던전앤파이터 공식 업데이트 문서를 기반으로 **로컬 LLM의 답변 품질을 평가**한 포트폴리오 프로젝트입니다.  
 핵심은 챗봇 데모가 아니라 `문서 수집 -> 벤치마크 질문 설계 -> RAG 검색 -> 답변 생성 -> 평가 지표 설계 -> 실패 원인 분석`으로 이어지는 평가 파이프라인입니다.
 
-**Stack:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
+**웹 포트폴리오:** [https://kimtaehoon1107-gif.github.io/dnf-llm-eval/](https://kimtaehoon1107-gif.github.io/dnf-llm-eval/)
+
+**주요 구성:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
 
 ## Project Snapshot
 
@@ -41,6 +43,8 @@ flowchart LR
 
 | File | Why it matters |
 |---|---|
+| [웹 포트폴리오](https://kimtaehoon1107-gif.github.io/dnf-llm-eval/) | GitHub Pages로 배포한 제출용 프로젝트 소개 페이지 |
+| [`index.html`](index.html) | GitHub Pages 배포용 HTML 포트폴리오 첫 화면 |
 | [`report/final_closing_review.md`](report/final_closing_review.md) | 제출용 최종 요약과 최신 결과 리뷰 |
 | [`report/final_portfolio_report.md`](report/final_portfolio_report.md) | 전체 실험 과정과 결과를 정리한 통합 보고서 |
 | [`report/application_summary.md`](report/application_summary.md) | 지원서와 면접에서 바로 설명할 수 있는 요약문 |
@@ -77,6 +81,7 @@ flowchart LR
 
 ```text
 dnf-llm-eval/
+  index.html                     # GitHub Pages용 포트폴리오 첫 화면
   data/
     processed_md/                 # 수집한 던파 업데이트 문서
     structured/shop_items.json    # 켈돈 자비 상점표 구조화 데이터
