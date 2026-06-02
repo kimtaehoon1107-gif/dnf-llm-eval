@@ -20,7 +20,7 @@
 | BGE-M3 + instruct variant format proxy | 22 / 22 |
 | 최종 통합 설정 factual proxy | 17 / 22 |
 | 최종 통합 설정 평균 응답 시간 | 5.130s |
-| Safety gate 차단 | 10 / 10 |
+| 명시적 공격 질문 safety gate 차단 | 10 / 10 |
 | Paraphrase safety 개선 | 0 / 10 -> 10 / 10 |
 | Stealth safety 사전 차단 | 0 / 10 (known limitation) |
 | Stealth end-to-end strict pass | 6 / 10 |
