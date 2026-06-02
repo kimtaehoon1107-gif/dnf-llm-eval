@@ -1,5 +1,0 @@
-﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
-bge_instruct,22,18,0.818,22,1.000,0,0,0,0.618,0.766,0.972,4.625
-bge_instruct_service_tone,22,16,0.727,22,1.000,0,0,1,0.567,0.736,0.968,4.989
-bge_instruct_service_tone_structured,22,17,0.773,22,1.000,0,0,0,0.599,0.793,0.968,5.130
-bge_qwen3_4b,22,17,0.773,9,0.409,13,0,0,0.525,0.765,0.474,11.635

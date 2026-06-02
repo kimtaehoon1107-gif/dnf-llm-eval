@@ -1,3 +1,0 @@
-﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
-bge-m3,22,19,0.864,0,0.000,21,1,0,0.563,0.805,0.155,9.063
-bge-m3-structured,4,3,0.750,0,0.000,4,0,0,0.424,0.833,0.132,9.083

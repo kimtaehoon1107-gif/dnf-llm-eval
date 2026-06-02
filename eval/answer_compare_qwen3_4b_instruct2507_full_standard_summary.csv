@@ -1,2 +1,0 @@
-﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
-qwen3_4b_instruct2507_standard,22,18,0.818,22,1.000,0,0,0,0.604,0.786,0.973,5.435
