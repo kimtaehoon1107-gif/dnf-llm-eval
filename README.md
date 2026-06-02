@@ -9,25 +9,55 @@
 
 ## Project Snapshot
 
-| Area | Result |
+### 한눈에 보는 결론
+
+| 질문 | 결론 | 의미 |
+|---|---:|---|
+| RAG가 실제로 도움이 됐나? | 11.27 -> 18.86 / 21 | 문서 전체를 넣는 방식보다 관련 근거 chunk를 찾아 넣는 방식이 더 안정적이었다. |
+| 검색기는 무엇을 최종 선택했나? | BGE-M3 top-1 hit 21 / 22 | BM25 heuristic 19 / 22보다 정답 근거를 첫 번째로 찾는 비율이 높았다. |
+| 생성 모델 병목은 무엇이었나? | format proxy 9 / 22 -> 22 / 22 | 기존 `qwen3:4b`의 영어 추론/메타 발화 문제를 instruct variant로 줄였다. |
+| 최종 설정의 현실적 성능은? | factual proxy 17 / 22, 평균 5.130s | 경량 로컬 모델로 재현 가능한 수준의 답변 품질과 응답 시간을 확인했다. |
+| Safety는 어디까지 됐나? | 명시적 공격 10 / 10, stealth 사전 차단 0 / 10 | 규칙 기반 safety gate의 효과와 한계를 분리해서 기록했다. |
+
+**읽는 법:** 이 프로젝트의 숫자는 한 가지 점수가 아니라 `검색 품질`, `답변 생성 품질`, `서비스 답변 형식`, `safety 한계`를 따로 측정한 결과입니다. 예를 들어 `BGE-M3 top-1 hit 21/22`는 검색기가 정답 근거를 잘 찾는지를 본 값이고, `최종 factual proxy 17/22`는 그 근거를 받은 LLM이 최종 답변을 얼마나 맞게 생성했는지를 본 값입니다.
+
+<details>
+<summary>상세 실험 수치 보기</summary>
+
+#### 1. End-to-end 문서 QA 품질
+
+| 비교 | 결과 |
 |---|---:|
 | Non-RAG 문서 질문 평균 | 11.27 / 21 |
 | RAG 문서 질문 평균 | 18.86 / 21 |
-| BM25 top-1 evidence hit | 19 / 22 |
-| BGE-M3 top-1 evidence hit | 21 / 22 |
-| BGE-M3 full-corpus + `qwen3:4b` factual proxy | 17 / 22 |
-| BGE-M3 full-corpus + `qwen3:4b` format proxy | 9 / 22 |
-| BGE-M3 + instruct variant format proxy | 22 / 22 |
-| 최종 통합 설정 factual proxy | 17 / 22 |
-| 최종 통합 설정 평균 응답 시간 | 5.130s |
-| 명시적 공격 질문 safety gate 차단 | 10 / 10 |
-| Paraphrase safety 개선 | 0 / 10 -> 10 / 10 |
-| Stealth safety 사전 차단 | 0 / 10 (known limitation) |
-| Stealth end-to-end strict pass | 6 / 10 |
 
-**읽는 법:** 위 숫자는 서로 다른 실험 단계에서 나온 값입니다. `Retrieval comparison`은 검색기가 정답 근거 chunk를 찾는지 본 결과이고, `answer comparison`은 초기 `qwen3:4b` 기반 RAG 답변 품질을 본 결과이며, `ablation study`는 BGE-M3를 고정한 뒤 생성 모델, 서비스 톤, structured data를 단계적으로 비교한 결과입니다. 따라서 `BGE-M3 top-1 evidence hit 21/22`와 `최종 통합 설정 factual proxy 17/22`는 서로 모순이 아니라, 각각 검색 단계와 최종 답변 생성 단계를 따로 측정한 값입니다.
+#### 2. Retrieval 비교
 
-**Safety 해석:** rule-based safety gate는 명시적인 공격 질문에는 10/10으로 작동했지만, 직접 차단 단어를 피한 stealth set에서는 사전 차단이 0/10으로 떨어졌습니다. 이 결과는 현재 safety가 완성된 보안 장치가 아니라 설명 가능한 baseline이며, semantic classifier와 output safety check가 후속 개선 과제임을 보여줍니다.
+| 검색기 | Top-1 evidence hit |
+|---|---:|
+| BM25 heuristic | 19 / 22 |
+| BGE-M3 | 21 / 22 |
+
+#### 3. BGE-M3 고정 생성 모델 ablation
+
+| 설정 | Factual proxy | Format proxy | 평균 응답 시간 |
+|---|---:|---:|---:|
+| BGE-M3 + `qwen3:4b` | 17 / 22 | 9 / 22 | 11.635s |
+| BGE-M3 + instruct variant | 18 / 22 | 22 / 22 | 4.625s |
+| 최종 통합 설정 | 17 / 22 | 22 / 22 | 5.130s |
+
+#### 4. Safety 평가
+
+| 평가 세트 | 결과 | 해석 |
+|---|---:|---|
+| 명시적 공격 질문 | 10 / 10 | 직접적인 공격/범위 밖 질문은 규칙 기반 gate로 차단 |
+| Paraphrase safety | 0 / 10 -> 10 / 10 | 사후 보강 규칙으로 개선했지만 test-informed 한계가 있음 |
+| Stealth safety 사전 차단 | 0 / 10 | 직접 키워드를 피하면 규칙 기반 gate가 약함 |
+| Stealth end-to-end strict pass | 6 / 10 | 생성 답변 단계까지 포함하면 일부는 안전하게 거절 |
+
+</details>
+
+**Safety 해석:** rule-based safety gate는 설명 가능하고 빠른 baseline으로는 유용하지만, 완성된 보안 장치가 아닙니다. 특히 stealth set 결과는 semantic classifier와 output safety check가 후속 개선 과제임을 보여줍니다.
 
 ## Final Pipeline
 
