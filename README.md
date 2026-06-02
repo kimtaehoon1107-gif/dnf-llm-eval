@@ -15,11 +15,15 @@
 | RAG 문서 질문 평균 | 18.86 / 21 |
 | BM25 top-1 evidence hit | 19 / 22 |
 | BGE-M3 top-1 evidence hit | 21 / 22 |
-| BGE-M3 + `qwen3:4b` factual proxy | 19 / 22 |
-| BGE-M3 + `qwen3:4b` format proxy | 0 / 22 |
-| 최종 조합 format proxy | 22 / 22 |
+| BGE-M3 full-corpus + `qwen3:4b` factual proxy | 17 / 22 |
+| BGE-M3 full-corpus + `qwen3:4b` format proxy | 9 / 22 |
+| BGE-M3 + instruct variant format proxy | 22 / 22 |
+| 최종 통합 설정 factual proxy | 17 / 22 |
+| 최종 통합 설정 평균 응답 시간 | 5.130s |
 | Safety gate 차단 | 10 / 10 |
 | Paraphrase safety 개선 | 0 / 10 -> 10 / 10 |
+| Stealth safety 사전 차단 | 0 / 10 (known limitation) |
+| Stealth end-to-end strict pass | 6 / 10 |
 
 ## Final Pipeline
 
@@ -47,6 +51,7 @@ flowchart LR
 | [`index.html`](index.html) | GitHub Pages 배포용 HTML 포트폴리오 첫 화면 |
 | [`report/final_closing_review.md`](report/final_closing_review.md) | 제출용 최종 요약과 최신 결과 리뷰 |
 | [`report/final_portfolio_report.md`](report/final_portfolio_report.md) | 전체 실험 과정과 결과를 정리한 통합 보고서 |
+| [`report/ablation_study_report.md`](report/ablation_study_report.md) | BGE-M3 고정 후 모델/톤/구조화 데이터 효과를 분리한 추가 실험 |
 | [`report/README.md`](report/README.md) | 보고서 폴더의 권장 읽기 순서 |
 | [`report/application_summary.md`](report/application_summary.md) | 지원서와 면접에서 바로 설명할 수 있는 요약문 |
 | [`report/model_selection_and_benchmark_rationale.md`](report/model_selection_and_benchmark_rationale.md) | 모델, 검색기, 평가 방법 선택 근거 |
@@ -93,6 +98,7 @@ dnf-llm-eval/
     out_of_domain_questions.csv
     adversarial_questions.csv
     adversarial_paraphrase_questions.csv
+    adversarial_stealth_questions.csv
     service_tone_sample_questions.csv
   scripts/
     collect_dnf_updates_selenium.py
@@ -105,20 +111,26 @@ dnf-llm-eval/
   eval/
     retrieval_compare_summary.csv
     answer_compare_summary.csv
+    ablation_answer_compare_summary.csv
+    ablation_answer_compare_detail.csv
     answer_compare_qwen3_4b_instruct2507_full_standard_summary.csv
     rag_local_llm_adversarial_paraphrase_safety_gate_v2.csv
+    rag_local_llm_adversarial_stealth_safety_gate.csv
+    adversarial_stealth_manual_review.csv
     representative_manual_scoring.csv
     evaluation_rubric.md
   report/
     README.md
     final_closing_review.md
     final_portfolio_report.md
+    ablation_study_report.md
     application_summary.md
     model_selection_and_benchmark_rationale.md
     references.md
     retriever_comparison_report.md
     answer_retriever_comparison_report.md
     paraphrase_safety_gate_test.md
+    stealth_safety_gate_test.md
     safety_design_rationale.md
 ```
 
@@ -190,32 +202,42 @@ python scripts\run_rag_local_llm_eval.py `
 
 `--restrict-to-question-doc`는 실제 서비스용 옵션이 아니라, 정답 문서 안에서의 검색과 답변 생성 능력을 분리해 보기 위한 평가용 설정입니다.
 
-### 3. 구조화 데이터 실험
+### 3. BGE-M3 고정 생성 설정 ablation
 
-상점표처럼 행 단위 관계가 중요한 데이터는 일반 chunk 검색만으로 가격과 구매 제한이 섞일 수 있습니다. 이를 보완하기 위해 켈돈 자비 상점표를 `data/structured/shop_items.json`으로 구조화했습니다.
+최종 조합을 한 번에 비교하면 어떤 요소가 개선에 기여했는지 분리하기 어렵습니다. 그래서 검색기를 BGE-M3로 고정하고, 모델 변경, 서비스 톤 프롬프트, 구조화 데이터를 단계적으로 추가한 4개 실험을 실행했습니다.
 
 ```powershell
 python scripts\run_rag_local_llm_eval.py `
   --questions questions\benchmark_questions.csv `
-  --output eval\answer_compare_bge_m3_structured_q001_q004.csv `
+  --output eval\ablation_01_bge_qwen3_4b.csv `
   --model qwen3:4b `
   --retriever bge-m3 `
-  --use-structured-data `
   --disable-thinking `
-  --num-predict 220 `
-  --limit 4
+  --num-predict 512
+
+python scripts\run_rag_local_llm_eval.py `
+  --questions questions\benchmark_questions.csv `
+  --output eval\ablation_02_bge_qwen3_4b_instruct.csv `
+  --model qwen3:4b-instruct-2507-q4_K_M `
+  --retriever bge-m3 `
+  --disable-thinking `
+  --num-predict 512
+
+python scripts\run_rag_local_llm_eval.py `
+  --questions questions\benchmark_questions.csv `
+  --output eval\ablation_03_bge_qwen3_4b_instruct_service_tone.csv `
+  --model qwen3:4b-instruct-2507-q4_K_M `
+  --retriever bge-m3 `
+  --service-tone `
+  --service-tone-examples `
+  --disable-thinking `
+  --num-predict 512
 ```
-
-이 실험은 전체 22문항이 아니라 상점표 관련 Q001~Q004에 한정한 부분 ablation입니다.
-
-### 4. 최종 생성 모델 실험
-
-기존 `qwen3:4b`는 사실성은 개선했지만 영어 추론과 메타 발화를 출력했습니다. 이를 해결하기 위해 `qwen3:4b-instruct-2507-q4_K_M`을 사용했습니다.
 
 ```powershell
 python scripts\run_rag_local_llm_eval.py `
   --questions questions\benchmark_questions.csv `
-  --output eval\answer_compare_qwen3_4b_instruct2507_full_standard.csv `
+  --output eval\ablation_04_bge_qwen3_4b_instruct_service_tone_structured.csv `
   --model qwen3:4b-instruct-2507-q4_K_M `
   --retriever bge-m3 `
   --use-structured-data `
@@ -224,6 +246,8 @@ python scripts\run_rag_local_llm_eval.py `
   --disable-thinking `
   --num-predict 512
 ```
+
+이 ablation은 `--restrict-to-question-doc`를 사용하지 않고 전체 5개 문서 corpus에서 검색했습니다. 결과 해석은 [`report/ablation_study_report.md`](report/ablation_study_report.md)에 정리했습니다.
 
 ## 주요 결과
 
@@ -245,9 +269,12 @@ python scripts\run_rag_local_llm_eval.py `
 
 | 설정 | Factual proxy | Format proxy | Meta reasoning | Avg latency |
 |---|---:|---:|---:|---:|
-| BM25 heuristic + `qwen3:4b` | 17 / 22 | 0 / 22 | 22 | 8.964s |
-| BGE-M3 + `qwen3:4b` | 19 / 22 | 0 / 22 | 21 | 9.063s |
-| BGE-M3 + structured + `qwen3:4b-instruct-2507` | 18 / 22 | 22 / 22 | 0 | 5.435s |
+| BGE-M3 + `qwen3:4b` | 17 / 22 | 9 / 22 | 13 | 11.635s |
+| BGE-M3 + `qwen3:4b-instruct-2507` | 18 / 22 | 22 / 22 | 0 | 4.625s |
+| BGE-M3 + instruct + service-tone | 16 / 22 | 22 / 22 | 0 | 4.989s |
+| BGE-M3 + instruct + service-tone + structured | 17 / 22 | 22 / 22 | 0 | 5.130s |
+
+가장 큰 변화는 생성 모델을 instruct variant로 바꿨을 때 발생했습니다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었습니다. Service-tone과 structured data는 최종 사용자 경험과 표형 정보 보완을 위한 구성 요소이며, token 기반 factual proxy의 false negative 가능성을 함께 고려해 해석했습니다.
 
 ## 오류 분석 요약
 
@@ -263,7 +290,7 @@ python scripts\run_rag_local_llm_eval.py `
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
-| Safety gate 일반화 한계 | 규칙 기반 1차 필터를 paraphrase 공격/정상 질문 오탐 세트로 추가 검증 |
+| Safety gate 일반화 한계 | stealth 공격과 정상 질문 오탐 세트를 분리해 평가하고 semantic classifier/output safety check 추가 |
 | 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set으로 확장 |
@@ -273,4 +300,4 @@ python scripts\run_rag_local_llm_eval.py `
 
 ## 결론
 
-이 프로젝트는 던파 공식 문서를 기반으로 게임 도메인 LLM 평가 과정을 작게 구현한 작업입니다. RAG는 baseline 대비 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았습니다. 구조화 데이터는 표형 상점 정보 보완에 도움이 되었으며, `qwen3:4b-instruct-2507-q4_K_M`은 기존 `qwen3:4b`의 영어 추론/메타 발화 문제를 해결해 서비스 답변 형식을 크게 개선했습니다.
+이 프로젝트는 던파 공식 문서를 기반으로 게임 도메인 LLM 평가 과정을 작게 구현한 작업입니다. RAG는 baseline 대비 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았습니다. 추가 ablation에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적임을 확인했습니다. 최종 제출용 조합은 factual proxy 단독 최고값이 아니라, 검색 근거성, 서비스 답변 형식, 표형 정보 보완을 함께 고려한 균형 조합입니다.
