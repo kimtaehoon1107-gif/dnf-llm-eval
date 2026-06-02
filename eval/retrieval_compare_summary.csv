@@ -1,0 +1,3 @@
+﻿"retriever","questions","evidence_hit_count","evidence_hit_rate","top1_evidence_hit_count","top1_evidence_hit_rate","avg_token_recall","avg_top1_token_recall","avg_phrase_hit_ratio","avg_top1_phrase_hit_ratio"
+"bge-m3","22","22","1.000","21","0.955","1.000","0.923","1.000","0.909"
+"bm25","22","22","1.000","19","0.864","0.994","0.917","0.955","0.795"
