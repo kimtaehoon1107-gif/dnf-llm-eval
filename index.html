@@ -451,7 +451,8 @@
           safety gate, 실패 분석까지 분리해 검증한 offline benchmark 프로젝트입니다.
         </p>
         <div class="quick-actions">
-          <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_portfolio_report.md">최종 보고서 보기</a>
+          <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval">GitHub Repository</a>
+          <a class="button" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_portfolio_report.md">최종 보고서 보기</a>
           <a class="button" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval#readme">README 보기</a>
           <a class="button" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/questions/benchmark_questions.csv">질문 세트 보기</a>
           <a class="button" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/eval/representative_manual_scoring.csv">수동 채점표 보기</a>
@@ -595,102 +596,34 @@
           <p class="section-note">RAGAS-style 관점은 참고하되, 게임 운영 문서의 최신성, 근거성, 범위 통제 리스크를 반영해 도메인 루브릭을 직접 설계했습니다.</p>
         </div>
         <div class="grid">
-          <article class="card">
-            <span class="tag">Benchmark</span>
-            <h3>문서 기반 질문 22개</h3>
-            <p>패치노트, 상점표, 조건 판단, 비교 질문을 섞어 실제 이용자 질문에 가깝게 구성했습니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Difficulty</span>
-            <h3>난이도 수동 라벨링</h3>
-            <p>easy는 단일 근거 추출, medium은 조건·비교·계산·요약, hard는 근거 기반 판단이 필요한 문항으로 수동 라벨링했습니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Proxy Metrics</span>
-            <h3>factual / format proxy</h3>
-            <p>factual proxy는 답변이 기준 정답·근거의 핵심 정보를 포함하는지, format proxy는 영어 추론·메타 발화 없이 서비스 답변 형식을 지켰는지 자동 확인한 대리 지표입니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Rubric</span>
-            <h3>7개 수동 평가 항목</h3>
-            <p>정확성, 근거 충실성, 완전성, 의도 적합성, 환각 억제, 범위 통제, 표현 품질로 채점했습니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Structured Data</span>
-            <h3>표형 정보 보완</h3>
-            <p>상점표처럼 행 단위 관계가 중요한 정보는 JSON record로 추가 제공해 가격·구매 제한 혼입을 줄이고자 했습니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Safety</span>
-            <h3>OOD와 공격 질문 통제</h3>
-            <p>날씨, 투자, 다른 게임, 현금화, 버그 악용, prompt leakage 질문을 범위 밖으로 제한했습니다.</p>
-          </article>
+          <article class="card"><span class="tag">Benchmark</span><h3>문서 기반 질문 22개</h3><p>패치노트, 상점표, 조건 판단, 비교 질문을 섞어 실제 이용자 질문에 가깝게 구성했습니다.</p></article>
+          <article class="card"><span class="tag">Difficulty</span><h3>난이도 수동 라벨링</h3><p>easy는 단일 근거 추출, medium은 조건·비교·계산·요약, hard는 근거 기반 판단이 필요한 문항으로 수동 라벨링했습니다.</p></article>
+          <article class="card"><span class="tag">Proxy Metrics</span><h3>factual / format proxy</h3><p>factual proxy는 답변이 기준 정답·근거의 핵심 정보를 포함하는지, format proxy는 영어 추론·메타 발화 없이 서비스 답변 형식을 지켰는지 자동 확인한 대리 지표입니다.</p></article>
+          <article class="card"><span class="tag">Rubric</span><h3>7개 수동 평가 항목</h3><p>정확성, 근거 충실성, 완전성, 의도 적합성, 환각 억제, 범위 통제, 표현 품질로 채점했습니다.</p></article>
+          <article class="card"><span class="tag">Structured Data</span><h3>표형 정보 보완</h3><p>상점표처럼 행 단위 관계가 중요한 정보는 JSON record로 추가 제공해 가격·구매 제한 혼입을 줄이고자 했습니다.</p></article>
+          <article class="card"><span class="tag">Safety</span><h3>OOD와 공격 질문 통제</h3><p>날씨, 투자, 다른 게임, 현금화, 버그 악용, prompt leakage 질문을 범위 밖으로 제한했습니다.</p></article>
         </div>
       </div>
     </section>
 
     <section>
       <div class="shell">
-        <div class="section-head">
-          <h2>What Changed</h2>
-          <p class="section-note">성공 수치만 보여주지 않고, 실패 원인을 검색, 구조화 데이터, 생성 모델, safety 한계로 나눠 기록했습니다.</p>
-        </div>
-        <table class="comparison-table">
-          <thead>
-            <tr>
-              <th>Issue</th>
-              <th>Finding</th>
-              <th>Response</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>긴 문서 근거 누락</td>
-              <td>Non-RAG baseline은 최신 패치노트 세부 조건을 안정적으로 찾지 못했습니다.</td>
-              <td>RAG를 붙여 문서 질문 평균을 11.27에서 18.86으로 개선했습니다.</td>
-            </tr>
-            <tr>
-              <td>표형 정보 혼입</td>
-              <td>상점표에서 인접 상품의 가격, 구매 제한이 섞이는 문제가 있었습니다.</td>
-              <td><code>shop_items.json</code>을 만들어 표 행 단위 근거를 별도 제공했습니다.</td>
-            </tr>
-            <tr>
-              <td>서비스 답변 형식 실패</td>
-              <td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td>
-              <td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td>
-            </tr>
-            <tr>
-              <td>Safety gate 우회</td>
-              <td>복합 조건 규칙은 paraphrase set을 10 / 10 차단했지만, 직접 키워드를 피한 stealth set은 0 / 10만 사전 차단했습니다.</td>
-              <td>규칙 기반 1차 필터의 한계를 기록하고, semantic classifier와 output safety check를 후속 개선으로 남겼습니다.</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="section-head"><h2>What Changed</h2><p class="section-note">성공 수치만 보여주지 않고, 실패 원인을 검색, 구조화 데이터, 생성 모델, safety 한계로 나눠 기록했습니다.</p></div>
+        <table class="comparison-table"><thead><tr><th>Issue</th><th>Finding</th><th>Response</th></tr></thead><tbody>
+          <tr><td>긴 문서 근거 누락</td><td>Non-RAG baseline은 최신 패치노트 세부 조건을 안정적으로 찾지 못했습니다.</td><td>RAG를 붙여 문서 질문 평균을 11.27에서 18.86으로 개선했습니다.</td></tr>
+          <tr><td>표형 정보 혼입</td><td>상점표에서 인접 상품의 가격, 구매 제한이 섞이는 문제가 있었습니다.</td><td><code>shop_items.json</code>을 만들어 표 행 단위 근거를 별도 제공했습니다.</td></tr>
+          <tr><td>서비스 답변 형식 실패</td><td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td><td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td></tr>
+          <tr><td>Safety gate 우회</td><td>복합 조건 규칙은 paraphrase set을 10 / 10 차단했지만, 직접 키워드를 피한 stealth set은 0 / 10만 사전 차단했습니다.</td><td>규칙 기반 1차 필터의 한계를 기록하고, semantic classifier와 output safety check를 후속 개선으로 남겼습니다.</td></tr>
+        </tbody></table>
       </div>
     </section>
 
     <section>
-      <div class="shell">
-        <div class="section-head">
-          <h2>Next Extension</h2>
-          <p class="section-note">현재 결과는 offline benchmark입니다. 실제 서비스 단계에서는 패치 주기별 평가셋 갱신과 운영 로그 추적을 붙여 확장할 수 있습니다.</p>
-        </div>
+      <div class="shell"><div class="section-head"><h2>Next Extension</h2><p class="section-note">현재 결과는 offline benchmark입니다. 실제 서비스 단계에서는 패치 주기별 평가셋 갱신과 운영 로그 추적을 붙여 확장할 수 있습니다.</p></div>
         <div class="grid">
-          <article class="card">
-            <span class="tag">Dynamic Eval</span>
-            <h3>패치 주기 기반 평가셋 갱신</h3>
-            <p>새 패치노트가 올라오면 변경점을 추출하고, 질문과 기준 정답 후보를 다시 만들어 평가셋이 낡지 않도록 확장합니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Auto Judge</span>
-            <h3>자동 평가는 보조 지표로 사용</h3>
-            <p>RAGAS, DeepEval, LLM-as-a-Judge는 최종 판정자가 아니라 검색 적합성, 근거 충실성, 환각 여부를 빠르게 점검하는 보조 지표로 둡니다.</p>
-          </article>
-          <article class="card">
-            <span class="tag">Observability</span>
-            <h3>질문부터 피드백까지 추적</h3>
-            <p>question_id, retrieved_chunk_ids, answer, latency, safety decision, user feedback을 기록해 offline 평가 결과와 실제 운영 로그를 연결합니다.</p>
-          </article>
+          <article class="card"><span class="tag">Dynamic Eval</span><h3>패치 주기 기반 평가셋 갱신</h3><p>새 패치노트가 올라오면 변경점을 추출하고, 질문과 기준 정답 후보를 다시 만들어 평가셋이 낡지 않도록 확장합니다.</p></article>
+          <article class="card"><span class="tag">Auto Judge</span><h3>자동 평가는 보조 지표로 사용</h3><p>RAGAS, DeepEval, LLM-as-a-Judge는 최종 판정자가 아니라 검색 적합성, 근거 충실성, 환각 여부를 빠르게 점검하는 보조 지표로 둡니다.</p></article>
+          <article class="card"><span class="tag">Observability</span><h3>질문부터 피드백까지 추적</h3><p>question_id, retrieved_chunk_ids, answer, latency, safety decision, user feedback을 기록해 offline 평가 결과와 실제 운영 로그를 연결합니다.</p></article>
         </div>
       </div>
     </section>
@@ -699,7 +632,7 @@
       <div class="shell">
         <div class="section-head">
           <h2>Portfolio Artifacts</h2>
-          <p class="section-note">면접에서 바로 열어볼 핵심 산출물입니다. Final Closing Review, Final Portfolio Report, Model Rationale 순서로 보는 것을 권장합니다.</p>
+          <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval">GitHub Repository 보기</a>
         </div>
         <div class="artifact-list">
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_closing_review.md"><span><strong>Final Closing Review</strong><span>최종 요약과 핵심 결론</span></span><span class="open">Open</span></a>
@@ -713,21 +646,10 @@
     </section>
 
     <section>
-      <div class="shell">
-        <div class="callout">
-          <p>
-            한 문장으로 요약하면, 이 프로젝트는 던파 공식 문서 기반 질문을 만들고,
-            검색-생성-안전성-평가를 분리해 로컬 LLM 답변 품질과 실패 원인을 체계적으로 비교한 제출용 평가 포트폴리오입니다.
-          </p>
-        </div>
-      </div>
+      <div class="shell"><div class="callout"><p>한 문장으로 요약하면, 이 프로젝트는 던파 공식 문서 기반 질문을 만들고, 검색-생성-안전성-평가를 분리해 로컬 LLM 답변 품질과 실패 원인을 체계적으로 비교한 제출용 평가 포트폴리오입니다.</p></div></div>
     </section>
   </main>
 
-  <footer>
-    <div class="shell">
-      DNF LLM Evaluation Project. Local files, reports, questions, and evaluation logs are included in this repository.
-    </div>
-  </footer>
+  <footer><div class="shell">DNF LLM Evaluation Project. Local files, reports, questions, and evaluation logs are included in this repository.</div></footer>
 </body>
 </html>
