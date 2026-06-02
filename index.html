@@ -8,7 +8,7 @@
     :root {
       --bg: #f6f7f9;
       --surface: #ffffff;
-      --surface-soft: #eef3f5;
+      --soft: #eef3f5;
       --ink: #171a1f;
       --muted: #5f6875;
       --line: #dfe4ea;
@@ -20,7 +20,7 @@
     }
 
     * { box-sizing: border-box; }
-
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       background: var(--bg);
@@ -28,8 +28,8 @@
       font-family: Arial, "Noto Sans KR", "Malgun Gothic", sans-serif;
       line-height: 1.58;
     }
-
     a { color: inherit; text-decoration: none; }
+    code { color: #111827; }
 
     .shell {
       max-width: 1180px;
@@ -98,7 +98,6 @@
     }
 
     .intro { padding: 50px 0 30px; }
-
     .eyebrow {
       margin: 0 0 12px;
       color: var(--green);
@@ -111,11 +110,10 @@
       margin: 0;
       font-size: 44px;
       line-height: 1.16;
-      letter-spacing: 0;
     }
 
     .lead {
-      max-width: 880px;
+      max-width: 900px;
       margin: 18px 0 0;
       color: var(--muted);
       font-size: 18px;
@@ -202,11 +200,10 @@
     h2 {
       margin: 0;
       font-size: 28px;
-      letter-spacing: 0;
     }
 
     .section-note {
-      max-width: 620px;
+      max-width: 640px;
       margin: 0;
       color: var(--muted);
       font-size: 15px;
@@ -285,9 +282,7 @@
     }
 
     .panel,
-    .card {
-      padding: 20px;
-    }
+    .card { padding: 20px; }
 
     .panel h3,
     .card h3 {
@@ -330,7 +325,7 @@
     .tag {
       display: inline-flex;
       border-radius: 999px;
-      background: var(--surface-soft);
+      background: var(--soft);
       padding: 4px 9px;
       color: #344054;
       font-size: 12px;
@@ -469,9 +464,9 @@
             <div class="note">Non-RAG 11.27점에서 개선</div>
           </article>
           <article class="stat">
-            <div class="label">BGE-M3 top-1 evidence hit</div>
-            <div class="value">21 / 22</div>
-            <div class="note">BM25 heuristic 19 / 22</div>
+            <div class="label">최종 Retriever</div>
+            <div class="value">BGE-M3</div>
+            <div class="note">Top-1 evidence hit 21 / 22</div>
           </article>
           <article class="stat">
             <div class="label">최종 format proxy</div>
@@ -507,7 +502,7 @@
             </tr>
             <tr>
               <td>평가 지표와 스코어링 기준 개발</td>
-              <td>정확성, 근거 충실성, 완전성, 의도 적합성, 환각 억제, 범위 통제, 표현 품질의 7개 루브릭을 만들고 0~3점 기준으로 채점했습니다.</td>
+              <td>검색 지표, factual/format proxy, safety block rate, 7개 수동 루브릭을 분리해 설계했습니다.</td>
             </tr>
             <tr>
               <td>LLM 응답 품질 평가</td>
@@ -532,9 +527,9 @@
           <div class="step"><div class="num">01</div><strong>Question</strong><span>벤치마크, OOD, 공격 질문</span></div>
           <div class="step"><div class="num">02</div><strong>Safety Gate</strong><span>범위 밖 및 공격성 요청 차단</span></div>
           <div class="step"><div class="num">03</div><strong>Retriever</strong><span>BM25 heuristic, BGE-M3 비교</span></div>
-          <div class="step"><div class="num">04</div><strong>Context Builder</strong><span>chunk와 structured data 결합</span></div>
+          <div class="step"><div class="num">04</div><strong>Context Builder</strong><span>검색 chunk와 구조화 근거 결합</span></div>
           <div class="step"><div class="num">05</div><strong>Generator</strong><span>Qwen3 4B Instruct</span></div>
-          <div class="step"><div class="num">06</div><strong>Evaluator</strong><span>proxy와 수동 rubric</span></div>
+          <div class="step"><div class="num">06</div><strong>Evaluator</strong><span>자동 지표와 수동 rubric</span></div>
           <div class="step"><div class="num">07</div><strong>Report</strong><span>결과, 실패 원인, 개선안 정리</span></div>
         </div>
       </div>
@@ -549,48 +544,29 @@
         <div class="split">
           <div class="panel">
             <h3>Score Movement</h3>
-            <div class="bar-row">
-              <span>Non-RAG 문서 질문</span>
-              <div class="bar red"><span style="width: 53.7%"></span></div>
-              <strong>11.27 / 21</strong>
-            </div>
-            <div class="bar-row">
-              <span>RAG 문서 질문</span>
-              <div class="bar"><span style="width: 89.8%"></span></div>
-              <strong>18.86 / 21</strong>
-            </div>
-            <div class="bar-row">
-              <span>BM25 top-1 hit</span>
-              <div class="bar gold"><span style="width: 86.4%"></span></div>
-              <strong>19 / 22</strong>
-            </div>
-            <div class="bar-row">
-              <span>BGE-M3 top-1 hit</span>
-              <div class="bar blue"><span style="width: 95.5%"></span></div>
-              <strong>21 / 22</strong>
-            </div>
-            <div class="bar-row">
-              <span>Final format proxy</span>
-              <div class="bar"><span style="width: 100%"></span></div>
-              <strong>22 / 22</strong>
-            </div>
+            <div class="bar-row"><span>Non-RAG 문서 질문</span><div class="bar red"><span style="width: 53.7%"></span></div><strong>11.27 / 21</strong></div>
+            <div class="bar-row"><span>RAG 문서 질문</span><div class="bar"><span style="width: 89.8%"></span></div><strong>18.86 / 21</strong></div>
+            <div class="bar-row"><span>BM25 top-1 hit</span><div class="bar gold"><span style="width: 86.4%"></span></div><strong>19 / 22</strong></div>
+            <div class="bar-row"><span>BGE-M3 top-1 hit</span><div class="bar blue"><span style="width: 95.5%"></span></div><strong>21 / 22</strong></div>
+            <div class="bar-row"><span>Final format proxy</span><div class="bar"><span style="width: 100%"></span></div><strong>22 / 22</strong></div>
           </div>
 
           <div class="panel">
             <h3>Final Combination</h3>
             <table class="comparison-table">
               <tbody>
-                <tr><th>Retriever</th><td>BGE-M3</td></tr>
-                <tr><th>Structured Data</th><td>켈돈 자비 상점표 JSON</td></tr>
+                <tr><th>Retriever</th><td>BGE-M3: 질문과 문서 chunk를 embedding으로 비교하는 최종 검색기</td></tr>
+                <tr><th>Structured Data</th><td>켈돈 자비 상점표를 아이템명·가격·구매 제한·이월 조건 단위로 JSON화</td></tr>
                 <tr><th>Generator</th><td>qwen3:4b-instruct-2507-q4_K_M</td></tr>
-                <tr><th>Prompt</th><td>service-tone, few-shot examples, disable-thinking</td></tr>
+                <tr><th>Service-tone Prompt</th><td>영어 추론/메타 발화를 줄이고 한국어 서비스 안내형 답변으로 정리</td></tr>
                 <tr><th>Average Latency</th><td>5.130s</td></tr>
               </tbody>
             </table>
           </div>
         </div>
+
         <div class="panel" style="margin-top: 16px;">
-          <h3>BGE-M3 Fixed Ablation</h3>
+          <h3>BGE-M3 고정 생성 설정 요소별 비교</h3>
           <table class="comparison-table">
             <thead>
               <tr>
@@ -625,9 +601,24 @@
             <p>패치노트, 상점표, 조건 판단, 비교 질문을 섞어 실제 이용자 질문에 가깝게 구성했습니다.</p>
           </article>
           <article class="card">
+            <span class="tag">Difficulty</span>
+            <h3>난이도 수동 라벨링</h3>
+            <p>easy는 단일 근거 추출, medium은 조건·비교·계산·요약, hard는 근거 기반 판단이 필요한 문항으로 수동 라벨링했습니다.</p>
+          </article>
+          <article class="card">
+            <span class="tag">Proxy Metrics</span>
+            <h3>factual / format proxy</h3>
+            <p>factual proxy는 답변이 기준 정답·근거의 핵심 정보를 포함하는지, format proxy는 영어 추론·메타 발화 없이 서비스 답변 형식을 지켰는지 자동 확인한 대리 지표입니다.</p>
+          </article>
+          <article class="card">
             <span class="tag">Rubric</span>
             <h3>7개 수동 평가 항목</h3>
             <p>정확성, 근거 충실성, 완전성, 의도 적합성, 환각 억제, 범위 통제, 표현 품질로 채점했습니다.</p>
+          </article>
+          <article class="card">
+            <span class="tag">Structured Data</span>
+            <h3>표형 정보 보완</h3>
+            <p>상점표처럼 행 단위 관계가 중요한 정보는 JSON record로 추가 제공해 가격·구매 제한 혼입을 줄이고자 했습니다.</p>
           </article>
           <article class="card">
             <span class="tag">Safety</span>
@@ -665,7 +656,7 @@
             </tr>
             <tr>
               <td>서비스 답변 형식 실패</td>
-              <td>BGE-M3 고정 ablation에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td>
+              <td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td>
               <td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td>
             </tr>
             <tr>
@@ -711,30 +702,12 @@
           <p class="section-note">면접에서 바로 열어볼 핵심 산출물입니다. Final Closing Review, Final Portfolio Report, Model Rationale 순서로 보는 것을 권장합니다.</p>
         </div>
         <div class="artifact-list">
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_closing_review.md">
-            <span><strong>Final Closing Review</strong><span>최종 요약과 핵심 결론</span></span>
-            <span class="open">Open</span>
-          </a>
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_portfolio_report.md">
-            <span><strong>Final Portfolio Report</strong><span>전체 실험 과정과 결과</span></span>
-            <span class="open">Open</span>
-          </a>
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/model_selection_and_benchmark_rationale.md">
-            <span><strong>Model Rationale</strong><span>모델과 검색기 선택 근거</span></span>
-            <span class="open">Open</span>
-          </a>
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/eval/evaluation_rubric.md">
-            <span><strong>Evaluation Rubric</strong><span>7개 평가 기준</span></span>
-            <span class="open">Open</span>
-          </a>
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/questions/out_of_domain_questions.csv">
-            <span><strong>OOD Questions</strong><span>범위 밖 질문 세트</span></span>
-            <span class="open">Open</span>
-          </a>
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/paraphrase_safety_gate_test.md">
-            <span><strong>Safety Gate Test</strong><span>paraphrase 공격 테스트</span></span>
-            <span class="open">Open</span>
-          </a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_closing_review.md"><span><strong>Final Closing Review</strong><span>최종 요약과 핵심 결론</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_portfolio_report.md"><span><strong>Final Portfolio Report</strong><span>전체 실험 과정과 결과</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/model_selection_and_benchmark_rationale.md"><span><strong>Model Rationale</strong><span>모델과 검색기 선택 근거</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/eval/evaluation_rubric.md"><span><strong>Evaluation Rubric</strong><span>7개 평가 기준</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/questions/out_of_domain_questions.csv"><span><strong>OOD Questions</strong><span>범위 밖 질문 세트</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/paraphrase_safety_gate_test.md"><span><strong>Safety Gate Test</strong><span>paraphrase 공격 테스트</span></span><span class="open">Open</span></a>
         </div>
       </div>
     </section>
