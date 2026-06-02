@@ -25,6 +25,10 @@
 | Stealth safety 사전 차단 | 0 / 10 (known limitation) |
 | Stealth end-to-end strict pass | 6 / 10 |
 
+**읽는 법:** 위 숫자는 서로 다른 실험 단계에서 나온 값입니다. `Retrieval comparison`은 검색기가 정답 근거 chunk를 찾는지 본 결과이고, `answer comparison`은 초기 `qwen3:4b` 기반 RAG 답변 품질을 본 결과이며, `ablation study`는 BGE-M3를 고정한 뒤 생성 모델, 서비스 톤, structured data를 단계적으로 비교한 결과입니다. 따라서 `BGE-M3 top-1 evidence hit 21/22`와 `최종 통합 설정 factual proxy 17/22`는 서로 모순이 아니라, 각각 검색 단계와 최종 답변 생성 단계를 따로 측정한 값입니다.
+
+**Safety 해석:** rule-based safety gate는 명시적인 공격 질문에는 10/10으로 작동했지만, 직접 차단 단어를 피한 stealth set에서는 사전 차단이 0/10으로 떨어졌습니다. 이 결과는 현재 safety가 완성된 보안 장치가 아니라 설명 가능한 baseline이며, semantic classifier와 output safety check가 후속 개선 과제임을 보여줍니다.
+
 ## Final Pipeline
 
 ```mermaid
@@ -149,6 +153,8 @@ BGE-M3 embedding 검색까지 재현하려면 추가 패키지가 필요합니�
 ```powershell
 pip install -r requirements-bge.txt
 ```
+
+BGE-M3 실행 환경에 따라 `torch`, `transformers`, `sentence-transformers` 계열 의존성이 함께 설치되거나 이미 설치되어 있어야 할 수 있습니다. CPU/GPU 환경에 따라 설치 시간과 첫 embedding cache 생성 시간이 길어질 수 있습니다.
 
 로컬 LLM 실험은 Ollama에 모델이 준비되어 있어야 실행됩니다. 본 저장소에는 모델 가중치와 BGE-M3 cache를 포함하지 않습니다.
 
