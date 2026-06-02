@@ -77,6 +77,52 @@ flowchart LR
 
 최종 생성 모델은 로컬 실행 가능한 4.0B Qwen3 계열 모델이며, `Q4_K_M` 양자화로 실행 부담을 줄인 구성을 사용했습니다. 기존 `qwen3:4b`는 검색 근거를 받은 뒤에도 영어 추론 과정과 메타 발화를 출력했기 때문에, 최종 단계에서는 instruction following이 더 안정적인 instruct variant를 사용해 서비스 답변 형식을 개선했습니다.
 
+## What Was Designed
+
+이 프로젝트에서 직접 설계한 부분은 모델 호출 자체보다 `평가 문제`, `평가 지표`, `실패 분석 기준`입니다.
+
+| 설계 요소 | 의미 | 사용 위치 |
+|---|---|---|
+| Benchmark questions | 던파 업데이트 문서에서 실제 유저가 물어볼 만한 질문, 기준 정답, 근거 문장을 함께 만든 평가셋 | `questions/benchmark_questions.csv` |
+| Service tone | 답변을 게임 서비스 안내처럼 만들기 위한 프롬프트 규칙. 핵심 답변 선제시, 조건/수치 분리, 퍼스트 서버 단정 방지, 문서 밖 추측 금지를 포함 | `report/service_tone_guideline.md` |
+| Structured data | 상점표처럼 행/열 관계가 중요한 정보를 JSON으로 따로 추출한 보조 근거. 가격, 구매 제한, 이월 조건처럼 표에서 섞이기 쉬운 정보를 보완 | `data/structured/shop_items.json` |
+| Safety gate | 프롬프트 유출, 가짜 근거, 버그 악용, 현금화, 매크로 요청, OOD 질문을 답변 전에 차단하는 규칙 기반 baseline | `questions/adversarial_*.csv` |
+| Manual rubric | 정확성, 근거성, 완전성, 의도 적합성, 환각 방지, 범위 통제, 표현 품질의 7개 항목으로 답변을 수동 채점 | `eval/evaluation_rubric.md` |
+
+`Service tone`은 단순히 말투를 부드럽게 만드는 옵션이 아닙니다. 게임 유저가 바로 행동할 수 있도록 답변 구조를 정리하는 장치입니다. 예를 들어 `모험가님` 호칭은 모든 답변에 강제로 넣지 않고, 안내나 주의사항이 필요한 경우에만 자연스럽게 사용하도록 설계했습니다.
+
+`Structured data`는 LoRA나 adapter가 아니라, RAG context builder에 추가로 넣는 구조화 근거입니다. 일반 chunk 검색은 긴 표 안에서 인접 행 정보를 섞을 수 있으므로, 상점 아이템명, 가격, 구매 제한, 이월 조건을 별도 record로 만들어 표형 정보 질문에서 보조 근거로 사용했습니다.
+
+## Evaluation Design
+
+정량 평가는 빠른 비교를 위한 proxy이고, 정성 평가는 실제 서비스 답변으로 볼 수 있는지를 확인하기 위한 수동 기준입니다.
+
+| 지표 | 유형 | 무엇을 보는가 |
+|---|---|---|
+| Top-1 evidence hit | 정량 | 검색기가 정답 근거 chunk를 첫 번째로 찾았는가 |
+| Token recall / phrase hit | 정량 | 검색된 근거와 답변이 기준 정답의 핵심 token/phrase를 포함하는가 |
+| Factual proxy | 정량 | 답변이 기준 정답의 핵심 정보를 포함하는지 자동으로 근사 판정 |
+| Format proxy | 정량 | 영어 추론, 메타 발화, 비한국어 잡음 없이 서비스 답변처럼 나오는가 |
+| Latency | 정량 | 로컬 모델이 실제 질의응답에 쓸 만한 속도로 답하는가 |
+| 7-item manual rubric | 정성 | 정확성, 근거성, 완전성, 의도 적합성, 환각 방지, 범위 통제, 표현 품질을 사람이 기준표로 확인 |
+
+자동 proxy는 빠르게 여러 설정을 비교하기 위한 보조 지표입니다. 예를 들어 답변이 사실상 맞아도 표현이 기준 정답과 다르면 factual proxy가 실패할 수 있습니다. 그래서 최종 해석에서는 [`eval/evaluation_rubric.md`](eval/evaluation_rubric.md)의 수동 루브릭과 [`eval/representative_manual_scoring.csv`](eval/representative_manual_scoring.csv)의 대표 문항 채점을 함께 봅니다.
+
+## Qualitative Example
+
+정량 결과만으로는 답변 품질 차이가 잘 보이지 않기 때문에, 대표 문항에서 실제 출력 형태도 비교했습니다.
+
+질문: `태초 광휘의 의지는 광휘의 잔영 몇 개로 구매할 수 있고 구매 제한은 어떻게 되는가?`
+
+| 설정 | 실제 답변 경향 | 해석 |
+|---|---|---|
+| BGE-M3 + `qwen3:4b` | 영어로 "Okay, let's tackle this question..."처럼 추론 과정을 길게 출력하고, 중간에 "Wait" 같은 메타 발화가 섞임 | 근거는 찾았지만 서비스 답변 형식으로는 부적합 |
+| BGE-M3 + instruct variant | `태초 광휘의지는 광휘의 잔영 790개로 구매할 수 있으며, 계정당 1회로 제한됩니다.` | 짧고 한국어 중심이며 핵심 답변을 바로 제시 |
+| BGE-M3 + instruct + service tone | `태초 광휘의 의지는 광휘의 잔영 790개로 구매할 수 있습니다. 구매 제한은 계정당 1회입니다.` | 문장성이 좋아지고 안내형 답변에 가까워짐 |
+| BGE-M3 + instruct + service tone + structured | 가격, 구매 제한, 월 구매 가능 횟수 같은 표형 조건을 bullet로 분리 | 표형 정보 보완에는 도움이 되지만, 인접 조건 혼입 여부는 수동 검토 필요 |
+
+이 예시에서 핵심 개선은 "모델이 더 많이 말한다"가 아니라, 근거 기반 답변을 짧고 확인 가능한 서비스 답변 형태로 바꾼 것입니다.
+
 ## Start Here
 
 | File | Why it matters |
