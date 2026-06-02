@@ -138,6 +138,7 @@
       font-size: 14px;
       font-weight: 800;
       box-shadow: 0 4px 14px rgba(17, 24, 39, 0.04);
+      white-space: nowrap;
     }
 
     .button.primary {
@@ -204,7 +205,7 @@
 
     .section-note {
       max-width: 640px;
-      margin: 0;
+      margin: 6px 0 0;
       color: var(--muted);
       font-size: 15px;
     }
@@ -486,33 +487,18 @@
     <section>
       <div class="shell">
         <div class="section-head">
-          <h2>Role Fit</h2>
-          <p class="section-note">공고의 주요 업무를 어떤 데이터, 평가 지표, 보고서 산출물로 증명했는지 정리했습니다.</p>
+          <div>
+            <h2>Role Fit</h2>
+            <p class="section-note">공고의 주요 업무를 어떤 데이터, 평가 지표, 보고서 산출물로 증명했는지 정리했습니다.</p>
+          </div>
         </div>
         <table class="comparison-table">
-          <thead>
-            <tr>
-              <th>공고 요구사항</th>
-              <th>프로젝트에서 보여준 방식</th>
-            </tr>
-          </thead>
+          <thead><tr><th>공고 요구사항</th><th>프로젝트에서 보여준 방식</th></tr></thead>
           <tbody>
-            <tr>
-              <td>게임 도메인 LLM 벤치마크 구성</td>
-              <td>던파 공식 업데이트 문서를 수집하고, 실제 모험가가 물어볼 법한 문서 기반 질문 22개와 OOD/공격 질문 세트를 설계했습니다.</td>
-            </tr>
-            <tr>
-              <td>평가 지표와 스코어링 기준 개발</td>
-              <td>검색 지표, factual/format proxy, safety block rate, 7개 수동 루브릭을 분리해 설계했습니다.</td>
-            </tr>
-            <tr>
-              <td>LLM 응답 품질 평가</td>
-              <td>Non-RAG, BM25 heuristic, BGE-M3, structured data, Qwen3 instruct 조합을 비교해 어떤 요소가 어떤 품질 문제를 개선했는지 분리했습니다.</td>
-            </tr>
-            <tr>
-              <td>결과 분석과 개선 의견 공유</td>
-              <td>검색 실패, 표형 정보 혼입, 영어 추론 출력, safety gate 우회 같은 실패 유형을 보고서로 정리하고 후속 개선 방향까지 제시했습니다.</td>
-            </tr>
+            <tr><td>게임 도메인 LLM 벤치마크 구성</td><td>던파 공식 업데이트 문서를 수집하고, 실제 모험가가 물어볼 법한 문서 기반 질문 22개와 OOD/공격 질문 세트를 설계했습니다.</td></tr>
+            <tr><td>평가 지표와 스코어링 기준 개발</td><td>검색 지표, factual/format proxy, safety block rate, 7개 수동 루브릭을 분리해 설계했습니다.</td></tr>
+            <tr><td>LLM 응답 품질 평가</td><td>Non-RAG, BM25 heuristic, BGE-M3, structured data, Qwen3 instruct 조합을 비교해 어떤 요소가 어떤 품질 문제를 개선했는지 분리했습니다.</td></tr>
+            <tr><td>결과 분석과 개선 의견 공유</td><td>검색 실패, 표형 정보 혼입, 영어 추론 출력, safety gate 우회 같은 실패 유형을 보고서로 정리하고 후속 개선 방향까지 제시했습니다.</td></tr>
           </tbody>
         </table>
       </div>
@@ -520,10 +506,7 @@
 
     <section id="pipeline">
       <div class="shell">
-        <div class="section-head">
-          <h2>Evaluation Pipeline</h2>
-          <p class="section-note">질문이 들어온 뒤 차단, 검색, 근거 구성, 생성, 평가, 보고서화까지 분리해 병목을 추적했습니다.</p>
-        </div>
+        <div class="section-head"><div><h2>Evaluation Pipeline</h2><p class="section-note">질문이 들어온 뒤 차단, 검색, 근거 구성, 생성, 평가, 보고서화까지 분리해 병목을 추적했습니다.</p></div></div>
         <div class="pipeline" aria-label="Evaluation pipeline steps">
           <div class="step"><div class="num">01</div><strong>Question</strong><span>벤치마크, OOD, 공격 질문</span></div>
           <div class="step"><div class="num">02</div><strong>Safety Gate</strong><span>범위 밖 및 공격성 요청 차단</span></div>
@@ -538,10 +521,7 @@
 
     <section id="results">
       <div class="shell">
-        <div class="section-head">
-          <h2>Key Results</h2>
-          <p class="section-note">검색 성능, 생성 모델, 답변 형식을 분리해 어떤 개선이 어떤 병목을 해결했는지 보여줍니다.</p>
-        </div>
+        <div class="section-head"><div><h2>Key Results</h2><p class="section-note">검색 성능, 생성 모델, 답변 형식을 분리해 어떤 개선이 어떤 병목을 해결했는지 보여줍니다.</p></div></div>
         <div class="split">
           <div class="panel">
             <h3>Score Movement</h3>
@@ -554,47 +534,31 @@
 
           <div class="panel">
             <h3>Final Combination</h3>
-            <table class="comparison-table">
-              <tbody>
-                <tr><th>Retriever</th><td>BGE-M3: 질문과 문서 chunk를 embedding으로 비교하는 최종 검색기</td></tr>
-                <tr><th>Structured Data</th><td>켈돈 자비 상점표를 아이템명·가격·구매 제한·이월 조건 단위로 JSON화</td></tr>
-                <tr><th>Generator</th><td>qwen3:4b-instruct-2507-q4_K_M</td></tr>
-                <tr><th>Service-tone Prompt</th><td>영어 추론/메타 발화를 줄이고 한국어 서비스 안내형 답변으로 정리</td></tr>
-                <tr><th>Average Latency</th><td>5.130s</td></tr>
-              </tbody>
-            </table>
+            <table class="comparison-table"><tbody>
+              <tr><th>Retriever</th><td>BGE-M3: 질문과 문서 chunk를 embedding으로 비교하는 최종 검색기</td></tr>
+              <tr><th>Structured Data</th><td>켈돈 자비 상점표를 아이템명·가격·구매 제한·이월 조건 단위로 JSON화</td></tr>
+              <tr><th>Generator</th><td>qwen3:4b-instruct-2507-q4_K_M</td></tr>
+              <tr><th>Service-tone Prompt</th><td>영어 추론/메타 발화를 줄이고 한국어 서비스 안내형 답변으로 정리</td></tr>
+              <tr><th>Average Latency</th><td>5.130s</td></tr>
+            </tbody></table>
           </div>
         </div>
 
         <div class="panel" style="margin-top: 16px;">
           <h3>BGE-M3 고정 생성 설정 요소별 비교</h3>
-          <table class="comparison-table">
-            <thead>
-              <tr>
-                <th>Setting</th>
-                <th>Factual Proxy</th>
-                <th>Format Proxy</th>
-                <th>Meta Reasoning</th>
-                <th>Avg Latency</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>BGE-M3 + qwen3:4b</td><td>17 / 22</td><td>9 / 22</td><td>13</td><td>11.635s</td></tr>
-              <tr><td>BGE-M3 + instruct</td><td>18 / 22</td><td>22 / 22</td><td>0</td><td>4.625s</td></tr>
-              <tr><td>BGE-M3 + instruct + service tone</td><td>16 / 22</td><td>22 / 22</td><td>0</td><td>4.989s</td></tr>
-              <tr><td>BGE-M3 + instruct + service tone + structured</td><td>17 / 22</td><td>22 / 22</td><td>0</td><td>5.130s</td></tr>
-            </tbody>
-          </table>
+          <table class="comparison-table"><thead><tr><th>Setting</th><th>Factual Proxy</th><th>Format Proxy</th><th>Meta Reasoning</th><th>Avg Latency</th></tr></thead><tbody>
+            <tr><td>BGE-M3 + qwen3:4b</td><td>17 / 22</td><td>9 / 22</td><td>13</td><td>11.635s</td></tr>
+            <tr><td>BGE-M3 + instruct</td><td>18 / 22</td><td>22 / 22</td><td>0</td><td>4.625s</td></tr>
+            <tr><td>BGE-M3 + instruct + service tone</td><td>16 / 22</td><td>22 / 22</td><td>0</td><td>4.989s</td></tr>
+            <tr><td>BGE-M3 + instruct + service tone + structured</td><td>17 / 22</td><td>22 / 22</td><td>0</td><td>5.130s</td></tr>
+          </tbody></table>
         </div>
       </div>
     </section>
 
     <section id="evaluation">
       <div class="shell">
-        <div class="section-head">
-          <h2>Evaluation Design</h2>
-          <p class="section-note">RAGAS-style 관점은 참고하되, 게임 운영 문서의 최신성, 근거성, 범위 통제 리스크를 반영해 도메인 루브릭을 직접 설계했습니다.</p>
-        </div>
+        <div class="section-head"><div><h2>Evaluation Design</h2><p class="section-note">RAGAS-style 관점은 참고하되, 게임 운영 문서의 최신성, 근거성, 범위 통제 리스크를 반영해 도메인 루브릭을 직접 설계했습니다.</p></div></div>
         <div class="grid">
           <article class="card"><span class="tag">Benchmark</span><h3>문서 기반 질문 22개</h3><p>패치노트, 상점표, 조건 판단, 비교 질문을 섞어 실제 이용자 질문에 가깝게 구성했습니다.</p></article>
           <article class="card"><span class="tag">Difficulty</span><h3>난이도 수동 라벨링</h3><p>easy는 단일 근거 추출, medium은 조건·비교·계산·요약, hard는 근거 기반 판단이 필요한 문항으로 수동 라벨링했습니다.</p></article>
@@ -607,8 +571,7 @@
     </section>
 
     <section>
-      <div class="shell">
-        <div class="section-head"><h2>What Changed</h2><p class="section-note">성공 수치만 보여주지 않고, 실패 원인을 검색, 구조화 데이터, 생성 모델, safety 한계로 나눠 기록했습니다.</p></div>
+      <div class="shell"><div class="section-head"><div><h2>What Changed</h2><p class="section-note">성공 수치만 보여주지 않고, 실패 원인을 검색, 구조화 데이터, 생성 모델, safety 한계로 나눠 기록했습니다.</p></div></div>
         <table class="comparison-table"><thead><tr><th>Issue</th><th>Finding</th><th>Response</th></tr></thead><tbody>
           <tr><td>긴 문서 근거 누락</td><td>Non-RAG baseline은 최신 패치노트 세부 조건을 안정적으로 찾지 못했습니다.</td><td>RAG를 붙여 문서 질문 평균을 11.27에서 18.86으로 개선했습니다.</td></tr>
           <tr><td>표형 정보 혼입</td><td>상점표에서 인접 상품의 가격, 구매 제한이 섞이는 문제가 있었습니다.</td><td><code>shop_items.json</code>을 만들어 표 행 단위 근거를 별도 제공했습니다.</td></tr>
@@ -619,7 +582,7 @@
     </section>
 
     <section>
-      <div class="shell"><div class="section-head"><h2>Next Extension</h2><p class="section-note">현재 결과는 offline benchmark입니다. 실제 서비스 단계에서는 패치 주기별 평가셋 갱신과 운영 로그 추적을 붙여 확장할 수 있습니다.</p></div>
+      <div class="shell"><div class="section-head"><div><h2>Next Extension</h2><p class="section-note">현재 결과는 offline benchmark입니다. 실제 서비스 단계에서는 패치 주기별 평가셋 갱신과 운영 로그 추적을 붙여 확장할 수 있습니다.</p></div></div>
         <div class="grid">
           <article class="card"><span class="tag">Dynamic Eval</span><h3>패치 주기 기반 평가셋 갱신</h3><p>새 패치노트가 올라오면 변경점을 추출하고, 질문과 기준 정답 후보를 다시 만들어 평가셋이 낡지 않도록 확장합니다.</p></article>
           <article class="card"><span class="tag">Auto Judge</span><h3>자동 평가는 보조 지표로 사용</h3><p>RAGAS, DeepEval, LLM-as-a-Judge는 최종 판정자가 아니라 검색 적합성, 근거 충실성, 환각 여부를 빠르게 점검하는 보조 지표로 둡니다.</p></article>
@@ -631,7 +594,10 @@
     <section id="artifacts">
       <div class="shell">
         <div class="section-head">
-          <h2>Portfolio Artifacts</h2>
+          <div>
+            <h2>Portfolio Artifacts</h2>
+            <p class="section-note">Final Closing Review, Final Portfolio Report, Model Rationale 순서로 보는 것을 권장합니다.</p>
+          </div>
           <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval">GitHub Repository 보기</a>
         </div>
         <div class="artifact-list">
@@ -645,9 +611,7 @@
       </div>
     </section>
 
-    <section>
-      <div class="shell"><div class="callout"><p>한 문장으로 요약하면, 이 프로젝트는 던파 공식 문서 기반 질문을 만들고, 검색-생성-안전성-평가를 분리해 로컬 LLM 답변 품질과 실패 원인을 체계적으로 비교한 제출용 평가 포트폴리오입니다.</p></div></div>
-    </section>
+    <section><div class="shell"><div class="callout"><p>한 문장으로 요약하면, 이 프로젝트는 던파 공식 문서 기반 질문을 만들고, 검색-생성-안전성-평가를 분리해 로컬 LLM 답변 품질과 실패 원인을 체계적으로 비교한 제출용 평가 포트폴리오입니다.</p></div></div></section>
   </main>
 
   <footer><div class="shell">DNF LLM Evaluation Project. Local files, reports, questions, and evaluation logs are included in this repository.</div></footer>
