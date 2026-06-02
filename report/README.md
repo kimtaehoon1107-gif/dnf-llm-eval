@@ -1,6 +1,6 @@
 # Report Reading Guide
 
-이 폴더에는 최종 제출용 보고서와 실험 과정에서 만든 중간 분석 문서가 함께 들어 있습니다. 처음 보는 사람은 아래 순서대로 읽는 것이 가장 안전합니다.
+이 폴더에는 최종 제출용 보고서와 실험 과정에서 만든 세부 분석 문서가 들어 있습니다. 초기 계획서와 오래된 중간 결과는 `archive/`에 보관했습니다. 처음 보는 사람은 아래 순서대로 읽는 것이 가장 안전합니다.
 
 ## 1. 제출용 핵심 문서
 
@@ -34,17 +34,17 @@
 
 | 파일 | 성격 |
 |---|---|
-| `project_direction_report.md` | 초기 프로젝트 방향 설계 |
-| `local_llm_experiment_plan.md` | 로컬 LLM 실험 계획 |
-| `initial_sample_eval_report.md` | 초기 5개 샘플 평가 결과 |
-| `full_eval_report.md` | 초기 전체 평가 보고 |
-| `rag_eval_report.md` | RAG 도입 직후 평가 보고 |
-| `bge_m3_retrieval_smoke_test.md` | BGE-M3 검색 smoke test |
-| `next_improvement_plan.md` | 후속 개선 아이디어 |
-| `adversarial_safety_evaluation_plan.md` | 공격 질문 세트 설계 계획 |
-| `document_summary.md` | 수집 문서 요약 |
-| `evaluation_methodology_research.md` | 평가 방법론 조사 |
-| `interview_pitch.md` | 면접 설명 초안 |
+| `archive/project_direction_report.md` | 초기 프로젝트 방향 설계 |
+| `archive/local_llm_experiment_plan.md` | 로컬 LLM 실험 계획 |
+| `archive/initial_sample_eval_report.md` | 초기 5개 샘플 평가 결과 |
+| `archive/full_eval_report.md` | 초기 전체 평가 보고 |
+| `archive/rag_eval_report.md` | RAG 도입 직후 평가 보고 |
+| `archive/bge_m3_retrieval_smoke_test.md` | BGE-M3 검색 smoke test |
+| `archive/next_improvement_plan.md` | 후속 개선 아이디어 |
+| `archive/adversarial_safety_evaluation_plan.md` | 공격 질문 세트 설계 계획 |
+| `archive/document_summary.md` | 수집 문서 요약 |
+| `archive/evaluation_methodology_research.md` | 평가 방법론 조사 |
+| `archive/interview_pitch.md` | 면접 설명 초안 |
 
 ## 주의
 
