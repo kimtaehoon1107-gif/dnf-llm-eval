@@ -14,7 +14,7 @@
 | 질문 | 결론 | 의미 |
 |---|---:|---|
 | RAG가 실제로 도움이 됐나? | 11.27 -> 18.86 / 21 | 문서 전체를 넣는 방식보다 관련 근거 chunk를 찾아 넣는 방식이 더 안정적이었다. |
-| 검색기는 무엇을 최종 선택했나? | BGE-M3 top-1 hit 21 / 22 | BM25 heuristic 19 / 22보다 정답 근거를 첫 번째로 찾는 비율이 높았다. |
+| 검색기는 무엇을 최종 선택했나? | BGE-M3 | Top-1 evidence hit이 21 / 22로 BM25 heuristic의 19 / 22보다 높았다. |
 | 생성 모델 병목은 무엇이었나? | format proxy 9 / 22 -> 22 / 22 | 기존 `qwen3:4b`의 영어 추론/메타 발화 문제를 instruct variant로 줄였다. |
 | 최종 설정의 현실적 성능은? | factual proxy 17 / 22, 평균 5.130s | 경량 로컬 모델로 재현 가능한 수준의 답변 품질과 응답 시간을 확인했다. |
 | Safety는 어디까지 됐나? | 명시적 공격 10 / 10, stealth 사전 차단 0 / 10 | 규칙 기반 safety gate의 효과와 한계를 분리해서 기록했다. |
@@ -38,7 +38,7 @@
 | BM25 heuristic | 19 / 22 |
 | BGE-M3 | 21 / 22 |
 
-#### 3. BGE-M3 고정 생성 모델 ablation
+#### 3. BGE-M3 고정 생성 설정 요소별 비교 실험
 
 | 설정 | Factual proxy | Format proxy | 평균 응답 시간 |
 |---|---:|---:|---:|
@@ -95,12 +95,13 @@ flowchart LR
 
 ## Evaluation Design
 
-정량 평가는 빠른 비교를 위한 proxy이고, 정성 평가는 실제 서비스 답변으로 볼 수 있는지를 확인하기 위한 수동 기준입니다.
+정량 평가는 여러 설정을 빠르게 비교하기 위한 자동 지표이며, 그중 factual proxy와 format proxy는 사람이 직접 평가하기 전의 대리 지표입니다. 정성 평가는 실제 서비스 답변으로 볼 수 있는지를 확인하기 위한 수동 기준입니다.
 
 | 지표 | 유형 | 무엇을 보는가 |
 |---|---|---|
 | Top-1 evidence hit | 정량 | 검색기가 정답 근거 chunk를 첫 번째로 찾았는가 |
-| Token recall / phrase hit | 정량 | 검색된 근거와 답변이 기준 정답의 핵심 token/phrase를 포함하는가 |
+| Retrieval token recall / phrase hit | 정량 | 검색된 context가 기준 evidence의 핵심 token/phrase를 얼마나 포함하는가 |
+| Answer token recall / phrase hit | 정량 | 모델 답변이 gold answer 또는 evidence의 핵심 token/phrase를 얼마나 포함하는가 |
 | Factual proxy | 정량 | 답변이 기준 정답의 핵심 정보를 포함하는지 자동으로 근사 판정 |
 | Format proxy | 정량 | 영어 추론, 메타 발화, 비한국어 잡음 없이 서비스 답변처럼 나오는가 |
 | Latency | 정량 | 로컬 모델이 실제 질의응답에 쓸 만한 속도로 답하는가 |
@@ -119,7 +120,7 @@ flowchart LR
 | BGE-M3 + `qwen3:4b` | 영어로 "Okay, let's tackle this question..."처럼 추론 과정을 길게 출력하고, 중간에 "Wait" 같은 메타 발화가 섞임 | 근거는 찾았지만 서비스 답변 형식으로는 부적합 |
 | BGE-M3 + instruct variant | `태초 광휘의지는 광휘의 잔영 790개로 구매할 수 있으며, 계정당 1회로 제한됩니다.` | 짧고 한국어 중심이며 핵심 답변을 바로 제시 |
 | BGE-M3 + instruct + service tone | `태초 광휘의 의지는 광휘의 잔영 790개로 구매할 수 있습니다. 구매 제한은 계정당 1회입니다.` | 문장성이 좋아지고 안내형 답변에 가까워짐 |
-| BGE-M3 + instruct + service tone + structured | 가격, 구매 제한, 월 구매 가능 횟수 같은 표형 조건을 bullet로 분리 | 표형 정보 보완에는 도움이 되지만, 인접 조건 혼입 여부는 수동 검토 필요 |
+| BGE-M3 + instruct + service tone + structured | 가격, 구매 제한, 이월 조건 같은 표형 정보를 구조화 근거로 함께 제공 | 표형 정보 보완에는 도움이 되지만, 인접 조건 혼입 여부는 수동 검토 필요 |
 
 이 예시에서 핵심 개선은 "모델이 더 많이 말한다"가 아니라, 근거 기반 답변을 짧고 확인 가능한 서비스 답변 형태로 바꾼 것입니다.
 
@@ -289,7 +290,7 @@ python scripts\run_rag_local_llm_eval.py `
 
 `--restrict-to-question-doc`는 실제 서비스용 옵션이 아니라, 정답 문서 안에서의 검색과 답변 생성 능력을 분리해 보기 위한 평가용 설정입니다.
 
-### 3. BGE-M3 고정 생성 설정 ablation
+### 3. BGE-M3 고정 생성 설정 요소별 비교 실험
 
 최종 조합을 한 번에 비교하면 어떤 요소가 개선에 기여했는지 분리하기 어렵습니다. 그래서 검색기를 BGE-M3로 고정하고, 모델 변경, 서비스 톤 프롬프트, 구조화 데이터를 단계적으로 추가한 4개 실험을 실행했습니다.
 
@@ -334,7 +335,7 @@ python scripts\run_rag_local_llm_eval.py `
   --num-predict 512
 ```
 
-이 ablation은 `--restrict-to-question-doc`를 사용하지 않고 전체 5개 문서 corpus에서 검색했습니다. 결과 해석은 [`report/ablation_study_report.md`](report/ablation_study_report.md)에 정리했습니다.
+이 요소별 비교 실험은 `--restrict-to-question-doc`를 사용하지 않고 전체 5개 문서 corpus에서 검색했습니다. 결과 해석은 [`report/ablation_study_report.md`](report/ablation_study_report.md)에 정리했습니다.
 
 ## 주요 결과
 
@@ -387,4 +388,4 @@ python scripts\run_rag_local_llm_eval.py `
 
 ## 결론
 
-이 프로젝트는 던파 공식 문서를 기반으로 게임 도메인 LLM 평가 과정을 작게 구현한 작업입니다. RAG는 baseline 대비 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았습니다. 추가 ablation에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적임을 확인했습니다. 최종 제출용 조합은 factual proxy 단독 최고값이 아니라, 검색 근거성, 서비스 답변 형식, 표형 정보 보완을 함께 고려한 균형 조합입니다.
+이 프로젝트는 던파 공식 문서를 기반으로 게임 도메인 LLM 평가 과정을 작게 구현한 작업입니다. RAG는 baseline 대비 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았습니다. 추가 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적임을 확인했습니다. 최종 제출용 조합은 factual proxy 단독 최고값이 아니라, 검색 근거성, 서비스 답변 형식, 표형 정보 보완을 함께 고려한 균형 조합입니다.
