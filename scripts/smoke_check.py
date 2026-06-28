@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import py_compile
 from pathlib import Path
 
 
@@ -46,11 +45,15 @@ CSV_REQUIRED_COLUMNS = {
 }
 
 
+def relative(path: Path) -> str:
+    return path.relative_to(BASE_DIR).as_posix()
+
+
 def check_required_files() -> list[str]:
     errors: list[str] = []
     for path in REQUIRED_FILES:
         if not path.exists():
-            errors.append(f"missing required file: {path.relative_to(BASE_DIR)}")
+            errors.append(f"missing required file: {relative(path)}")
     return errors
 
 
@@ -58,28 +61,60 @@ def check_python_syntax() -> list[str]:
     errors: list[str] = []
     for path in PYTHON_SCRIPTS:
         if not path.exists():
-            errors.append(f"missing Python script: {path.relative_to(BASE_DIR)}")
+            errors.append(f"missing Python script: {relative(path)}")
             continue
         try:
-            py_compile.compile(str(path), doraise=True)
-        except py_compile.PyCompileError as exc:
-            errors.append(f"syntax error in {path.relative_to(BASE_DIR)}: {exc.msg}")
+            source = path.read_text(encoding="utf-8")
+            compile(source, str(path), "exec", dont_inherit=True)
+        except SyntaxError as exc:
+            location = f"{relative(path)}:{exc.lineno or 0}:{exc.offset or 0}"
+            errors.append(f"syntax error in {location}: {exc.msg}")
+        except UnicodeDecodeError as exc:
+            errors.append(f"cannot decode {relative(path)} as UTF-8: {exc}")
     return errors
 
 
-def check_csv_headers() -> list[str]:
+def read_csv_rows(path: Path) -> list[dict[str, str]]:
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def check_csv_inputs() -> list[str]:
     errors: list[str] = []
     for path, required_columns in CSV_REQUIRED_COLUMNS.items():
         if not path.exists():
             continue
-        with path.open("r", encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            fieldnames = set(reader.fieldnames or [])
+        rows = read_csv_rows(path)
+        fieldnames = set(rows[0].keys()) if rows else set()
         missing = sorted(required_columns - fieldnames)
         if missing:
-            errors.append(
-                f"{path.relative_to(BASE_DIR)} missing columns: {', '.join(missing)}"
-            )
+            errors.append(f"{relative(path)} missing columns: {', '.join(missing)}")
+        if not rows:
+            errors.append(f"{relative(path)} has no data rows")
+
+    benchmark_path = BASE_DIR / "questions" / "benchmark_questions.csv"
+    if benchmark_path.exists():
+        rows = read_csv_rows(benchmark_path)
+        seen_question_ids: set[str] = set()
+        processed_doc_ids = {
+            path.name.split("_", 1)[0]
+            for path in (BASE_DIR / "data" / "processed_md").glob("DOC-*.md")
+        }
+        for index, row in enumerate(rows, start=2):
+            question_id = row.get("question_id", "").strip()
+            doc_id = row.get("doc_id", "").strip()
+            if not question_id:
+                errors.append(f"{relative(benchmark_path)} row {index} has empty question_id")
+            elif question_id in seen_question_ids:
+                errors.append(f"{relative(benchmark_path)} duplicate question_id: {question_id}")
+            seen_question_ids.add(question_id)
+
+            if not doc_id:
+                errors.append(f"{relative(benchmark_path)} row {index} has empty doc_id")
+            elif doc_id not in processed_doc_ids:
+                errors.append(
+                    f"{relative(benchmark_path)} row {index} references missing doc_id: {doc_id}"
+                )
     return errors
 
 
@@ -92,7 +127,7 @@ def check_structured_data() -> list[str]:
     with path.open("r", encoding="utf-8") as f:
         records = json.load(f)
     if not isinstance(records, list):
-        return [f"{path.relative_to(BASE_DIR)} must contain a JSON list"]
+        return [f"{relative(path)} must contain a JSON list"]
 
     required_keys = {
         "record_id",
@@ -101,16 +136,34 @@ def check_structured_data() -> list[str]:
         "price_text",
         "purchase_limit_text",
     }
+    seen_record_ids: set[str] = set()
+    processed_doc_ids = {
+        path.name.split("_", 1)[0]
+        for path in (BASE_DIR / "data" / "processed_md").glob("DOC-*.md")
+    }
     for index, record in enumerate(records, start=1):
         if not isinstance(record, dict):
-            errors.append(f"{path.relative_to(BASE_DIR)} record {index} is not an object")
+            errors.append(f"{relative(path)} record {index} is not an object")
             continue
         missing = sorted(required_keys - set(record))
         if missing:
             errors.append(
-                f"{path.relative_to(BASE_DIR)} record {index} missing keys: "
+                f"{relative(path)} record {index} missing keys: "
                 f"{', '.join(missing)}"
             )
+
+        record_id = str(record.get("record_id", "")).strip()
+        doc_id = str(record.get("doc_id", "")).strip()
+        if not record_id:
+            errors.append(f"{relative(path)} record {index} has empty record_id")
+        elif record_id in seen_record_ids:
+            errors.append(f"{relative(path)} duplicate record_id: {record_id}")
+        seen_record_ids.add(record_id)
+
+        if not doc_id:
+            errors.append(f"{relative(path)} record {index} has empty doc_id")
+        elif doc_id not in processed_doc_ids:
+            errors.append(f"{relative(path)} record {index} references missing doc_id: {doc_id}")
     return errors
 
 
@@ -127,7 +180,7 @@ def main() -> None:
 
     checks = [
         ("required files", check_required_files),
-        ("CSV headers", check_csv_headers),
+        ("CSV inputs", check_csv_inputs),
         ("structured data", check_structured_data),
     ]
     if not args.skip_syntax:
