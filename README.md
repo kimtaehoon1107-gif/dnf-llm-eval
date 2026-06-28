@@ -249,6 +249,16 @@ ollama pull qwen3:4b-instruct-2507-q4_K_M
 
 BGE-M3는 최초 실행 시 Hugging Face 모델 로드와 embedding cache 생성 때문에 몇 분 정도 걸릴 수 있습니다. 이후 실행은 `data/cache`를 사용하므로 더 빠릅니다.
 
+## 빠른 검증
+
+Ollama 모델이나 BGE-M3 가중치를 내려받기 전에, 저장소 구조와 Python 문법, 주요 CSV/JSON 입력 형식을 먼저 확인할 수 있습니다.
+
+```powershell
+python scripts\smoke_check.py
+```
+
+이 검증은 외부 모델을 호출하지 않으며, `requirements-bge.txt` 설치도 필요하지 않습니다. Python 실행기 자체가 없는 환경에서는 먼저 Python 3.10 이상이 `PATH`에 잡혀 있는지 확인해 주세요.
+
 ## 실험 흐름
 
 ### 1. Non-RAG baseline
