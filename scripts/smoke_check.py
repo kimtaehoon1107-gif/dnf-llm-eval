@@ -286,11 +286,38 @@ def check_question_sets() -> list[str]:
                 errors.append(f"{relative(path)} question set {question_set_id} missing path: {question_path}")
 
         corpus_snapshot_path = str(question_set.get("corpus_snapshot_path", "")).strip()
+        corpus_snapshot = None
         if corpus_snapshot_path and not (BASE_DIR / corpus_snapshot_path).exists():
             errors.append(
                 f"{relative(path)} question set {question_set_id} missing corpus snapshot: "
                 f"{corpus_snapshot_path}"
             )
+        elif corpus_snapshot_path:
+            with (BASE_DIR / corpus_snapshot_path).open("r", encoding="utf-8") as f:
+                corpus_snapshot = json.load(f)
+
+        if status != "planned" and question_path and (BASE_DIR / question_path).exists():
+            rows = read_csv_rows(BASE_DIR / question_path)
+            expected_count = question_set.get("question_count")
+            if expected_count != len(rows):
+                errors.append(
+                    f"{relative(path)} question set {question_set_id} question_count "
+                    f"must be {len(rows)}"
+                )
+
+            if corpus_snapshot:
+                known_doc_ids = {
+                    str(doc.get("doc_id", "")).strip()
+                    for doc in corpus_snapshot.get("documents", [])
+                    if isinstance(doc, dict)
+                }
+                for row_index, row in enumerate(rows, start=2):
+                    doc_id = row.get("doc_id", "").strip()
+                    if doc_id and doc_id not in known_doc_ids:
+                        errors.append(
+                            f"{question_path} row {row_index} references doc_id not in "
+                            f"{corpus_snapshot_path}: {doc_id}"
+                        )
 
     if active_id and not active_seen:
         errors.append(f"{relative(path)} active_question_set_id is not listed: {active_id}")
