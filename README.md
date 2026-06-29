@@ -225,6 +225,20 @@ dnf-llm-eval/
 
 기존 corpus는 `DOC-01`처럼 수집 순번 기반 ID를 사용합니다. 이 checked-in 기준점은 `data/corpus_snapshot.json`에 문서 목록, metadata hash, processed markdown hash로 기록합니다. 이후 재수집분은 공식 업데이트 게시글 번호를 사용한 `DNF-2927756` 형식의 안정 ID를 사용하도록 collector를 바꿨습니다. 로더와 smoke check는 기존 `DOC-*`와 신규 `DNF-*` 파일명을 모두 지원합니다.
 
+최신 공식 문서를 실험용으로 다시 수집할 때는 기존 benchmark corpus를 덮어쓰지 않고 snapshot 디렉터리에 staging할 수 있습니다.
+
+```powershell
+python scripts\collect_dnf_updates_selenium.py `
+  --data-dir data\snapshots\2026-06-official-updates `
+  --max 8
+
+python scripts\build_corpus_snapshot.py `
+  --metadata data\snapshots\2026-06-official-updates\metadata.csv `
+  --doc-dir data\snapshots\2026-06-official-updates\processed_md `
+  --output data\snapshots\2026-06-official-updates\corpus_snapshot.json `
+  --corpus-id dnf-official-updates-2026-06-staged
+```
+
 ## 실행 준비
 
 기본 수집/분석 스크립트는 다음 패키지를 사용합니다.

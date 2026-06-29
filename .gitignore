@@ -8,6 +8,9 @@ dist/
 data/debug_*.html
 data/debug_*.csv
 data/raw_html/
+data/**/debug_*.html
+data/**/debug_*.csv
+data/**/raw_html/
 data/cache/
 
 # Intermediate local evaluation runs
