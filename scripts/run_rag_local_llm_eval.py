@@ -914,6 +914,11 @@ def call_ollama(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS)
+    parser.add_argument(
+        "--question-set-id",
+        default="",
+        help="Optional stable question set identifier to record in the run manifest.",
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--model", default=os.getenv("OLLAMA_MODEL", "qwen3:4b"))
     parser.add_argument("--endpoint", default=os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434/api/chat"))
@@ -1197,6 +1202,7 @@ def main() -> None:
             args=args,
             output_path=args.output,
             questions_path=args.questions,
+            question_set_id=args.question_set_id,
             question_count=len(questions),
             rows=rows,
             checked_at=args.checked_at,

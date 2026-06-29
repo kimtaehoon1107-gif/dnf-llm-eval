@@ -99,6 +99,7 @@ def build_run_manifest(
     args: Any,
     output_path: Path,
     questions_path: Path,
+    question_set_id: str,
     question_count: int,
     rows: list[dict[str, str]],
     checked_at: str,
@@ -121,6 +122,7 @@ def build_run_manifest(
         "output_csv": relative_path(output_path, base_dir),
         "questions": {
             **file_source(questions_path, base_dir),
+            "id": question_set_id,
             "row_count": question_count,
         },
         "dates": {

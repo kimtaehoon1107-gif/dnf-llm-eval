@@ -26,6 +26,8 @@ REQUIRED_FILES = (
     BASE_DIR / "index.html",
     BASE_DIR / "requirements.txt",
     BASE_DIR / "questions" / "benchmark_questions.csv",
+    BASE_DIR / "questions" / "benchmark_questions_v2026_05.csv",
+    BASE_DIR / "questions" / "question_sets.json",
     BASE_DIR / "questions" / "adversarial_questions.csv",
     BASE_DIR / "eval" / "evaluation_rubric.md",
     BASE_DIR / "data" / "corpus_snapshot.json",
@@ -34,6 +36,14 @@ REQUIRED_FILES = (
 
 CSV_REQUIRED_COLUMNS = {
     BASE_DIR / "questions" / "benchmark_questions.csv": {
+        "question_id",
+        "doc_id",
+        "question",
+        "gold_answer",
+        "evidence",
+        "expected_behavior",
+    },
+    BASE_DIR / "questions" / "benchmark_questions_v2026_05.csv": {
         "question_id",
         "doc_id",
         "question",
@@ -237,6 +247,57 @@ def check_corpus_snapshot() -> list[str]:
     return errors
 
 
+def check_question_sets() -> list[str]:
+    path = BASE_DIR / "questions" / "question_sets.json"
+    if not path.exists():
+        return []
+
+    errors: list[str] = []
+    with path.open("r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    active_id = str(manifest.get("active_question_set_id", "")).strip()
+    question_sets = manifest.get("question_sets", [])
+    if not isinstance(question_sets, list):
+        return [f"{relative(path)} question_sets must be a list"]
+
+    seen_ids: set[str] = set()
+    active_seen = False
+    for index, question_set in enumerate(question_sets, start=1):
+        if not isinstance(question_set, dict):
+            errors.append(f"{relative(path)} question_sets[{index}] must be an object")
+            continue
+
+        question_set_id = str(question_set.get("id", "")).strip()
+        question_path = str(question_set.get("path", "")).strip()
+        status = str(question_set.get("status", "")).strip()
+
+        if not question_set_id:
+            errors.append(f"{relative(path)} question_sets[{index}] has empty id")
+        elif question_set_id in seen_ids:
+            errors.append(f"{relative(path)} duplicate question set id: {question_set_id}")
+        seen_ids.add(question_set_id)
+        active_seen = active_seen or question_set_id == active_id
+
+        if status != "planned":
+            if not question_path:
+                errors.append(f"{relative(path)} question set {question_set_id} has empty path")
+            elif not (BASE_DIR / question_path).exists():
+                errors.append(f"{relative(path)} question set {question_set_id} missing path: {question_path}")
+
+        corpus_snapshot_path = str(question_set.get("corpus_snapshot_path", "")).strip()
+        if corpus_snapshot_path and not (BASE_DIR / corpus_snapshot_path).exists():
+            errors.append(
+                f"{relative(path)} question set {question_set_id} missing corpus snapshot: "
+                f"{corpus_snapshot_path}"
+            )
+
+    if active_id and not active_seen:
+        errors.append(f"{relative(path)} active_question_set_id is not listed: {active_id}")
+
+    return errors
+
+
 def check_collector_doc_id_logic() -> list[str]:
     collector_path = BASE_DIR / "scripts" / "collect_dnf_updates_selenium.py"
     spec = importlib.util.spec_from_file_location("collect_dnf_updates_selenium", collector_path)
@@ -293,6 +354,7 @@ def main() -> None:
         ("CSV inputs", check_csv_inputs),
         ("structured data", check_structured_data),
         ("corpus snapshot", check_corpus_snapshot),
+        ("question sets", check_question_sets),
         ("collector doc_id logic", check_collector_doc_id_logic),
     ]
     if not args.skip_syntax:

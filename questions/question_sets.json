@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "active_question_set_id": "benchmark_questions_v2026_05",
+  "question_sets": [
+    {
+      "id": "benchmark_questions_v2026_05",
+      "path": "questions/benchmark_questions_v2026_05.csv",
+      "active_alias": "questions/benchmark_questions.csv",
+      "corpus_id": "dnf-official-updates-2026-05-doc-snapshot",
+      "corpus_snapshot_path": "data/corpus_snapshot.json",
+      "doc_id_style": "DOC-*",
+      "question_count": 22,
+      "status": "active",
+      "notes": "Original benchmark questions used by the current reports and historical evaluation outputs."
+    },
+    {
+      "id": "benchmark_questions_v2026_06",
+      "path": "questions/benchmark_questions_v2026_06.csv",
+      "corpus_id": "dnf-official-updates-2026-06-staged",
+      "corpus_snapshot_path": "data/snapshots/2026-06-official-updates/corpus_snapshot.json",
+      "doc_id_style": "DNF-*",
+      "question_count": 0,
+      "status": "planned",
+      "notes": "Question set to create after reviewing the staged 2026-06 official update corpus."
+    }
+  ]
+}
