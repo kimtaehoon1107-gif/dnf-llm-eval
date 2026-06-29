@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import importlib.util
 import json
 from pathlib import Path
 
@@ -170,6 +171,46 @@ def check_structured_data() -> list[str]:
     return errors
 
 
+def check_collector_doc_id_logic() -> list[str]:
+    collector_path = BASE_DIR / "scripts" / "collect_dnf_updates_selenium.py"
+    spec = importlib.util.spec_from_file_location("collect_dnf_updates_selenium", collector_path)
+    if spec is None or spec.loader is None:
+        return [f"cannot load collector module spec from {relative(collector_path)}"]
+
+    collector = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(collector)
+
+    errors: list[str] = []
+    major_update_row = {
+        "source_post_id": "2927617",
+        "title": "시즌 11 Act 2. 제국의 파도 ＆ 폭권",
+        "url": "https://df.nexon.com/pr/actupdate/MDAxNzI",
+    }
+    if collector.make_doc_id(major_update_row, 1) != "DNF-2927617":
+        errors.append("collector must prefer source_post_id for data-url posts")
+
+    regular_update_row = {
+        "source_post_id": "",
+        "title": "6/18(목) 정기점검 업데이트 안내",
+        "url": "https://df.nexon.com/community/news/update/2927756?categoryType=0",
+    }
+    if collector.make_doc_id(regular_update_row, 2) != "DNF-2927756":
+        errors.append("collector must fall back to URL post ID when source_post_id is empty")
+
+    unknown_row = {"source_post_id": "", "title": "external", "url": "https://example.com"}
+    if collector.make_doc_id(unknown_row, 3) != "DOC-03":
+        errors.append("collector must keep DOC fallback when no stable post ID exists")
+
+    try:
+        collector.validate_unique_source_post_ids([major_update_row, major_update_row])
+    except ValueError:
+        pass
+    else:
+        errors.append("collector must reject duplicate source_post_id values")
+
+    return errors
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run dependency-light repository smoke checks."
@@ -185,6 +226,7 @@ def main() -> None:
         ("required files", check_required_files),
         ("CSV inputs", check_csv_inputs),
         ("structured data", check_structured_data),
+        ("collector doc_id logic", check_collector_doc_id_logic),
     ]
     if not args.skip_syntax:
         checks.insert(1, ("Python syntax", check_python_syntax))

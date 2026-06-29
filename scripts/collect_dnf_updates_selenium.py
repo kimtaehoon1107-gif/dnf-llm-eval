@@ -5,12 +5,6 @@ import argparse
 import csv
 import re
 import time
-import requests
-from bs4 import BeautifulSoup
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 
 
 # ============================================================
@@ -75,6 +69,8 @@ def clean_filename(text: str) -> str:
 # ============================================================
 
 def fetch_page(url: str) -> str:
+    import requests
+
     response = requests.get(url, headers=HEADERS, timeout=20)
     response.raise_for_status()
     response.encoding = response.apparent_encoding
@@ -113,6 +109,8 @@ def infer_doc_type(title: str, category: str = "") -> str:
 # ============================================================
 
 def extract_title_from_detail(html: str, fallback_title: str) -> str:
+    from bs4 import BeautifulSoup
+
     soup = BeautifulSoup(html, "html.parser")
 
     title_tag = soup.select_one("h3")
@@ -132,6 +130,8 @@ def extract_title_from_detail(html: str, fallback_title: str) -> str:
 # ============================================================
 
 def extract_article_text(html: str) -> str:
+    from bs4 import BeautifulSoup
+
     soup = BeautifulSoup(html, "html.parser")
 
     for tag in soup(["script", "style", "noscript"]):
@@ -171,6 +171,9 @@ def extract_article_text(html: str) -> str:
 # ============================================================
 
 def make_driver(show_browser: bool = False):
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+
     options = Options()
 
     if not show_browser:
@@ -271,6 +274,8 @@ def normalize_posted_date(raw_date: str, title: str) -> str:
 # ============================================================
 
 def discover_update_links_with_selenium(show_browser: bool = False) -> list[dict]:
+    from bs4 import BeautifulSoup
+
     """
     Selenium으로 업데이트 목록 페이지를 연 뒤,
     article.board_list.news_list 안의 ul 목록을 읽어서
@@ -358,6 +363,7 @@ def discover_update_links_with_selenium(show_browser: bool = False) -> list[dict
             found.append({
                 "title": title,
                 "url": detail_url,
+                "source_post_id": data_no,
                 "category": category,
                 "posted_date": posted_date,
             })
@@ -385,7 +391,15 @@ def discover_update_links_with_selenium(show_browser: bool = False) -> list[dict
 
 def save_discovered_links(rows: list[dict]):
     with open(DISCOVERED_FILE, "w", newline="", encoding="utf-8-sig") as f:
-        fieldnames = ["doc_id", "doc_type", "category", "posted_date", "title", "url"]
+        fieldnames = [
+            "doc_id",
+            "source_post_id",
+            "doc_type",
+            "category",
+            "posted_date",
+            "title",
+            "url",
+        ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
@@ -395,6 +409,7 @@ def save_metadata(rows: list[dict]):
     with open(META_FILE, "w", newline="", encoding="utf-8-sig") as f:
         fieldnames = [
             "doc_id",
+            "source_post_id",
             "doc_type",
             "category",
             "posted_date",
@@ -417,11 +432,38 @@ def extract_update_post_id(url: str) -> str:
     return match.group(1) if match else ""
 
 
+def resolve_source_post_id(row: dict[str, str]) -> str:
+    source_post_id = row.get("source_post_id", "").strip()
+    if source_post_id:
+        return source_post_id
+    return extract_update_post_id(row.get("url", ""))
+
+
 def make_doc_id(row: dict[str, str], index: int) -> str:
-    post_id = extract_update_post_id(row.get("url", ""))
+    post_id = resolve_source_post_id(row)
     if post_id:
         return f"DNF-{post_id}"
     return f"DOC-{index:02d}"
+
+
+def validate_unique_source_post_ids(rows: list[dict[str, str]]) -> None:
+    seen: dict[str, str] = {}
+    duplicates: list[str] = []
+    for row in rows:
+        source_post_id = resolve_source_post_id(row)
+        if not source_post_id:
+            continue
+
+        title = row.get("title", "")
+        if source_post_id in seen:
+            duplicates.append(f"{source_post_id}: {seen[source_post_id]} / {title}")
+        else:
+            seen[source_post_id] = title
+
+    if duplicates:
+        raise ValueError(
+            "Duplicate source_post_id values detected: " + "; ".join(duplicates)
+        )
 
 
 def to_project_relative_path(path: Path) -> str:
@@ -484,6 +526,7 @@ def main():
 
         rows.append({
             "doc_id": "",
+            "source_post_id": item.get("source_post_id", ""),
             "doc_type": doc_type,
             "category": item["category"],
             "posted_date": item["posted_date"],
@@ -493,6 +536,8 @@ def main():
 
     # 3. 최대 개수 제한
     rows = rows[:args.max]
+
+    validate_unique_source_post_ids(rows)
 
     # 4. doc_id 부여
     for i, row in enumerate(rows, start=1):
@@ -514,6 +559,7 @@ def main():
         posted_date = row["posted_date"]
         title_from_list = row["title"]
         url = row["url"]
+        source_post_id = resolve_source_post_id(row)
 
         print()
         print(f"[FETCH] {doc_id} | {doc_type} | {title_from_list}")
@@ -535,6 +581,7 @@ def main():
             md_content = f"""# {title}
 
 - doc_id: {doc_id}
+- source_post_id: {source_post_id}
 - doc_type: {doc_type}
 - category: {category}
 - posted_date: {posted_date}
@@ -550,6 +597,7 @@ def main():
 
             metadata_rows.append({
                 "doc_id": doc_id,
+                "source_post_id": source_post_id,
                 "doc_type": doc_type,
                 "category": category,
                 "posted_date": posted_date,
@@ -571,6 +619,7 @@ def main():
 
             metadata_rows.append({
                 "doc_id": doc_id,
+                "source_post_id": source_post_id,
                 "doc_type": doc_type,
                 "category": category,
                 "posted_date": posted_date,
