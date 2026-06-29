@@ -236,8 +236,17 @@ def read_source_reference_dates(path: Path = METADATA_FILE) -> dict[str, str]:
 
 
 def extract_doc_id(path: Path) -> str:
-    match = re.match(r"(DOC-\d+)_", path.name)
+    match = re.match(r"((?:DOC|DNF)-\d+)_", path.name)
     return match.group(1) if match else path.stem
+
+
+def iter_processed_doc_paths() -> list[Path]:
+    return sorted(
+        {
+            *DOC_DIR.glob("DOC-*.md"),
+            *DOC_DIR.glob("DNF-*.md"),
+        }
+    )
 
 
 def clean_lines(text: str) -> list[str]:
@@ -255,7 +264,7 @@ def clean_lines(text: str) -> list[str]:
 def build_chunks(window_lines: int, stride: int, max_chars: int) -> list[Chunk]:
     chunks: list[Chunk] = []
 
-    for path in sorted(DOC_DIR.glob("DOC-*.md")):
+    for path in iter_processed_doc_paths():
         doc_id = extract_doc_id(path)
         text = path.read_text(encoding="utf-8")
         lines = clean_lines(text)
