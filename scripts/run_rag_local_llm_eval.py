@@ -912,6 +912,9 @@ def call_ollama(
 
 
 def main() -> None:
+    global DOC_DIR
+    global METADATA_FILE
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--questions", type=Path, default=DEFAULT_QUESTIONS)
     parser.add_argument(
@@ -920,6 +923,18 @@ def main() -> None:
         help="Optional stable question set identifier to record in the run manifest.",
     )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--doc-dir",
+        type=Path,
+        default=DOC_DIR,
+        help="Directory containing processed markdown documents.",
+    )
+    parser.add_argument(
+        "--metadata",
+        type=Path,
+        default=METADATA_FILE,
+        help="Metadata CSV for source_reference_date lookup.",
+    )
     parser.add_argument("--model", default=os.getenv("OLLAMA_MODEL", "qwen3:4b"))
     parser.add_argument("--endpoint", default=os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434/api/chat"))
     parser.add_argument("--window-lines", type=int, default=15)
@@ -1026,6 +1041,10 @@ def main() -> None:
         help="Do not write a run manifest JSON next to the output CSV.",
     )
     args = parser.parse_args()
+    DOC_DIR = args.doc_dir if args.doc_dir.is_absolute() else BASE_DIR / args.doc_dir
+    METADATA_FILE = args.metadata if args.metadata.is_absolute() else BASE_DIR / args.metadata
+    args.doc_dir = DOC_DIR
+    args.metadata = METADATA_FILE
 
     if args.fast_service_profile:
         args.top_k = 2
@@ -1037,6 +1056,7 @@ def main() -> None:
 
     print(
         "[CONFIG] "
+        f"doc_dir={DOC_DIR} "
         f"model={args.model} top_k={args.top_k} window_lines={args.window_lines} "
         f"stride={args.stride} chunk_max_chars={args.chunk_max_chars} "
         f"retriever={args.retriever} embedding_model={args.embedding_model} "

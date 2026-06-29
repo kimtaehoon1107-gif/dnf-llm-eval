@@ -19,9 +19,9 @@
       "corpus_id": "dnf-official-updates-2026-06-staged",
       "corpus_snapshot_path": "data/snapshots/2026-06-official-updates/corpus_snapshot.json",
       "doc_id_style": "DNF-*",
-      "question_count": 0,
-      "status": "planned",
-      "notes": "Question set to create after reviewing the staged 2026-06 official update corpus."
+      "question_count": 20,
+      "status": "draft",
+      "notes": "Draft benchmark questions for the staged 2026-06 official update corpus. Use with --doc-dir data/snapshots/2026-06-official-updates/processed_md and --metadata data/snapshots/2026-06-official-updates/metadata.csv."
     }
   ]
 }

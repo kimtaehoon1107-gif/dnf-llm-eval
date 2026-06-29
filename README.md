@@ -178,6 +178,7 @@ dnf-llm-eval/
   questions/
     benchmark_questions.csv
     benchmark_questions_v2026_05.csv
+    benchmark_questions_v2026_06.csv
     question_sets.json
     out_of_domain_questions.csv
     adversarial_questions.csv
@@ -285,6 +286,18 @@ python scripts\smoke_check.py
 manifest에는 실행 스크립트, git commit, 질문 CSV hash, question set id, corpus markdown hash, metadata hash, 모델명, retriever 설정, 날짜 기준, 실행 결과 status count가 기록됩니다. corpus를 refresh하거나 여러 run을 비교할 때 “어떤 문서와 설정으로 만든 결과인지”를 추적하기 위한 파일입니다.
 
 현재 active 질문셋은 `questions/question_sets.json`의 `benchmark_questions_v2026_05`이며, 기존 `questions/benchmark_questions.csv`는 이 파일의 active alias입니다. 평가 실행 시 `--question-set-id benchmark_questions_v2026_05`를 넘기면 manifest에 질문셋 버전이 명시됩니다.
+
+2026-06 staged corpus 검증용 질문셋은 `benchmark_questions_v2026_06`입니다. 기존 active corpus와 다른 문서 디렉터리를 쓰므로 실행 시 staged metadata/doc dir를 같이 지정합니다.
+
+```powershell
+python scripts\run_rag_local_llm_eval.py `
+  --questions questions\benchmark_questions_v2026_06.csv `
+  --question-set-id benchmark_questions_v2026_06 `
+  --doc-dir data\snapshots\2026-06-official-updates\processed_md `
+  --metadata data\snapshots\2026-06-official-updates\metadata.csv `
+  --retriever bm25 `
+  --dry-run
+```
 
 필요하면 `--manifest-output path\to\run.manifest.json`으로 저장 위치를 직접 지정할 수 있고, 임시 실행에서는 `--no-manifest`로 생성을 끌 수 있습니다.
 
