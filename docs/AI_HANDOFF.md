@@ -53,3 +53,17 @@
   - Corpus refresh should happen after this compatibility layer is merged.
 - Verification note:
   - Smoke check compiles the collector, but direct collector import was not run in the bundled Python because `requests` is not installed there.
+
+## 2026-06-29 Source Post ID Stability Follow-up
+
+- Goal: fix a stable-ID edge case before corpus refresh.
+- Branch: `codex/source-post-id-stability`.
+- Problem:
+  - Major update rows can use `data-url="/pr/actupdate/..."` while also carrying `data-no="2927617"`.
+  - If the collector derives stable IDs from URL only, these important rows can fall back to `DOC-xx` instead of `DNF-2927617`.
+- Change:
+  - Preserve `data-no` as `source_post_id` in discovered and metadata CSV outputs.
+  - Prefer `source_post_id` over URL parsing when building `doc_id`.
+  - Keep URL parsing as fallback and `DOC-xx` as final fallback.
+  - Reject duplicate non-empty `source_post_id` values.
+  - Move third-party collector imports into runtime functions so smoke check can import and test stable-ID helpers without installing Selenium/requests.
