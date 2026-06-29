@@ -16,6 +16,14 @@ from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
+from run_manifest import (
+    build_run_manifest,
+    default_manifest_path,
+    file_source,
+    relative_path,
+    write_run_manifest,
+)
+
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DOC_DIR = BASE_DIR / "data" / "processed_md"
@@ -1001,6 +1009,17 @@ def main() -> None:
             "per question doc_id when available."
         ),
     )
+    parser.add_argument(
+        "--manifest-output",
+        type=Path,
+        default=None,
+        help="Path for run manifest JSON. Defaults to the output CSV name with .manifest.json.",
+    )
+    parser.add_argument(
+        "--no-manifest",
+        action="store_true",
+        help="Do not write a run manifest JSON next to the output CSV.",
+    )
     args = parser.parse_args()
 
     if args.fast_service_profile:
@@ -1168,6 +1187,38 @@ def main() -> None:
 
     write_csv(args.output, rows)
     print(f"[DONE] saved: {args.output}")
+
+    if not args.no_manifest:
+        manifest_path = args.manifest_output or default_manifest_path(args.output)
+        manifest = build_run_manifest(
+            run_type="rag_local_llm_eval",
+            base_dir=BASE_DIR,
+            script_path=Path(__file__),
+            args=args,
+            output_path=args.output,
+            questions_path=args.questions,
+            question_count=len(questions),
+            rows=rows,
+            checked_at=args.checked_at,
+            answer_reference_date=answer_reference_date,
+            source_reference_date_arg=args.source_reference_date,
+            metadata_path=METADATA_FILE,
+            processed_doc_dir=DOC_DIR,
+            extra_config={
+                "temperature": 0.0,
+                "chunk_count": len(chunks),
+                "doc_count": len(set(chunk.doc_id for chunk in chunks)),
+                "embedding_cache_dir": relative_path(EMBEDDING_CACHE_DIR, BASE_DIR),
+            },
+            extra_sources={
+                "structured_shop_file": {
+                    **file_source(STRUCTURED_SHOP_FILE, BASE_DIR),
+                    "used": args.use_structured_data,
+                },
+            },
+        )
+        write_run_manifest(manifest_path, manifest)
+        print(f"[DONE] manifest: {manifest_path}")
 
 
 if __name__ == "__main__":
