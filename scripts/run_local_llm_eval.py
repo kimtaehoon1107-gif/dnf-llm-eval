@@ -10,6 +10,8 @@ from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
+from run_manifest import build_run_manifest, default_manifest_path, write_run_manifest
+
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_QUESTIONS = BASE_DIR / "questions" / "benchmark_questions.csv"
@@ -338,6 +340,17 @@ def main() -> None:
             "per question doc_id when available."
         ),
     )
+    parser.add_argument(
+        "--manifest-output",
+        type=Path,
+        default=None,
+        help="Path for run manifest JSON. Defaults to the output CSV name with .manifest.json.",
+    )
+    parser.add_argument(
+        "--no-manifest",
+        action="store_true",
+        help="Do not write a run manifest JSON next to the output CSV.",
+    )
     args = parser.parse_args()
 
     questions = read_csv(args.questions)
@@ -421,6 +434,27 @@ def main() -> None:
 
     write_csv(args.output, rows)
     print(f"[DONE] saved: {args.output}")
+
+    if not args.no_manifest:
+        manifest_path = args.manifest_output or default_manifest_path(args.output)
+        manifest = build_run_manifest(
+            run_type="local_llm_eval",
+            base_dir=BASE_DIR,
+            script_path=Path(__file__),
+            args=args,
+            output_path=args.output,
+            questions_path=args.questions,
+            question_count=len(questions),
+            rows=rows,
+            checked_at=args.checked_at,
+            answer_reference_date=answer_reference_date,
+            source_reference_date_arg=args.source_reference_date,
+            metadata_path=METADATA_FILE,
+            processed_doc_dir=DOC_DIR,
+            extra_config={"temperature": 0.0},
+        )
+        write_run_manifest(manifest_path, manifest)
+        print(f"[DONE] manifest: {manifest_path}")
 
 
 if __name__ == "__main__":

@@ -261,6 +261,14 @@ python scripts\smoke_check.py
 
 이 검증은 외부 모델을 호출하지 않으며, `requirements-bge.txt` 설치도 필요하지 않습니다. Python 실행기 자체가 없는 환경에서는 먼저 Python 3.10 이상이 `PATH`에 잡혀 있는지 확인해 주세요.
 
+## Run manifest
+
+`scripts/run_local_llm_eval.py`와 `scripts/run_rag_local_llm_eval.py`는 평가 CSV를 저장할 때 같은 이름의 manifest JSON도 함께 저장합니다. 예를 들어 `--output eval\answer_compare_bm25.csv`로 실행하면 기본적으로 `eval\answer_compare_bm25.manifest.json`이 생성됩니다.
+
+manifest에는 실행 스크립트, git commit, 질문 CSV hash, corpus markdown hash, metadata hash, 모델명, retriever 설정, 날짜 기준, 실행 결과 status count가 기록됩니다. corpus를 refresh하거나 여러 run을 비교할 때 “어떤 문서와 설정으로 만든 결과인지”를 추적하기 위한 파일입니다.
+
+필요하면 `--manifest-output path\to\run.manifest.json`으로 저장 위치를 직접 지정할 수 있고, 임시 실행에서는 `--no-manifest`로 생성을 끌 수 있습니다.
+
 ## 실험 흐름
 
 ### 1. Non-RAG baseline
