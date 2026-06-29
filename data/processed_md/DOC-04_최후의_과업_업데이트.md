@@ -1,6 +1,7 @@
 # 최후의 과업 업데이트
 
 - doc_id: DOC-04
+- source_post_id: 2927335
 - doc_type: main_update
 - category: 주요
 - posted_date: 2026.05.13
