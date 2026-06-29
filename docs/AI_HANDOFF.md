@@ -24,3 +24,18 @@
 - Verification:
   - PowerShell integrity equivalent passed: 22 benchmark questions, 10 structured records, 5 processed docs.
   - Local Python remains unavailable, so final `python scripts\smoke_check.py` verification is expected to come from GitHub Actions after push.
+
+## 2026-06-29 Freshness and Gate Follow-up
+
+- Goal: address Issue #1 by separating score metrics from critical gates and recording evaluation date metadata.
+- Branch: `codex/freshness-critical-gates`.
+- Pre-step: PR #2 was verified with local bundled Python and GitHub Actions, then squash-merged into `main`.
+- Scope:
+  - Rewrite `eval/evaluation_rubric.md` so hallucination/overreach is a binary critical gate instead of a 0-3 score item.
+  - Add `최신성` as a scored rubric item.
+  - Add `checked_at`, `answer_reference_date`, and `source_reference_date` output fields to local and RAG evaluation CSV writers.
+  - Keep existing generated CSVs and historical report scores unchanged; treat them as legacy results.
+- Current implementation note:
+  - `checked_at` defaults to the run date.
+  - `answer_reference_date` defaults to `checked_at` unless explicitly supplied.
+  - `source_reference_date` uses `data/metadata.csv` `posted_date` per `doc_id` unless explicitly supplied.
