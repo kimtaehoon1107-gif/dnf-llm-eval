@@ -28,8 +28,29 @@ META_FILE = DATA_DIR / "metadata.csv"
 DEBUG_HTML_FILE = DATA_DIR / "debug_update_list_selenium.html"
 DEBUG_ONCLICK_FILE = DATA_DIR / "debug_onclicks.csv"
 
-RAW_DIR.mkdir(parents=True, exist_ok=True)
-MD_DIR.mkdir(parents=True, exist_ok=True)
+
+def configure_output_paths(data_dir: Path) -> None:
+    global DATA_DIR
+    global RAW_DIR
+    global MD_DIR
+    global DISCOVERED_FILE
+    global META_FILE
+    global DEBUG_HTML_FILE
+    global DEBUG_ONCLICK_FILE
+
+    DATA_DIR = data_dir
+    RAW_DIR = DATA_DIR / "raw_html"
+    MD_DIR = DATA_DIR / "processed_md"
+    DISCOVERED_FILE = DATA_DIR / "discovered_update_urls.csv"
+    META_FILE = DATA_DIR / "metadata.csv"
+    DEBUG_HTML_FILE = DATA_DIR / "debug_update_list_selenium.html"
+    DEBUG_ONCLICK_FILE = DATA_DIR / "debug_onclicks.csv"
+
+    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    MD_DIR.mkdir(parents=True, exist_ok=True)
+
+
+configure_output_paths(DATA_DIR)
 
 
 # ============================================================
@@ -372,7 +393,7 @@ def discover_update_links_with_selenium(show_browser: bool = False) -> list[dict
 
         # 디버그 CSV 저장
         with open(DEBUG_ONCLICK_FILE, "w", newline="", encoding="utf-8-sig") as f:
-            fieldnames = ["title", "category", "posted_date", "url"]
+            fieldnames = ["title", "source_post_id", "category", "posted_date", "url"]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(found)
@@ -467,7 +488,10 @@ def validate_unique_source_post_ids(rows: list[dict[str, str]]) -> None:
 
 
 def to_project_relative_path(path: Path) -> str:
-    return path.relative_to(BASE_DIR).as_posix()
+    try:
+        return path.relative_to(BASE_DIR).as_posix()
+    except ValueError:
+        return str(path)
 
 
 # ============================================================
@@ -479,6 +503,15 @@ def main():
 
     parser.add_argument("--max", type=int, default=5, help="수집할 최대 문서 수")
     parser.add_argument("--sleep", type=float, default=1.5, help="요청 사이 대기 시간")
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        default=DATA_DIR,
+        help=(
+            "수집 산출물을 저장할 디렉터리. 기본값은 data/. "
+            "최신 corpus를 staging하려면 data/snapshots/<name>을 지정한다."
+        ),
+    )
 
     parser.add_argument(
         "--type",
@@ -503,7 +536,11 @@ def main():
     )
 
     args = parser.parse_args()
+    data_dir = args.data_dir if args.data_dir.is_absolute() else BASE_DIR / args.data_dir
+    configure_output_paths(data_dir)
     fetched_at = datetime.now().isoformat(timespec="seconds")
+
+    print(f"[OUTPUT] data_dir={DATA_DIR}")
 
     # 1. Selenium으로 상세 링크 발견
     discovered = discover_update_links_with_selenium(show_browser=args.show_browser)
