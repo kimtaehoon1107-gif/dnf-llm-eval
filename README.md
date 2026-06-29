@@ -87,7 +87,7 @@ flowchart LR
 | Service tone | 답변을 게임 서비스 안내처럼 만들기 위한 프롬프트 규칙. 핵심 답변 선제시, 조건/수치 분리, 퍼스트 서버 단정 방지, 문서 밖 추측 금지를 포함 | `report/service_tone_guideline.md` |
 | Structured data | 상점표처럼 행/열 관계가 중요한 정보를 JSON으로 따로 추출한 보조 근거. 가격, 구매 제한, 이월 조건처럼 표에서 섞이기 쉬운 정보를 보완 | `data/structured/shop_items.json` |
 | Safety gate | 프롬프트 유출, 가짜 근거, 버그 악용, 현금화, 매크로 요청, OOD 질문을 답변 전에 차단하는 규칙 기반 baseline | `questions/adversarial_*.csv` |
-| Manual rubric | 정확성, 근거성, 완전성, 의도 적합성, 환각 방지, 범위 통제, 표현 품질의 7개 항목으로 답변을 수동 채점 | `eval/evaluation_rubric.md` |
+| Manual rubric | 기존 대표 채점은 7개 항목 legacy 루브릭으로 기록했고, 현재 운영 루브릭은 점수 항목과 binary critical gate를 분리 | `eval/evaluation_rubric.md` |
 
 `Service tone`은 단순히 말투를 부드럽게 만드는 옵션이 아닙니다. 게임 유저가 바로 행동할 수 있도록 답변 구조를 정리하는 장치입니다. 예를 들어 `모험가님` 호칭은 모든 답변에 강제로 넣지 않고, 안내나 주의사항이 필요한 경우에만 자연스럽게 사용하도록 설계했습니다.
 
@@ -105,9 +105,9 @@ flowchart LR
 | Factual proxy | 정량 | 답변이 기준 정답의 핵심 정보를 포함하는지 자동으로 근사 판정 |
 | Format proxy | 정량 | 영어 추론, 메타 발화, 비한국어 잡음 없이 서비스 답변처럼 나오는가 |
 | Latency | 정량 | 로컬 모델이 실제 질의응답에 쓸 만한 속도로 답하는가 |
-| 7-item manual rubric | 정성 | 정확성, 근거성, 완전성, 의도 적합성, 환각 방지, 범위 통제, 표현 품질을 사람이 기준표로 확인 |
+| Manual rubric + critical gates | 정성 | 정확성, 근거성, 완전성, 의도 적합성, 표현 품질, 최신성을 채점하고 환각/과잉추론, 중대 수치 오류, 라이브 서버 기준 오인, 범위 통제는 binary gate로 확인 |
 
-자동 proxy는 빠르게 여러 설정을 비교하기 위한 보조 지표입니다. 예를 들어 답변이 사실상 맞아도 표현이 기준 정답과 다르면 factual proxy가 실패할 수 있습니다. 그래서 최종 해석에서는 [`eval/evaluation_rubric.md`](eval/evaluation_rubric.md)의 수동 루브릭과 [`eval/representative_manual_scoring.csv`](eval/representative_manual_scoring.csv)의 대표 문항 채점을 함께 봅니다.
+자동 proxy는 빠르게 여러 설정을 비교하기 위한 보조 지표입니다. 예를 들어 답변이 사실상 맞아도 표현이 기준 정답과 다르면 factual proxy가 실패할 수 있습니다. 그래서 최종 해석에서는 [`eval/evaluation_rubric.md`](eval/evaluation_rubric.md)의 운영 루브릭과 [`eval/representative_manual_scoring.csv`](eval/representative_manual_scoring.csv)의 legacy 대표 문항 채점을 함께 봅니다.
 
 ## Qualitative Example
 
@@ -160,7 +160,7 @@ flowchart LR
 | 직무 요구 | 프로젝트 대응 |
 |---|---|
 | 게임 도메인 LLM 벤치마크 구성 | 던파 업데이트 문서 기반 질문 22개, OOD 질문, adversarial 질문 설계 |
-| 평가 지표 및 기준 개발 | 검색 지표, 답변 proxy, 7개 수동 rubric 설계 |
+| 평가 지표 및 기준 개발 | 검색 지표, 답변 proxy, 수동 rubric, binary critical gate 설계 |
 | LLM 응답 품질 평가 | baseline, RAG, BM25, BGE-M3, structured data, 생성 모델 비교 |
 | 결과 분석 및 공유 | CSV 로그와 Markdown 보고서로 결과 정리 |
 

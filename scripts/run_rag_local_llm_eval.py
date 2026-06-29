@@ -11,6 +11,7 @@ import re
 import time
 from collections import Counter
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
@@ -18,6 +19,7 @@ from urllib.request import Request, urlopen
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DOC_DIR = BASE_DIR / "data" / "processed_md"
+METADATA_FILE = BASE_DIR / "data" / "metadata.csv"
 STRUCTURED_SHOP_FILE = BASE_DIR / "data" / "structured" / "shop_items.json"
 EMBEDDING_CACHE_DIR = BASE_DIR / "data" / "cache"
 DEFAULT_QUESTIONS = BASE_DIR / "questions" / "benchmark_questions.csv"
@@ -179,6 +181,9 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         "gold_answer",
         "evidence",
         "expected_behavior",
+        "checked_at",
+        "answer_reference_date",
+        "source_reference_date",
         "model",
         "retriever",
         "embedding_model",
@@ -215,6 +220,19 @@ def tokenize(text: str) -> list[str]:
                     tokens.extend(word[i : i + n] for i in range(len(word) - n + 1))
 
     return tokens
+
+
+def read_source_reference_dates(path: Path = METADATA_FILE) -> dict[str, str]:
+    if not path.exists():
+        return {}
+
+    source_dates: dict[str, str] = {}
+    for row in read_csv(path):
+        doc_id = row.get("doc_id", "").strip()
+        posted_date = row.get("posted_date", "").strip()
+        if doc_id and posted_date:
+            source_dates[doc_id] = posted_date
+    return source_dates
 
 
 def extract_doc_id(path: Path) -> str:
@@ -956,12 +974,33 @@ def main() -> None:
         action="store_true",
         help="If a benchmark row has doc_id, retrieve chunks only from that document.",
     )
+    parser.add_argument(
+        "--checked-at",
+        default=date.today().isoformat(),
+        help="Date when this evaluation run was checked, in YYYY-MM-DD format.",
+    )
+    parser.add_argument(
+        "--answer-reference-date",
+        default="",
+        help="Date basis assumed by generated answers. Defaults to --checked-at.",
+    )
+    parser.add_argument(
+        "--source-reference-date",
+        default="",
+        help=(
+            "Official source date basis. If omitted, use data/metadata.csv posted_date "
+            "per question doc_id when available."
+        ),
+    )
     args = parser.parse_args()
 
     if args.fast_service_profile:
         args.top_k = 2
         args.chunk_max_chars = 700
         args.disable_thinking = True
+
+    answer_reference_date = args.answer_reference_date or args.checked_at
+    source_reference_dates = read_source_reference_dates()
 
     print(
         "[CONFIG] "
@@ -1093,6 +1132,10 @@ def main() -> None:
                 "gold_answer": row.get("gold_answer", ""),
                 "evidence": row.get("evidence", ""),
                 "expected_behavior": row.get("expected_behavior", ""),
+                "checked_at": args.checked_at,
+                "answer_reference_date": answer_reference_date,
+                "source_reference_date": args.source_reference_date
+                or source_reference_dates.get(row.get("doc_id", ""), ""),
                 "model": args.model,
                 "retriever": args.retriever,
                 "embedding_model": args.embedding_model if args.retriever in {"bge-m3", "hybrid"} else "",
