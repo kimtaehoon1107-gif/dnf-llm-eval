@@ -11,9 +11,11 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 
 PYTHON_SCRIPTS = (
     BASE_DIR / "scripts" / "ask_dnf_rag.py",
+    BASE_DIR / "scripts" / "build_corpus_snapshot.py",
     BASE_DIR / "scripts" / "build_structured_shop_data.py",
     BASE_DIR / "scripts" / "collect_dnf_updates_selenium.py",
     BASE_DIR / "scripts" / "run_local_llm_eval.py",
+    BASE_DIR / "scripts" / "run_manifest.py",
     BASE_DIR / "scripts" / "run_rag_local_llm_eval.py",
     BASE_DIR / "scripts" / "score_answer_runs.py",
     BASE_DIR / "scripts" / "score_retrieval_runs.py",
@@ -26,6 +28,7 @@ REQUIRED_FILES = (
     BASE_DIR / "questions" / "benchmark_questions.csv",
     BASE_DIR / "questions" / "adversarial_questions.csv",
     BASE_DIR / "eval" / "evaluation_rubric.md",
+    BASE_DIR / "data" / "corpus_snapshot.json",
     BASE_DIR / "data" / "structured" / "shop_items.json",
 )
 
@@ -171,6 +174,69 @@ def check_structured_data() -> list[str]:
     return errors
 
 
+def check_corpus_snapshot() -> list[str]:
+    metadata_path = BASE_DIR / "data" / "metadata.csv"
+    snapshot_path = BASE_DIR / "data" / "corpus_snapshot.json"
+    errors: list[str] = []
+
+    if not metadata_path.exists() or not snapshot_path.exists():
+        return errors
+
+    rows = read_csv_rows(metadata_path)
+    required_columns = {"doc_id", "source_post_id", "processed_path", "url", "status"}
+    fieldnames = set(rows[0].keys()) if rows else set()
+    missing = sorted(required_columns - fieldnames)
+    if missing:
+        errors.append(f"{relative(metadata_path)} missing columns: {', '.join(missing)}")
+
+    seen_source_post_ids: set[str] = set()
+    metadata_doc_ids: set[str] = set()
+    for index, row in enumerate(rows, start=2):
+        doc_id = row.get("doc_id", "").strip()
+        source_post_id = row.get("source_post_id", "").strip()
+        processed_path = row.get("processed_path", "").strip()
+
+        if not doc_id:
+            errors.append(f"{relative(metadata_path)} row {index} has empty doc_id")
+        else:
+            metadata_doc_ids.add(doc_id)
+
+        if not source_post_id:
+            errors.append(f"{relative(metadata_path)} row {index} has empty source_post_id")
+        elif source_post_id in seen_source_post_ids:
+            errors.append(f"{relative(metadata_path)} duplicate source_post_id: {source_post_id}")
+        seen_source_post_ids.add(source_post_id)
+
+        if processed_path and not (BASE_DIR / processed_path).exists():
+            errors.append(f"{relative(metadata_path)} row {index} missing processed file: {processed_path}")
+
+    with snapshot_path.open("r", encoding="utf-8") as f:
+        snapshot = json.load(f)
+
+    documents = snapshot.get("documents", [])
+    if not isinstance(documents, list):
+        errors.append(f"{relative(snapshot_path)} documents must be a list")
+        documents = []
+
+    snapshot_doc_ids = {
+        str(doc.get("doc_id", "")).strip()
+        for doc in documents
+        if isinstance(doc, dict)
+    }
+    if snapshot_doc_ids != metadata_doc_ids:
+        errors.append(f"{relative(snapshot_path)} document IDs do not match metadata.csv")
+
+    summary_count = snapshot.get("summary", {}).get("document_count")
+    if summary_count != len(rows):
+        errors.append(f"{relative(snapshot_path)} summary.document_count must be {len(rows)}")
+
+    processed_docs = snapshot.get("processed_docs", {})
+    if not processed_docs.get("sha256"):
+        errors.append(f"{relative(snapshot_path)} processed_docs.sha256 is missing")
+
+    return errors
+
+
 def check_collector_doc_id_logic() -> list[str]:
     collector_path = BASE_DIR / "scripts" / "collect_dnf_updates_selenium.py"
     spec = importlib.util.spec_from_file_location("collect_dnf_updates_selenium", collector_path)
@@ -226,6 +292,7 @@ def main() -> None:
         ("required files", check_required_files),
         ("CSV inputs", check_csv_inputs),
         ("structured data", check_structured_data),
+        ("corpus snapshot", check_corpus_snapshot),
         ("collector doc_id logic", check_collector_doc_id_logic),
     ]
     if not args.skip_syntax:

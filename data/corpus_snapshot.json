@@ -1,0 +1,94 @@
+{
+  "corpus_id": "dnf-official-updates-2026-05-doc-snapshot",
+  "created_at": "2026-06-29T14:48:00.406630+00:00",
+  "description": "Checked-in 2026-05 DNF official update corpus used by the original DOC-* benchmark questions.",
+  "doc_id_policy": "This checked-in snapshot keeps the original DOC-* benchmark IDs for backward-compatible questions. The collector assigns DNF-<source_post_id> for refreshed official update documents.",
+  "documents": [
+    {
+      "category": "일반",
+      "doc_id": "DOC-01",
+      "doc_type": "regular_update",
+      "posted_date": "2026.05.28",
+      "processed_path": "data/processed_md/DOC-01_5_28(목)_정기점검_업데이트_안내.md",
+      "source_post_id": "2927522",
+      "status": "success",
+      "title": "5/28(목) 정기점검 업데이트 안내",
+      "url": "https://df.nexon.com/community/news/update/2927522?categoryType=0"
+    },
+    {
+      "category": "퍼스트서버",
+      "doc_id": "DOC-02",
+      "doc_type": "first_server",
+      "posted_date": "2026.05.20",
+      "processed_path": "data/processed_md/DOC-02_5_20(수)_퍼스트_서버_업데이트_안내.md",
+      "source_post_id": "2927399",
+      "status": "success",
+      "title": "5/20(수) 퍼스트 서버 업데이트 안내",
+      "url": "https://df.nexon.com/community/news/update/2927399?categoryType=0"
+    },
+    {
+      "category": "일반",
+      "doc_id": "DOC-03",
+      "doc_type": "regular_update",
+      "posted_date": "2026.05.20",
+      "processed_path": "data/processed_md/DOC-03_5_21(목)_정기점검_업데이트_안내.md",
+      "source_post_id": "2927392",
+      "status": "success",
+      "title": "5/21(목) 정기점검 업데이트 안내",
+      "url": "https://df.nexon.com/community/news/update/2927392?categoryType=0"
+    },
+    {
+      "category": "주요",
+      "doc_id": "DOC-04",
+      "doc_type": "main_update",
+      "posted_date": "2026.05.13",
+      "processed_path": "data/processed_md/DOC-04_최후의_과업_업데이트.md",
+      "source_post_id": "2927335",
+      "status": "success",
+      "title": "최후의 과업 업데이트",
+      "url": "https://df.nexon.com/community/news/update/2927335?categoryType=0"
+    },
+    {
+      "category": "퍼스트서버",
+      "doc_id": "DOC-05",
+      "doc_type": "first_server",
+      "posted_date": "2026.05.06",
+      "processed_path": "data/processed_md/DOC-05_5_6(수)_퍼스트_서버_업데이트_안내.md",
+      "source_post_id": "2927233",
+      "status": "success",
+      "title": "5/6(수) 퍼스트 서버 업데이트 안내",
+      "url": "https://df.nexon.com/community/news/update/2927233?categoryType=0"
+    }
+  ],
+  "generated_from_git_commit": "3aa3261987afb12020612a2b54b18b19b15447f8",
+  "metadata": {
+    "bytes": 1733,
+    "exists": true,
+    "path": "data/metadata.csv",
+    "sha256": "3cb75d56e9d865d280b55e0bfdf2731f47adacdbd850e8009fb6af9ae6e43fec"
+  },
+  "processed_docs": {
+    "exists": true,
+    "file_count": 5,
+    "path": "data/processed_md",
+    "sha256": "dd03899d0499c695da32a1ef43e54b5aa440d6eef99c7993060b2393b33697e8"
+  },
+  "schema_version": 1,
+  "source": {
+    "list_url": "https://df.nexon.com/community/news/update/list",
+    "name": "Dungeon & Fighter official update notices"
+  },
+  "summary": {
+    "doc_type_counts": {
+      "first_server": 2,
+      "main_update": 1,
+      "regular_update": 2
+    },
+    "document_count": 5,
+    "posted_date_max": "2026.05.28",
+    "posted_date_min": "2026.05.06",
+    "status_counts": {
+      "success": 5
+    }
+  }
+}
