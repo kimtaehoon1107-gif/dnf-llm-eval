@@ -412,7 +412,15 @@ def save_metadata(rows: list[dict]):
         writer.writerows(rows)
 
 
-def make_doc_id(index: int) -> str:
+def extract_update_post_id(url: str) -> str:
+    match = re.search(r"/community/news/update/(\d+)", url)
+    return match.group(1) if match else ""
+
+
+def make_doc_id(row: dict[str, str], index: int) -> str:
+    post_id = extract_update_post_id(row.get("url", ""))
+    if post_id:
+        return f"DNF-{post_id}"
     return f"DOC-{index:02d}"
 
 
@@ -488,7 +496,7 @@ def main():
 
     # 4. doc_id 부여
     for i, row in enumerate(rows, start=1):
-        row["doc_id"] = make_doc_id(i)
+        row["doc_id"] = make_doc_id(row, i)
 
     save_discovered_links(rows)
 

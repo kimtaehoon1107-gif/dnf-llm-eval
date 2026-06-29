@@ -39,3 +39,17 @@
   - `checked_at` defaults to the run date.
   - `answer_reference_date` defaults to `checked_at` unless explicitly supplied.
   - `source_reference_date` uses `data/metadata.csv` `posted_date` per `doc_id` unless explicitly supplied.
+
+## 2026-06-29 Stable Document ID Follow-up
+
+- Goal: prevent future corpus refreshes from reassigning `DOC-01`, `DOC-02`, etc. to different official posts.
+- Branch: `codex/stable-document-ids`.
+- Scope:
+  - Change `scripts/collect_dnf_updates_selenium.py` so new collection runs use official update post IDs like `DNF-2927756` when the source URL contains a post number.
+  - Keep a `DOC-xx` fallback for any source that does not expose a numeric update post ID.
+  - Update RAG, structured-data builder, and smoke check document discovery to accept both existing `DOC-*` files and future `DNF-*` files.
+- Deliberate non-goal:
+  - Do not rewrite existing `data/processed_md`, `data/metadata.csv`, benchmark questions, or historical evaluation CSVs in this PR.
+  - Corpus refresh should happen after this compatibility layer is merged.
+- Verification note:
+  - Smoke check compiles the collector, but direct collector import was not run in the bundled Python because `requests` is not installed there.

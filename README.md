@@ -222,6 +222,8 @@ dnf-llm-eval/
 
 `data/metadata.csv`에는 수집 당시의 `raw_path` 컬럼이 남아 있습니다. 원본 HTML(`data/raw_html/`)은 재수집/디버깅 단계에서 생성되는 로컬 산출물이라 최종 제출 패키지에는 포함하지 않았고, 평가와 재현에는 `data/processed_md/`의 Markdown 문서와 `metadata.csv`의 출처 URL을 사용합니다.
 
+기존 corpus는 `DOC-01`처럼 수집 순번 기반 ID를 사용합니다. 이후 재수집분은 공식 업데이트 게시글 번호를 사용한 `DNF-2927756` 형식의 안정 ID를 사용하도록 collector를 바꿨습니다. 로더와 smoke check는 기존 `DOC-*`와 신규 `DNF-*` 파일명을 모두 지원합니다.
+
 ## 실행 준비
 
 기본 수집/분석 스크립트는 다음 패키지를 사용합니다.

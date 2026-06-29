@@ -26,8 +26,17 @@ SECTION_END_MARKERS = (
 
 
 def extract_doc_id(path: Path) -> str:
-    match = re.match(r"(DOC-\d+)_", path.name)
+    match = re.match(r"((?:DOC|DNF)-\d+)_", path.name)
     return match.group(1) if match else path.stem
+
+
+def iter_processed_doc_paths() -> list[Path]:
+    return sorted(
+        {
+            *DOC_DIR.glob("DOC-*.md"),
+            *DOC_DIR.glob("DNF-*.md"),
+        }
+    )
 
 
 def clean_lines(text: str) -> list[str]:
@@ -135,7 +144,7 @@ def parse_shop_section(lines: list[str], doc_id: str, title: str) -> list[dict[s
 def main() -> None:
     all_records: list[dict[str, object]] = []
 
-    for path in sorted(DOC_DIR.glob("DOC-*.md")):
+    for path in iter_processed_doc_paths():
         doc_id = extract_doc_id(path)
         lines = clean_lines(path.read_text(encoding="utf-8"))
         title = extract_title(lines, doc_id)

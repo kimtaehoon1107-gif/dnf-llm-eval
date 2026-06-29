@@ -79,6 +79,15 @@ def read_csv_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def processed_doc_ids() -> set[str]:
+    processed_dir = BASE_DIR / "data" / "processed_md"
+    return {
+        path.name.split("_", 1)[0]
+        for pattern in ("DOC-*.md", "DNF-*.md")
+        for path in processed_dir.glob(pattern)
+    }
+
+
 def check_csv_inputs() -> list[str]:
     errors: list[str] = []
     for path, required_columns in CSV_REQUIRED_COLUMNS.items():
@@ -96,10 +105,7 @@ def check_csv_inputs() -> list[str]:
     if benchmark_path.exists():
         rows = read_csv_rows(benchmark_path)
         seen_question_ids: set[str] = set()
-        processed_doc_ids = {
-            path.name.split("_", 1)[0]
-            for path in (BASE_DIR / "data" / "processed_md").glob("DOC-*.md")
-        }
+        known_doc_ids = processed_doc_ids()
         for index, row in enumerate(rows, start=2):
             question_id = row.get("question_id", "").strip()
             doc_id = row.get("doc_id", "").strip()
@@ -111,7 +117,7 @@ def check_csv_inputs() -> list[str]:
 
             if not doc_id:
                 errors.append(f"{relative(benchmark_path)} row {index} has empty doc_id")
-            elif doc_id not in processed_doc_ids:
+            elif doc_id not in known_doc_ids:
                 errors.append(
                     f"{relative(benchmark_path)} row {index} references missing doc_id: {doc_id}"
                 )
@@ -137,10 +143,7 @@ def check_structured_data() -> list[str]:
         "purchase_limit_text",
     }
     seen_record_ids: set[str] = set()
-    processed_doc_ids = {
-        path.name.split("_", 1)[0]
-        for path in (BASE_DIR / "data" / "processed_md").glob("DOC-*.md")
-    }
+    known_doc_ids = processed_doc_ids()
     for index, record in enumerate(records, start=1):
         if not isinstance(record, dict):
             errors.append(f"{relative(path)} record {index} is not an object")
@@ -162,7 +165,7 @@ def check_structured_data() -> list[str]:
 
         if not doc_id:
             errors.append(f"{relative(path)} record {index} has empty doc_id")
-        elif doc_id not in processed_doc_ids:
+        elif doc_id not in known_doc_ids:
             errors.append(f"{relative(path)} record {index} references missing doc_id: {doc_id}")
     return errors
 
