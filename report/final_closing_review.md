@@ -13,7 +13,7 @@
 | 직무 요구 | 프로젝트 대응 |
 |---|---|
 | 게임 도메인 LLM 벤치마크 구성 | 던파 업데이트 문서 기반 질문 22개, OOD 질문, adversarial 질문 설계 |
-| 평가 지표 및 기준 개발 | 검색 지표, 답변 proxy, 7개 수동 rubric 설계 |
+| 평가 지표 및 기준 개발 | 검색 지표, 답변 proxy, legacy 수동 rubric, binary critical gate 설계 |
 | LLM 응답 품질 평가 | baseline, RAG, BM25, BGE-M3, structured data, 생성 모델 비교 |
 | 결과 분석 및 공유 | CSV 로그와 Markdown 보고서로 결과 정리 |
 
