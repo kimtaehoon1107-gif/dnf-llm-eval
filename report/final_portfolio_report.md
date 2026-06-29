@@ -20,7 +20,7 @@ Selenium 기반 수집 스크립트로 던전앤파이터 업데이트 목록을
 
 질문 난이도는 코드가 자동 계산한 값이 아니라 benchmark 설계 단계에서 수동으로 붙인 metadata다. `easy`는 단일 근거에서 이름·수치·조건을 그대로 추출하는 질문, `medium`은 여러 조건을 묶거나 비교·요약·간단한 계산이 필요한 질문, `hard`는 문서 근거를 바탕으로 가능 여부나 결론을 판단해야 하는 질문으로 구분했다.
 
-평가 루브릭은 7개 항목으로 구성했다.
+초기 대표 수동 채점은 legacy 7개 항목 0~3점 루브릭으로 구성했다. 이 기준은 `eval/representative_manual_scoring.csv`에 남아 있는 과거 대표 채점 결과를 해석하기 위한 기준이다.
 
 | 항목 | 평가 의도 |
 |---|---|
@@ -31,6 +31,8 @@ Selenium 기반 수집 스크립트로 던전앤파이터 업데이트 목록을
 | 환각 억제 | 문서에 없는 내용을 만들지 않았는가 |
 | 범위 통제 | 게임 외 질문과 공격성 질문을 제한하는가 |
 | 표현 품질 | 실제 게임 서비스 답변처럼 읽히는가 |
+
+현재 운영 루브릭은 `eval/evaluation_rubric.md`에서 최신성 점수 항목을 추가하고, 환각/과잉추론, 중대 수치 오류, 라이브 서버 기준 오인, 범위 통제를 binary critical gate로 분리한다. 따라서 총점은 품질 비교용 보조 지표이고, critical gate FAIL은 총점과 별개로 수동 재검토 대상으로 본다.
 
 이 기준은 RAGAS의 context relevance, faithfulness, answer relevance 관점과 HELM의 다차원 평가 관점을 참고해 게임 운영 문서 평가에 맞게 재구성했다. RAGAS 라이브러리를 직접 실행한 것은 아니며, 평가 구조를 설계할 때 참고 기준으로 사용했다.
 
@@ -142,7 +144,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 | 파일 | 내용 |
 |---|---|
-| `eval/representative_manual_scoring.csv` | 대표 문항별 7개 루브릭 점수 |
+| `eval/representative_manual_scoring.csv` | 대표 문항별 legacy 7개 루브릭 점수 |
 | `report/representative_manual_scoring.md` | 실패 원인과 개선 효과 해석 |
 
 핵심 발견은 세 가지다.
@@ -165,7 +167,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 | 공고 요구 | 프로젝트 대응 |
 |---|---|
 | 게임 도메인 LLM 벤치마크 구성 | DNF 업데이트 문서 기반 질문 22개와 공격 질문 세트 설계 |
-| 평가 지표 및 기준 개발 | 7개 루브릭과 0~3점 스코어링 체계 설계 |
+| 평가 지표 및 기준 개발 | legacy 수동 루브릭과 현재 운영 루브릭(점수 항목 + binary critical gate) 설계 |
 | LLM 응답 품질 평가 | baseline, RAG, BGE-M3, structured data, 생성 모델 비교 |
 | 결과 분석 및 공유 | 실패 유형, 개선 효과, 다음 개선 방향 보고서화 |
 | 데이터 기반 문제 분석 | 검색 hit, factual proxy, format proxy, 수동 채점 결합 |

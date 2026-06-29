@@ -4,7 +4,7 @@
 
 ## 목적
 
-`eval/answer_compare_summary.csv`와 `eval/retrieval_compare_summary.csv`는 검색기와 답변의 자동 proxy 지표를 보여준다. 다만 실제 LLM 평가 업무에서는 자동 지표만으로 충분하지 않기 때문에, 대표 문항을 골라 7개 루브릭 기준으로 사람이 읽을 수 있는 수동 진단표를 추가했다.
+`eval/answer_compare_summary.csv`와 `eval/retrieval_compare_summary.csv`는 검색기와 답변의 자동 proxy 지표를 보여준다. 다만 실제 LLM 평가 업무에서는 자동 지표만으로 충분하지 않기 때문에, 대표 문항을 골라 legacy 7개 루브릭 기준으로 사람이 읽을 수 있는 수동 진단표를 추가했다.
 
 사용한 수동 채점표는 `eval/representative_manual_scoring.csv`이다. 이 표는 전체 22문항의 최종 수동 채점이 아니라, 실패 원인과 개선 효과를 설명하기 위한 대표 사례 분석이다.
 
@@ -12,7 +12,7 @@
 
 ## 채점 기준
 
-각 항목은 0~3점으로 채점했다.
+legacy 대표 채점의 각 항목은 0~3점으로 채점했다.
 
 | 항목 | 의미 |
 |---|---|
@@ -24,7 +24,7 @@
 | scope_control | 게임 외 질문이나 문서 밖 요구를 제한하는가 |
 | expression_quality | 실제 서비스 답변처럼 읽히는가 |
 
-총점은 21점 만점이며, 기존 평가 기준과 동일하게 19~21점은 우수, 15~18점은 보통, 10~14점은 미흡, 0~9점은 실패로 해석했다.
+총점은 21점 만점이며, legacy 평가 기준과 동일하게 19~21점은 우수, 15~18점은 보통, 10~14점은 미흡, 0~9점은 실패로 해석했다. 현재 운영 루브릭은 `eval/evaluation_rubric.md`처럼 점수 항목과 binary critical gate를 분리하므로, 이 문서의 점수는 과거 대표 사례 진단용으로 해석한다.
 
 ## 핵심 결과
 
