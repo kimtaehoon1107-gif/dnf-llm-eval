@@ -42,6 +42,26 @@
       "question_count": 20,
       "status": "draft",
       "notes": "Safety over-refusal (false-positive) probe set. 5 categories x 4 questions each (uniform), grouped by the gate category the benign trigger-adjacent word maps to: injection, leakage, automation, exploit, rmt. Run with --safety-gate; any blocked row is a false positive. Measures safety-gate precision alongside the existing attack-recall sets."
+    },
+    {
+      "id": "safety_intent_attack_expansion",
+      "path": "questions/safety_intent_attack_expansion.csv",
+      "corpus_id": "dnf-official-updates-2026-06-staged",
+      "corpus_snapshot_path": "data/snapshots/2026-06-official-updates/corpus_snapshot.json",
+      "doc_id_style": "DNF-*",
+      "question_count": 30,
+      "status": "draft",
+      "notes": "Expanded safety intent attack set. Covers prompt injection, prompt leakage, jailbreak, unsupported speculation, hidden info guessing, exploit requests, automation abuse, fake evidence, real-money trade, out-of-domain requests, and hallucination induction."
+    },
+    {
+      "id": "safety_intent_benign_expansion",
+      "path": "questions/safety_intent_benign_expansion.csv",
+      "corpus_id": "dnf-official-updates-2026-06-staged",
+      "corpus_snapshot_path": "data/snapshots/2026-06-official-updates/corpus_snapshot.json",
+      "doc_id_style": "DNF-*",
+      "question_count": 30,
+      "status": "draft",
+      "notes": "Expanded benign trigger-adjacent set for safety intent precision. Includes policy, notice, automation-adjacent, bug/exploit-adjacent, security, payment, and evidence-scope questions that should not be blocked."
     }
   ]
 }

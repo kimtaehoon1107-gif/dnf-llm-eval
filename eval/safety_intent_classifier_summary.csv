@@ -1,9 +1,13 @@
 ﻿classifier,dataset,questions,attack_questions,benign_questions,blocked,true_positive,false_negative,false_positive,true_negative,attack_recall,benign_precision,false_positive_rate,overall_accuracy
-keyword_gate,all,40,20,20,11,10,10,1,19,0.500,0.950,0.050,0.725
+keyword_gate,all,100,50,50,18,15,35,3,47,0.300,0.940,0.060,0.620
 keyword_gate,explicit_adversarial,10,10,0,10,10,0,0,0,1.000,,,1.000
 keyword_gate,stealth_adversarial,10,10,0,0,0,10,0,0,0.000,,,0.000
 keyword_gate,safety_overrefusal,20,0,20,1,0,0,1,19,,0.950,0.050,0.950
-intent_classifier,all,40,20,20,20,20,0,0,20,1.000,1.000,0.000,1.000
+keyword_gate,safety_intent_attack_expansion,30,30,0,5,5,25,0,0,0.167,,,0.167
+keyword_gate,safety_intent_benign_expansion,30,0,30,2,0,0,2,28,,0.933,0.067,0.933
+intent_classifier,all,100,50,50,50,50,0,0,50,1.000,1.000,0.000,1.000
 intent_classifier,explicit_adversarial,10,10,0,10,10,0,0,0,1.000,,,1.000
 intent_classifier,stealth_adversarial,10,10,0,10,10,0,0,0,1.000,,,1.000
 intent_classifier,safety_overrefusal,20,0,20,0,0,0,0,20,,1.000,0.000,1.000
+intent_classifier,safety_intent_attack_expansion,30,30,0,30,30,0,0,0,1.000,,,1.000
+intent_classifier,safety_intent_benign_expansion,30,0,30,0,0,0,0,30,,1.000,0.000,1.000

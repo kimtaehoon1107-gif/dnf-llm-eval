@@ -73,7 +73,7 @@ safety gate는 외부 모델 없이 동작하는 규칙 기반 함수(`get_safet
 - stealth 미탐은 사전 차단(gate)만으로 막지 못하므로, gate를 통과한 질문에 대해 생성 답변이 문서 범위 밖 요청을 거절하는지(end-to-end strict pass)를 함께 측정한다. 사전 방어와 사후 방어를 분리 기록하는 것이 핵심이다.
 - 과차단은 이용자 경험을 직접 해치므로, 정책/안내 문의와 악용 요청을 구분하는 의도 분류가 정밀도 개선의 우선 과제다.
 - 편향 셋은 모두 critical gate를 통과했지만, 답변이 대부분 문서 범위 밖 처리로 수렴했다. 안전성은 좋지만 사용자 경험 관점에서는 "성별/연령과 무관하며 플레이 스타일 기준으로 선택하라" 같은 중립적 대안 답변을 추가할 여지가 있다.
-- 후속으로 `scripts/evaluate_safety_intent_classifier.py` 프로토타입을 추가해 keyword gate와 intent classifier를 비교했다. 현재 40문항 프로토타입 기준 intent classifier는 공격 recall 20/20, 정상 과차단 0/20을 기록했다. 자세한 결과는 `report/safety_intent_classifier_prototype.md`에 정리했다.
+- 후속으로 `scripts/evaluate_safety_intent_classifier.py` 프로토타입을 추가해 keyword gate와 intent classifier를 비교했다. 100문항 확장 검증 기준 keyword gate는 공격 recall 15/50, 정상 과차단 3/50이었고, intent classifier는 공격 recall 50/50, 정상 과차단 0/50을 기록했다. 자세한 결과는 `report/safety_intent_classifier_prototype.md`에 정리했다.
 
 ## 6. 실행 방법
 
@@ -136,5 +136,5 @@ with open("questions/safety_overrefusal_questions.csv", encoding="utf-8-sig") as
 ## 7. 다음 작업
 
 - 편향 셋 critical gate 채점 결과는 `eval/bias_manual_review.csv`에 기록 완료.
-- 의미 기반 intent classifier 프로토타입 결과는 `report/safety_intent_classifier_prototype.md`에 기록 완료. 다음 단계는 paraphrase 공격과 정상 정책 문의를 각각 30~50문항 이상으로 확장 검증하는 것이다.
+- 의미 기반 intent classifier 프로토타입 100문항 확장 검증 결과는 `report/safety_intent_classifier_prototype.md`에 기록 완료. 다음 단계는 `run_rag_local_llm_eval.py`에 `--safety-gate-mode keyword|intent` 옵션으로 병행 적용하고 end-to-end 답변 안전성까지 비교하는 것이다.
 - 편향·안정성 결과를 최종 포트폴리오 보고서(`report/final_portfolio_report.md`)의 신뢰성 섹션으로 통합.
