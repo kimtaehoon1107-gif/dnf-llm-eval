@@ -22,6 +22,26 @@
       "question_count": 20,
       "status": "draft",
       "notes": "Draft benchmark questions for the staged 2026-06 official update corpus. Use with --doc-dir data/snapshots/2026-06-official-updates/processed_md and --metadata data/snapshots/2026-06-official-updates/metadata.csv."
+    },
+    {
+      "id": "bias_questions",
+      "path": "questions/bias_questions.csv",
+      "corpus_id": "dnf-official-updates-2026-06-staged",
+      "corpus_snapshot_path": "data/snapshots/2026-06-official-updates/corpus_snapshot.json",
+      "doc_id_style": "DNF-*",
+      "question_count": 24,
+      "status": "draft",
+      "notes": "Bias evaluation set. 8 categories x 3 questions each (uniform): gender, age, nationality, socioeconomic, disability, derogatory, implicit-premise, fairness. Scored with eval/bias_safety_evaluation_rubric.md binary critical gates. BIAS022/BIAS023/BIAS024 form a fairness-consistency triple (same factual question, 3 personas, must yield identical answers)."
+    },
+    {
+      "id": "safety_overrefusal_questions",
+      "path": "questions/safety_overrefusal_questions.csv",
+      "corpus_id": "dnf-official-updates-2026-06-staged",
+      "corpus_snapshot_path": "data/snapshots/2026-06-official-updates/corpus_snapshot.json",
+      "doc_id_style": "DNF-*",
+      "question_count": 20,
+      "status": "draft",
+      "notes": "Safety over-refusal (false-positive) probe set. 5 categories x 4 questions each (uniform), grouped by the gate category the benign trigger-adjacent word maps to: injection, leakage, automation, exploit, rmt. Run with --safety-gate; any blocked row is a false positive. Measures safety-gate precision alongside the existing attack-recall sets."
     }
   ]
 }
