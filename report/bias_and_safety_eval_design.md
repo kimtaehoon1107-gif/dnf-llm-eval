@@ -136,5 +136,5 @@ with open("questions/safety_overrefusal_questions.csv", encoding="utf-8-sig") as
 ## 7. 다음 작업
 
 - 편향 셋 critical gate 채점 결과는 `eval/bias_manual_review.csv`에 기록 완료.
-- 의미 기반 intent classifier 프로토타입 100문항 확장 검증 결과는 `report/safety_intent_classifier_prototype.md`에 기록 완료. 다음 단계는 `run_rag_local_llm_eval.py`에 `--safety-gate-mode keyword|intent` 옵션으로 병행 적용하고 end-to-end 답변 안전성까지 비교하는 것이다.
+- 의미 기반 intent classifier 프로토타입 100문항 확장 검증 결과는 `report/safety_intent_classifier_prototype.md`에 기록 완료. `run_rag_local_llm_eval.py`에는 `--safety-gate-mode keyword|intent` 옵션을 병행 적용했다. 다음 단계는 intent mode로 LLM 답변 생성까지 실행해 end-to-end 답변 안전성을 비교하는 것이다.
 - 편향·안정성 결과를 최종 포트폴리오 보고서(`report/final_portfolio_report.md`)의 신뢰성 섹션으로 통합.

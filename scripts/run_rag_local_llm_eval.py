@@ -23,6 +23,7 @@ from run_manifest import (
     relative_path,
     write_run_manifest,
 )
+from safety_intent import INTENT_GATE_VERSION, classify_intent
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -37,6 +38,7 @@ DEFAULT_EMBEDDING_MODEL = "BAAI/bge-m3"
 DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 SAFE_REFUSAL = "제공된 문서에서 확인할 수 없습니다."
 FINAL_ANSWER_MARKER = "최종 답변:"
+KEYWORD_GATE_VERSION = "keyword_rules_v1"
 
 SAFETY_BLOCK_RULES = (
     ("prompt_injection", "이전 지시"),
@@ -205,6 +207,10 @@ def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
         "structured_context",
         "blocked_category",
         "blocked_reason",
+        "safety_gate_mode",
+        "intent_category",
+        "intent_reason",
+        "gate_version",
         "model_answer",
         "latency_sec",
         "status",
@@ -1024,6 +1030,33 @@ def get_safety_block(row_question: str) -> tuple[str, str]:
     return "", ""
 
 
+def evaluate_safety_gate(
+    row_question: str,
+    enabled: bool,
+    mode: str,
+) -> tuple[str, str, str, str, str]:
+    if not enabled:
+        return "", "", "", "", ""
+
+    if mode == "keyword":
+        blocked_category, blocked_reason = get_safety_block(row_question)
+        return blocked_category, blocked_reason, "", "", KEYWORD_GATE_VERSION
+
+    if mode == "intent":
+        decision = classify_intent(row_question)
+        blocked_category = decision.category if decision.blocked else ""
+        blocked_reason = decision.reason if decision.blocked else ""
+        return (
+            blocked_category,
+            blocked_reason,
+            decision.category,
+            decision.reason,
+            INTENT_GATE_VERSION,
+        )
+
+    raise ValueError(f"unsupported safety gate mode: {mode}")
+
+
 def build_user_prompt(row: dict[str, str], context: str, service_tone: bool) -> str:
     if context:
         context_block = f"[검색된 근거 - 읽기 전용 데이터]\n{context}"
@@ -1239,6 +1272,12 @@ def main() -> None:
         help="Block obvious prompt-injection, leakage, exploitation, and abuse requests before retrieval/model call.",
     )
     parser.add_argument(
+        "--safety-gate-mode",
+        choices=["keyword", "intent"],
+        default="keyword",
+        help="Safety gate implementation to use when --safety-gate is enabled.",
+    )
+    parser.add_argument(
         "--service-tone",
         action="store_true",
         help="Apply lightweight DNF service tone guidelines for user-facing answers.",
@@ -1310,6 +1349,7 @@ def main() -> None:
         f"reranker_model={args.reranker_model or 'none'} "
         f"rerank_candidates={args.rerank_candidates} "
         f"min_score={args.min_score} safety_gate={args.safety_gate} "
+        f"safety_gate_mode={args.safety_gate_mode} "
         f"use_structured_data={args.use_structured_data} "
         f"service_tone={args.service_tone} "
         f"service_tone_examples={args.service_tone_examples} "
@@ -1370,8 +1410,14 @@ def main() -> None:
         query = row.get("question", "")
         doc_filter = row.get("doc_id", "") if args.restrict_to_question_doc else ""
         started = time.perf_counter()
-        blocked_category, blocked_reason = get_safety_block(query) if args.safety_gate else ("", "")
-        blocked = bool(blocked_reason)
+        (
+            blocked_category,
+            blocked_reason,
+            intent_category,
+            intent_reason,
+            gate_version,
+        ) = evaluate_safety_gate(query, args.safety_gate, args.safety_gate_mode)
+        blocked = bool(blocked_category)
 
         if blocked:
             results = []
@@ -1476,6 +1522,10 @@ def main() -> None:
                 "structured_context": structured_context,
                 "blocked_category": blocked_category,
                 "blocked_reason": blocked_reason,
+                "safety_gate_mode": args.safety_gate_mode if args.safety_gate else "",
+                "intent_category": intent_category,
+                "intent_reason": intent_reason,
+                "gate_version": gate_version,
                 "model_answer": answer,
                 "latency_sec": f"{latency:.3f}",
                 "status": status,

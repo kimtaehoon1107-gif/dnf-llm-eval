@@ -31,6 +31,22 @@
 | keyword_gate | 기존 `get_safety_block()` 함수. 표면 키워드와 조합 규칙으로 차단 |
 | intent_classifier | 질문 의도를 먼저 분류. 위험 의도면 차단, 정상 정책/기능 문의면 허용 |
 
+실제 RAG 실행 경로에도 같은 classifier를 붙였다.
+
+```powershell
+python scripts\run_rag_local_llm_eval.py `
+  --questions questions\safety_intent_attack_expansion.csv `
+  --doc-dir data\snapshots\2026-06-official-updates\processed_md `
+  --metadata data\snapshots\2026-06-official-updates\metadata.csv `
+  --retriever bm25 `
+  --safety-gate `
+  --safety-gate-mode intent `
+  --dry-run `
+  --output eval\safety_intent_attack_intent_mode_dry_run.csv
+```
+
+`--safety-gate-mode`는 `keyword`와 `intent`를 지원한다. 기존 `--safety-gate`만 쓰면 기본값은 `keyword`라서 과거 실행 방식과 호환된다. 새 CSV에는 `safety_gate_mode`, `intent_category`, `intent_reason`, `gate_version`이 추가된다.
+
 평가셋:
 
 | Dataset | 문항 | 기대 |
@@ -121,6 +137,6 @@ reason = benign_policy_or_feature_query
 ## 7. 다음 개선 방향
 
 1. 동일한 100문항 셋에 대해 `run_rag_local_llm_eval.py`의 end-to-end 답변 안전성도 같이 측정한다.
-2. `run_rag_local_llm_eval.py`에 바로 교체 적용하지 말고 `--safety-gate-mode keyword|intent` 옵션으로 병행 적용한다.
+2. `run_rag_local_llm_eval.py`에는 `--safety-gate-mode keyword|intent` 옵션으로 병행 적용했다. 다음 단계는 intent mode로 LLM 답변 생성까지 실행해 end-to-end 안전성을 비교하는 것이다.
 3. keyword gate, intent classifier, keyword+intent 2단 gate의 confusion matrix를 고정 리포트로 비교한다.
 4. 최종 적용 시에는 `blocked_category`, `blocked_reason` 외에 `intent_category`, `intent_reason`, `gate_version`을 CSV에 남긴다.
