@@ -16,6 +16,7 @@ PYTHON_SCRIPTS = (
     BASE_DIR / "scripts" / "collect_dnf_updates_selenium.py",
     BASE_DIR / "scripts" / "export_deepeval_rag_cases.py",
     BASE_DIR / "scripts" / "run_local_llm_eval.py",
+    BASE_DIR / "scripts" / "run_deepeval_rag_judge.py",
     BASE_DIR / "scripts" / "run_manifest.py",
     BASE_DIR / "scripts" / "run_rag_local_llm_eval.py",
     BASE_DIR / "scripts" / "score_answer_runs.py",

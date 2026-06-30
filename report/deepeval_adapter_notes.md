@@ -7,6 +7,7 @@
 추가한 어댑터:
 
 - `scripts/export_deepeval_rag_cases.py`
+- `scripts/run_deepeval_rag_judge.py`
 
 기본 입력:
 
@@ -62,6 +63,84 @@ python scripts\export_deepeval_rag_cases.py `
 5. Custom `GEval`: 던파 패치노트용 수동 rubric을 LLM-as-judge rubric으로 옮긴다.
 
 이 순서는 현재 프로젝트의 핵심 실패 모드와 맞다. 지금까지의 proxy는 token/phrase 기반이라 보수적인 false negative가 있었고, DeepEval 계열 judge는 이 중 일부를 “근거는 맞지만 표현이 달라 proxy가 놓친 사례”로 분리하는 데 쓸 수 있다.
+
+## Judge runner
+
+DeepEval은 optional dependency로 분리했다.
+
+```powershell
+python -m pip install -r requirements-deepeval.txt
+```
+
+환경 검증용 dry-run:
+
+```powershell
+python scripts\run_deepeval_rag_judge.py `
+  --dry-run `
+  --limit 2 `
+  --output eval\deepeval_rag_v2026_06_judge_dry_run.csv `
+  --summary-output eval\deepeval_rag_v2026_06_judge_dry_run_summary.csv
+```
+
+로컬 Ollama judge 실행 예시:
+
+```powershell
+python scripts\run_deepeval_rag_judge.py `
+  --limit 3 `
+  --metrics faithfulness contextual_relevancy answer_relevancy `
+  --judge-model qwen3:4b-instruct-2507-q4_K_M `
+  --judge-num-ctx 8192 `
+  --output eval\deepeval_rag_v2026_06_hybrid_structured_judge_sample.csv `
+  --summary-output eval\deepeval_rag_v2026_06_hybrid_structured_judge_sample_summary.csv `
+  --keep-going
+```
+
+전체 실행은 `--limit`을 제거하면 된다. `contextual_precision`과 `contextual_recall`은 기준 정답을 함께 쓰는 보조 metric으로, sample 실행이 안정화된 뒤 추가하는 것이 낫다.
+
+DeepEval의 Ollama 기본 context가 4096으로 잡히면 긴 RAG context 문항에서 overflow가 날 수 있다. 그래서 runner 기본값은 `--judge-num-ctx 8192`로 두었다.
+
+## 2026-06-30 실제 judge 실행 결과
+
+실행에 사용한 optional dependency:
+
+- `deepeval==4.0.7`
+- `ollama==0.6.2`
+
+주의: `deepeval==4.0.7`은 `click<8.4.0`을 요구한다. 현재 로컬 Python 환경에서는 `huggingface-hub`가 `click>=8.4.0`을 요구한다는 dependency resolver 경고가 발생했다. `huggingface_hub`와 `FlagEmbedding` import는 정상 동작했지만, 장기적으로는 DeepEval 실행을 별도 virtualenv에 격리하는 편이 안전하다. 실제 judge 결과를 만든 뒤 기본 환경은 다시 `pip check`가 통과하도록 원복했다.
+
+실행 명령:
+
+```powershell
+python scripts\run_deepeval_rag_judge.py `
+  --metrics faithfulness `
+  --judge-model qwen3:4b-instruct-2507-q4_K_M `
+  --judge-num-ctx 8192 `
+  --output eval\deepeval_rag_v2026_06_hybrid_structured_faithfulness_judge.csv `
+  --summary-output eval\deepeval_rag_v2026_06_hybrid_structured_faithfulness_judge_summary.csv `
+  --keep-going
+```
+
+결과:
+
+| metric | cases | scored | passed | errors | avg_score | min_score | max_score |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| faithfulness | 20 | 20 | 13 | 0 | 0.692 | 0.000 | 1.000 |
+
+threshold 0.7 기준 fail 문항:
+
+- `Q001`: 전리품 상점 가격/구매 제한 해석 오류
+- `Q002`: 가격 조정값 해석 오류
+- `Q011`: 타이드 바운드 쿨타임 수치 불일치
+- `Q012`: 구조화 근거와 chunk 근거 사이의 skill/option 매칭 혼선
+- `Q015`: judge reason과 score가 서로 모순됨
+- `Q016`: 충전 기능 삭제 외 추가 조작 방식 변경을 생성
+- `Q020`: major update 구성요소를 과도하게 "주요 구성요소"로 일반화
+
+해석:
+
+- DeepEval faithfulness는 기존 token/phrase proxy가 놓치거나 애매하게 본 수치/관계 오류를 비교적 잘 잡았다.
+- `Q015`처럼 judge reason은 정합성을 말하면서 score는 0.000을 주는 self-consistency 오류가 있다. 따라서 DeepEval 결과는 자동 최종 판정자가 아니라 manual review queue를 정렬하는 보조 신호로 쓰는 것이 맞다.
+- 다음 calibration 단계에서는 fail 문항을 사람이 다시 확인하고, judge prompt/model/threshold를 조정한 뒤 `contextual_relevancy`와 `answer_relevancy`를 전체 실행으로 확장한다.
 
 ## 아직 남은 결정
 
