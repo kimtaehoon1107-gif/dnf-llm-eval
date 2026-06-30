@@ -1,0 +1,98 @@
+{
+  "config": {
+    "answer_reference_date": "",
+    "bge_use_fp16": false,
+    "checked_at": "2026-06-30",
+    "chunk_max_chars": 1600,
+    "disable_thinking": true,
+    "doc_dir": "data/snapshots/2026-06-official-updates/processed_md",
+    "dry_run": false,
+    "embedding_batch_size": 8,
+    "embedding_max_length": 8192,
+    "embedding_min_score": 0.0,
+    "embedding_model": "BAAI/bge-m3",
+    "endpoint": "http://localhost:11434/api/chat",
+    "fast_service_profile": false,
+    "hybrid_alpha": 0.5,
+    "limit": 0,
+    "manifest_output": null,
+    "metadata": "data/snapshots/2026-06-official-updates/metadata.csv",
+    "min_score": 2.0,
+    "model": "qwen3:4b-instruct-2507-q4_K_M",
+    "no_manifest": false,
+    "num_ctx": 8192,
+    "num_predict": 512,
+    "output": "eval/rag_v2026_06_hybrid_rerank_instruct_answers.csv",
+    "question_set_id": "benchmark_questions_v2026_06",
+    "questions": "questions/benchmark_questions_v2026_06.csv",
+    "rerank_candidates": 30,
+    "reranker_batch_size": 16,
+    "reranker_max_length": 512,
+    "reranker_model": "BAAI/bge-reranker-v2-m3",
+    "reranker_use_fp16": false,
+    "restrict_to_question_doc": false,
+    "retriever": "hybrid",
+    "safety_gate": false,
+    "service_tone": false,
+    "service_tone_examples": false,
+    "source_reference_date": "",
+    "stride": 3,
+    "timeout": 120,
+    "top_k": 8,
+    "use_structured_data": false,
+    "window_lines": 15
+  },
+  "created_at": "2026-06-30T06:49:16.292721+00:00",
+  "dates": {
+    "answer_reference_date": "2026-06-30",
+    "checked_at": "2026-06-30",
+    "source_reference_date_arg": ""
+  },
+  "derived_config": {
+    "chunk_count": 599,
+    "doc_count": 8,
+    "embedding_cache_dir": "data/cache",
+    "temperature": 0.0
+  },
+  "git_commit": "d2f86bb167a103e8e039fcbb66543266b693b934",
+  "output_csv": "eval/rag_v2026_06_hybrid_rerank_instruct_answers.csv",
+  "python_version": "3.14.4",
+  "questions": {
+    "bytes": 9621,
+    "exists": true,
+    "id": "benchmark_questions_v2026_06",
+    "path": "questions/benchmark_questions_v2026_06.csv",
+    "row_count": 20,
+    "sha256": "eacb869b885c0aa5b22ea0de1504f2ee7982b9af9a6a351bf3ed874c7aa56ea5"
+  },
+  "results": {
+    "row_count": 20,
+    "status_counts": {
+      "success": 20
+    }
+  },
+  "run_type": "rag_local_llm_eval",
+  "schema_version": 1,
+  "script": "scripts/run_rag_local_llm_eval.py",
+  "sources": {
+    "metadata": {
+      "bytes": 3393,
+      "exists": true,
+      "path": "data/snapshots/2026-06-official-updates/metadata.csv",
+      "sha256": "c3a78340c6224d15b759694b06c9ad5209b7a82ab94972e89cebc46ff748e550"
+    },
+    "processed_docs": {
+      "exists": true,
+      "file_count": 8,
+      "path": "data/snapshots/2026-06-official-updates/processed_md",
+      "sha256": "5883ca354d980ee605a04bb9d949d45a91512952eb4c185df5d28d0ed39d1b35"
+    },
+    "structured_shop_file": {
+      "bytes": 7051,
+      "exists": true,
+      "path": "data/structured/shop_items.json",
+      "sha256": "241f2ada76a5f7d284e9a9910eb7c754c8fa24ba7da64aff02697a81d044dd01",
+      "used": false
+    }
+  }
+}

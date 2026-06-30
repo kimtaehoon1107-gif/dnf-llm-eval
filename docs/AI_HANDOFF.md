@@ -88,6 +88,8 @@
   - `eval\rag_v2026_06_bge_m3_instruct_answers.manifest.json`
   - `eval\rag_v2026_06_hybrid_instruct_answers.csv`
   - `eval\rag_v2026_06_hybrid_instruct_answers.manifest.json`
+  - `eval\rag_v2026_06_hybrid_rerank_instruct_answers.csv`
+  - `eval\rag_v2026_06_hybrid_rerank_instruct_answers.manifest.json`
   - `eval\v2026_06_answer_compare_summary.csv`
   - `eval\v2026_06_answer_compare_detail.csv`
   - `eval\v2026_06_retrieval_compare_summary.csv`
@@ -98,15 +100,19 @@
   - BM25 generation: factual 13/20, format 20/20, meta reasoning 0, refusal 3, average latency 6.061s.
   - BGE-M3 generation: factual 13/20, format 20/20, meta reasoning 0, refusal 3, average latency 4.219s.
   - Hybrid generation: factual 15/20, format 20/20, meta reasoning 0, refusal 2, average latency 4.613s.
+  - Hybrid + BGE reranker generation: factual 15/20, format 20/20, meta reasoning 0, refusal 0, average latency 20.868s.
   - BM25 retrieval: evidence hit 19/20, top-1 evidence hit 18/20, avg token recall 0.974.
   - BGE-M3 retrieval: evidence hit 20/20, top-1 evidence hit 18/20, avg token recall 0.997.
   - Hybrid retrieval: evidence hit 20/20, top-1 evidence hit 18/20, avg token recall 1.000.
+  - Hybrid + BGE reranker retrieval: evidence hit 20/20, top-1 evidence hit 19/20, avg token recall 1.000.
 - Documentation updated:
   - `README.md`
   - `report\benchmark_questions_v2026_06_design.md`
   - `report\README.md`
 - Remaining follow-up:
-  - Treat hybrid as the current best automatic-proxy setting for `benchmark_questions_v2026_06`.
-  - Review Q012 and Q013 manually because generation still refused those answers despite retrieved context.
+  - Treat hybrid as the current best speed/accuracy setting for `benchmark_questions_v2026_06`.
+  - Treat hybrid + BGE reranker as a useful retrieval-quality reference, but not as the default generation setting because latency rose without factual proxy gain.
+  - Review Q012 and Q013 manually because generation still missed those answers despite retrieved context.
   - Check Q003, Q014, and Q018 as likely proxy false negatives or partial-answer cases.
+  - Next likely technical path: structured patch-note change records for before/after skill changes.
   - Use manual rubric or LLM-as-judge to separate proxy false negatives from real answer failures.

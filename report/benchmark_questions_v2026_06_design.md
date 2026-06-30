@@ -60,6 +60,24 @@ python scripts\run_rag_local_llm_eval.py `
 
 `top_k=8` 기본 RAG context는 일부 문항에서 Ollama 기본 context window인 4096 tokens를 넘을 수 있다. `--num-ctx 8192`는 이 실행을 안정적으로 재현하기 위한 설정이다.
 
+Hybrid + BGE reranker 실험은 retrieval 후보를 30개까지 넓힌 뒤, `BAAI/bge-reranker-v2-m3`로 다시 top 8을 고르는 방식으로 실행했다.
+
+```powershell
+python scripts\run_rag_local_llm_eval.py `
+  --questions questions\benchmark_questions_v2026_06.csv `
+  --question-set-id benchmark_questions_v2026_06 `
+  --doc-dir data\snapshots\2026-06-official-updates\processed_md `
+  --metadata data\snapshots\2026-06-official-updates\metadata.csv `
+  --retriever hybrid `
+  --reranker-model BAAI/bge-reranker-v2-m3 `
+  --rerank-candidates 30 `
+  --model qwen3:4b-instruct-2507-q4_K_M `
+  --disable-thinking `
+  --num-predict 512 `
+  --num-ctx 8192 `
+  --output eval\rag_v2026_06_hybrid_rerank_instruct_answers.csv
+```
+
 ## 초기 검색 검증
 
 BM25 dry-run으로 모델 호출 전 검색 가능성을 확인했다.
@@ -71,9 +89,9 @@ BM25 dry-run으로 모델 호출 전 검색 가능성을 확인했다.
 
 Q013은 초안에서 6/11 공지와 6/18 공지의 브레이커 `격랑` 변경이 혼동되어 full-corpus top 문서가 어긋났다. 질문에 `15.8%`와 `17.6%` 수치를 포함하도록 수정한 뒤 full-corpus 기준 top doc match가 20/20으로 맞춰졌다.
 
-## BM25/BGE-M3/hybrid + Qwen3 instruct 실행 결과
+## BM25/BGE-M3/hybrid/rerank + Qwen3 instruct 실행 결과
 
-2026-06-30에 Ollama `qwen3:4b-instruct-2507-q4_K_M` 모델로 BM25, BGE-M3, hybrid RAG 답변 생성을 실행했다. 이 결과는 기존 active `benchmark_questions_v2026_05` 결과를 대체하지 않는 staged corpus 검증용 결과다.
+2026-06-30에 Ollama `qwen3:4b-instruct-2507-q4_K_M` 모델로 BM25, BGE-M3, hybrid, hybrid + BGE reranker RAG 답변 생성을 실행했다. 이 결과는 기존 active `benchmark_questions_v2026_05` 결과를 대체하지 않는 staged corpus 검증용 결과다.
 
 생성 결과:
 
@@ -82,6 +100,7 @@ Q013은 초안에서 6/11 공지와 6/18 공지의 브레이커 `격랑` 변경�
 | BM25 + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 13 / 20 | 20 / 20 | 0 | 3 | 6.061s |
 | BGE-M3 + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 13 / 20 | 20 / 20 | 0 | 3 | 4.219s |
 | Hybrid + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 15 / 20 | 20 / 20 | 0 | 2 | 4.613s |
+| Hybrid + BGE reranker + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 15 / 20 | 20 / 20 | 0 | 0 | 20.868s |
 
 검색 proxy:
 
@@ -90,6 +109,7 @@ Q013은 초안에서 6/11 공지와 6/18 공지의 브레이커 `격랑` 변경�
 | full-corpus BM25 dry-run | 20 | 19 / 20 | 18 / 20 | 0.974 | 0.935 |
 | full-corpus BGE-M3 dry-run | 20 | 20 / 20 | 18 / 20 | 0.997 | 0.931 |
 | full-corpus hybrid dry-run | 20 | 20 / 20 | 18 / 20 | 1.000 | 0.924 |
+| full-corpus hybrid + BGE reranker dry-run | 20 | 20 / 20 | 19 / 20 | 1.000 | 0.961 |
 
 생성 CSV와 manifest:
 
@@ -99,6 +119,8 @@ Q013은 초안에서 6/11 공지와 6/18 공지의 브레이커 `격랑` 변경�
 - `eval/rag_v2026_06_bge_m3_instruct_answers.manifest.json`
 - `eval/rag_v2026_06_hybrid_instruct_answers.csv`
 - `eval/rag_v2026_06_hybrid_instruct_answers.manifest.json`
+- `eval/rag_v2026_06_hybrid_rerank_instruct_answers.csv`
+- `eval/rag_v2026_06_hybrid_rerank_instruct_answers.manifest.json`
 - `eval/v2026_06_answer_compare_summary.csv`
 - `eval/v2026_06_answer_compare_detail.csv`
 - `eval/v2026_06_retrieval_compare_summary.csv`
@@ -110,7 +132,8 @@ Raw dry-run output인 `eval/v2026_06_*_full_dry_run.csv`와 manifest는 `eval/*d
 
 - 검색 단계는 BM25도 안정적이었지만, BGE-M3와 hybrid가 evidence hit 20/20으로 더 높았다.
 - BGE-M3 단독은 검색 hit과 평균 지연은 개선했지만 factual proxy는 BM25와 같은 13/20이었다.
-- Hybrid는 factual proxy를 15/20으로 올렸고 refusal도 3건에서 2건으로 줄였다. 현재 2026-06 staged corpus의 가장 나은 자동 proxy 설정은 hybrid다.
+- Hybrid는 factual proxy를 15/20으로 올렸고 refusal도 3건에서 2건으로 줄였다. 현재 2026-06 staged corpus의 가장 나은 속도/정확도 균형 설정은 hybrid다.
+- Hybrid + BGE reranker는 top-1 evidence hit을 19/20으로 올리고 refusal을 0건으로 줄였지만, factual proxy는 15/20으로 hybrid와 같았다. 평균 지연은 20.868s로 크게 늘어, 현재 자동 proxy 기준에서는 기본 hybrid 대비 비용 대비 이득이 작다.
 - Q001, Q015는 BM25 대비 hybrid에서 개선됐다. Q017은 BGE-M3 단독에서는 실패했지만 hybrid에서는 BM25와 같이 통과했다.
 - 남은 hybrid 실패 중 Q003, Q014, Q018은 답변이 부분적으로 맞지만 token/phrase 기반 proxy가 보수적으로 실패 처리한 false negative 가능성이 있다.
-- Q012와 Q013은 검색 context를 받은 뒤에도 모델이 보수적으로 거절한 실제 개선 대상이다. 다음 단계는 해당 문항의 retrieved context를 수동 검토하고, chunk window/top-k 또는 answer prompt를 조정해 근거 활용률을 높이는 것이다.
+- Q012와 Q013은 reranker 적용 후에도 모델이 핵심 변경점을 놓친 실제 개선 대상이다. Q013은 reranker에서 거절은 사라졌지만, `격랑` 옵션과 `훅 샷` 대상 스킬 관계를 잘못 압축했다. 다음 단계는 해당 문항의 retrieved context를 수동 검토하고, patch-note change table을 구조화 record로 추출해 근거 활용률을 높이는 것이다.

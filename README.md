@@ -441,11 +441,13 @@ python scripts\run_rag_local_llm_eval.py `
 | Retrieval | BM25 full-corpus dry-run | evidence hit 19 / 20, top-1 evidence hit 18 / 20 |
 | Retrieval | BGE-M3 full-corpus dry-run | evidence hit 20 / 20, top-1 evidence hit 18 / 20 |
 | Retrieval | Hybrid full-corpus dry-run | evidence hit 20 / 20, top-1 evidence hit 18 / 20 |
+| Retrieval | Hybrid + BGE reranker | evidence hit 20 / 20, top-1 evidence hit 19 / 20 |
 | Generation | BM25 + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 13 / 20, format proxy 20 / 20, 평균 6.061s |
 | Generation | BGE-M3 + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 13 / 20, format proxy 20 / 20, 평균 4.219s |
 | Generation | Hybrid + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 15 / 20, format proxy 20 / 20, 평균 4.613s |
+| Generation | Hybrid + BGE reranker + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 15 / 20, format proxy 20 / 20, 평균 20.868s |
 
-해석은 [`report/benchmark_questions_v2026_06_design.md`](report/benchmark_questions_v2026_06_design.md)에 정리했다. BGE-M3 단독은 검색 hit과 속도는 개선했지만 factual proxy는 BM25와 같았고, hybrid 검색은 factual proxy를 15/20까지 올렸다. 남은 실패 중 Q003, Q014, Q018은 token/phrase proxy의 false negative 가능성이 있으며, Q012와 Q013은 모델이 근거를 보고도 보수적으로 거절한 실제 개선 대상이다.
+해석은 [`report/benchmark_questions_v2026_06_design.md`](report/benchmark_questions_v2026_06_design.md)에 정리했다. BGE-M3 단독은 검색 hit과 속도는 개선했지만 factual proxy는 BM25와 같았고, hybrid 검색은 factual proxy를 15/20까지 올렸다. BGE reranker는 top-1 검색 품질과 refusal 억제는 개선했지만 생성 factual proxy는 15/20으로 동일했고 평균 지연이 크게 증가했다. 남은 실패 중 Q003, Q014, Q018은 token/phrase proxy의 false negative 가능성이 있으며, Q012와 Q013은 모델이 근거를 보고도 핵심 변경점을 놓친 실제 개선 대상이다.
 
 ## 오류 분석 요약
 

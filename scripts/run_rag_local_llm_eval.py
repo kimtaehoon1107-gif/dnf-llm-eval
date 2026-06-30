@@ -33,6 +33,7 @@ EMBEDDING_CACHE_DIR = BASE_DIR / "data" / "cache"
 DEFAULT_QUESTIONS = BASE_DIR / "questions" / "benchmark_questions.csv"
 DEFAULT_OUTPUT = BASE_DIR / "eval" / "rag_local_llm_answers.csv"
 DEFAULT_EMBEDDING_MODEL = "BAAI/bge-m3"
+DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 SAFE_REFUSAL = "제공된 문서에서 확인할 수 없습니다."
 FINAL_ANSWER_MARKER = "최종 답변:"
 
@@ -494,6 +495,67 @@ def load_bge_m3_model(model_name: str, use_fp16: bool) -> object:
     return BGEM3FlagModel(model_name, use_fp16=use_fp16)
 
 
+class TransformersReranker:
+    def __init__(self, model_name: str, use_fp16: bool, max_length: int) -> None:
+        try:
+            import torch
+            from transformers import AutoModelForSequenceClassification, AutoTokenizer
+        except ImportError as exc:
+            raise RuntimeError(
+                "BGE reranker를 사용하려면 torch/transformers가 필요합니다. "
+                "먼저 `pip install -r requirements-bge.txt`를 실행하세요."
+            ) from exc
+
+        self.torch = torch
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.max_length = max_length
+
+        self.model.to(self.device)
+        if use_fp16 and self.device == "cuda":
+            self.model.half()
+        self.model.eval()
+
+    def compute_score(
+        self,
+        sentence_pairs: list[tuple[str, str]],
+        batch_size: int = 16,
+        max_length: int | None = None,
+    ) -> list[float]:
+        scores: list[float] = []
+        effective_max_length = max_length or self.max_length
+
+        for start in range(0, len(sentence_pairs), batch_size):
+            batch = sentence_pairs[start : start + batch_size]
+            queries = [query for query, _ in batch]
+            passages = [passage for _, passage in batch]
+            inputs = self.tokenizer(
+                queries,
+                passages,
+                padding=True,
+                truncation=True,
+                max_length=effective_max_length,
+                return_tensors="pt",
+            )
+            inputs = {key: value.to(self.device) for key, value in inputs.items()}
+
+            with self.torch.no_grad():
+                logits = self.model(**inputs).logits
+
+            if logits.ndim == 2 and logits.shape[1] > 1:
+                values = logits[:, -1]
+            else:
+                values = logits.reshape(-1)
+            scores.extend(float(value) for value in values.detach().cpu().tolist())
+
+        return scores
+
+
+def load_bge_reranker(model_name: str, use_fp16: bool, max_length: int) -> object:
+    return TransformersReranker(model_name, use_fp16, max_length)
+
+
 def encode_bge_dense(
     embedding_runner: object,
     texts: list[str],
@@ -670,6 +732,49 @@ def hybrid_search(
     scored = [
         (chunk_by_id[chunk_id], score * 1000.0)
         for chunk_id, score in score_by_chunk_id.items()
+    ]
+    scored.sort(key=lambda item: item[1], reverse=True)
+    return scored[:top_k]
+
+
+def as_score_list(scores: object) -> list[float]:
+    if hasattr(scores, "tolist"):
+        scores = scores.tolist()
+
+    if isinstance(scores, (int, float)):
+        return [float(scores)]
+
+    return [float(score) for score in scores]  # type: ignore[union-attr]
+
+
+def rerank_results(
+    query: str,
+    results: list[tuple[Chunk, float]],
+    reranker: object,
+    top_k: int,
+    batch_size: int,
+    max_length: int,
+) -> list[tuple[Chunk, float]]:
+    if not results:
+        return []
+
+    pairs = [
+        (
+            query,
+            f"{chunk.title}\n{chunk.text}",
+        )
+        for chunk, _ in results
+    ]
+    compute_score = getattr(reranker, "compute_score")
+
+    try:
+        scores = compute_score(pairs, batch_size=batch_size, max_length=max_length)
+    except TypeError:
+        scores = compute_score(pairs)
+
+    scored = [
+        (chunk, score)
+        for (chunk, _), score in zip(results, as_score_list(scores))
     ]
     scored.sort(key=lambda item: item[1], reverse=True)
     return scored[:top_k]
@@ -976,6 +1081,27 @@ def main() -> None:
         default=0.5,
         help="Hybrid RRF weight for BGE-M3. 0.0=BM25 only, 1.0=BGE only.",
     )
+    parser.add_argument(
+        "--reranker-model",
+        default="",
+        help=(
+            "Optional BGE reranker model. For example "
+            f"{DEFAULT_RERANKER_MODEL}. Requires requirements-bge.txt."
+        ),
+    )
+    parser.add_argument(
+        "--rerank-candidates",
+        type=int,
+        default=0,
+        help="Number of retrieved candidates to rerank before trimming to --top-k.",
+    )
+    parser.add_argument("--reranker-batch-size", type=int, default=16)
+    parser.add_argument("--reranker-max-length", type=int, default=512)
+    parser.add_argument(
+        "--reranker-use-fp16",
+        action="store_true",
+        help="Use fp16 for BGE reranker if the local hardware supports it.",
+    )
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--num-predict", type=int, default=0, help="Optional Ollama output token limit.")
@@ -1070,6 +1196,8 @@ def main() -> None:
         f"model={args.model} top_k={args.top_k} window_lines={args.window_lines} "
         f"stride={args.stride} chunk_max_chars={args.chunk_max_chars} "
         f"retriever={args.retriever} embedding_model={args.embedding_model} "
+        f"reranker_model={args.reranker_model or 'none'} "
+        f"rerank_candidates={args.rerank_candidates} "
         f"min_score={args.min_score} safety_gate={args.safety_gate} "
         f"use_structured_data={args.use_structured_data} "
         f"service_tone={args.service_tone} "
@@ -1098,6 +1226,7 @@ def main() -> None:
     structured_shop_records = read_structured_shop_records() if args.use_structured_data else []
     embedding_runner = None
     chunk_vectors: list[list[float]] = []
+    reranker = None
 
     if args.retriever in {"bge-m3", "hybrid"}:
         embedding_runner = load_bge_m3_model(args.embedding_model, args.bge_use_fp16)
@@ -1107,6 +1236,13 @@ def main() -> None:
             args.embedding_model,
             args.embedding_batch_size,
             args.embedding_max_length,
+        )
+
+    if args.reranker_model:
+        reranker = load_bge_reranker(
+            args.reranker_model,
+            args.reranker_use_fp16,
+            args.reranker_max_length,
         )
 
     print(f"[INDEX] chunks={len(chunks)} docs={len(set(chunk.doc_id for chunk in chunks))}")
@@ -1132,7 +1268,7 @@ def main() -> None:
                 query=query,
                 chunks=chunks,
                 idf=idf,
-                top_k=args.top_k,
+                top_k=max(args.top_k, args.rerank_candidates) if reranker else args.top_k,
                 min_score=args.min_score,
                 doc_filter=doc_filter,
                 retriever=args.retriever,
@@ -1143,6 +1279,15 @@ def main() -> None:
                 embedding_max_length=args.embedding_max_length,
                 hybrid_alpha=args.hybrid_alpha,
             )
+            if reranker:
+                results = rerank_results(
+                    query,
+                    results,
+                    reranker,
+                    args.top_k,
+                    args.reranker_batch_size,
+                    args.reranker_max_length,
+                )
             retrieved_context = format_context(results)
             structured_records = find_structured_shop_records(row, structured_shop_records)
             structured_context = format_structured_context(structured_records)
