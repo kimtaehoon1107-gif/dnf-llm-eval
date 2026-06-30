@@ -20,7 +20,7 @@
   - LLM-as-a-Judge 방식으로 답변 품질을 평가하는 후속 자동 채점 방향의 근거로 참고했다. 본 프로젝트에서는 직접 구현하지 않고 수동 rubric과 proxy 지표를 우선 사용했다.
 
 - Confident AI. (2026). *DeepEval: The LLM Evaluation Framework*. https://github.com/confident-ai/deepeval
-  - RAG/LLM 응답 평가를 테스트 코드처럼 자동화하는 후속 개선 후보로 참고했다. 본 프로젝트에는 DeepEval을 직접 연동하지 않고, 향후 보조 평가 도구로 제안했다.
+  - RAG/LLM 응답 평가를 테스트 코드처럼 자동화하는 후속 개선 후보로 참고했다. 2026-06 실험에서는 내부 CSV를 DeepEval RAG test case JSONL로 변환하는 어댑터를 추가했고, judge metric 실행은 평가자 모델과 threshold를 정한 뒤 진행할 후속 단계로 남겼다.
 
 ## 2. Retrieval and Model Selection
 
