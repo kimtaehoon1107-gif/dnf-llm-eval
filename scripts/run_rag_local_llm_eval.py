@@ -29,6 +29,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 DOC_DIR = BASE_DIR / "data" / "processed_md"
 METADATA_FILE = BASE_DIR / "data" / "metadata.csv"
 STRUCTURED_SHOP_FILE = BASE_DIR / "data" / "structured" / "shop_items.json"
+STRUCTURED_CHANGE_FILENAME = "change_records.json"
 EMBEDDING_CACHE_DIR = BASE_DIR / "data" / "cache"
 DEFAULT_QUESTIONS = BASE_DIR / "questions" / "benchmark_questions.csv"
 DEFAULT_OUTPUT = BASE_DIR / "eval" / "rag_local_llm_answers.csv"
@@ -852,6 +853,20 @@ def read_structured_shop_records() -> list[dict[str, object]]:
     return json.loads(STRUCTURED_SHOP_FILE.read_text(encoding="utf-8"))
 
 
+def structured_change_file() -> Path:
+    snapshot_structured_file = DOC_DIR.parent / "structured" / STRUCTURED_CHANGE_FILENAME
+    if snapshot_structured_file.exists():
+        return snapshot_structured_file
+    return BASE_DIR / "data" / "structured" / STRUCTURED_CHANGE_FILENAME
+
+
+def read_structured_change_records() -> list[dict[str, object]]:
+    path = structured_change_file()
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def find_structured_shop_records(
     row: dict[str, str],
     records: list[dict[str, object]],
@@ -876,22 +891,118 @@ def find_structured_shop_records(
     return matched
 
 
+def record_terms(record: dict[str, object]) -> list[str]:
+    raw_terms = record.get("match_terms", [])
+    if isinstance(raw_terms, list):
+        terms = [str(term) for term in raw_terms if str(term).strip()]
+    else:
+        terms = []
+
+    for key in (
+        "character",
+        "option_name",
+        "target_skill",
+        "field",
+        "before",
+        "after",
+        "unchanged",
+    ):
+        value = record.get(key, "")
+        if isinstance(value, list):
+            terms.extend(str(item) for item in value if str(item).strip())
+        elif str(value).strip():
+            terms.append(str(value))
+
+    return terms
+
+
+def find_structured_change_records(
+    row: dict[str, str],
+    records: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    if not records:
+        return []
+
+    query = row.get("question", "")
+    doc_id = row.get("doc_id", "")
+    change_terms = ("변경", "조정", "쿨타임", "공격력", "개화", "스킬", "브레이커")
+    if not any(term in query for term in change_terms):
+        return []
+
+    scored: list[tuple[dict[str, object], int]] = []
+    for record in records:
+        if doc_id and record.get("doc_id") != doc_id:
+            continue
+
+        record_text = json.dumps(record, ensure_ascii=False)
+        option_name = str(record.get("option_name", "")).strip()
+        target_skill = str(record.get("target_skill", "")).strip()
+        field = str(record.get("field", "")).strip()
+        option_match = bool(option_name and option_name in query)
+        target_match = bool(target_skill and target_skill in query)
+        field_match = bool(field and field in query)
+        numeric_matches = sum(
+            1
+            for value in re.findall(r"\d+(?:\.\d+)?%|\d+\s*초", query)
+            if value and value in record_text
+        )
+        specific_match = option_match or numeric_matches >= 2 or (target_match and field_match)
+        if not specific_match:
+            continue
+
+        score = 0
+        if option_match:
+            score += 3
+        if target_match:
+            score += 2
+        if field_match:
+            score += 1
+        score += numeric_matches * 2
+
+        for term in record_terms(record):
+            normalized = term.strip()
+            if normalized and normalized in query:
+                score += 1
+
+        if score > 0:
+            scored.append((record, score))
+
+    scored.sort(key=lambda item: item[1], reverse=True)
+    best_score = scored[0][1] if scored else 0
+    return [record for record, score in scored if score == best_score][:3]
+
+
 def format_structured_context(records: list[dict[str, object]]) -> str:
     if not records:
         return ""
 
     blocks = []
     for index, record in enumerate(records, start=1):
-        blocks.append(
-            "[구조화 근거 {index}] record_id={record_id}, doc_id={doc_id}, "
-            "table_type={table_type}\n"
-            "item_name: {item_name}\n"
-            "npc: {npc}\n"
-            "price: {price_text}\n"
-            "purchase_limit: {purchase_limit_text}\n"
-            "trade_type: {trade_type}\n"
-            "carryover: {carryover_text}".format(index=index, **record)
-        )
+        record_type = record.get("record_type") or record.get("table_type", "")
+        if record_type == "patch_change":
+            blocks.append(
+                "[구조화 근거 {index}] record_id={record_id}, doc_id={doc_id}, "
+                "record_type={record_type}\n"
+                "character: {character}\n"
+                "option_name: {option_name}\n"
+                "target_skill: {target_skill}\n"
+                "field: {field}\n"
+                "before: {before}\n"
+                "after: {after}\n"
+                "unchanged: {unchanged}\n"
+                "source_relation: {source_relation}".format(index=index, **record)
+            )
+        else:
+            blocks.append(
+                "[구조화 근거 {index}] record_id={record_id}, doc_id={doc_id}, "
+                "table_type={table_type}\n"
+                "item_name: {item_name}\n"
+                "npc: {npc}\n"
+                "price: {price_text}\n"
+                "purchase_limit: {purchase_limit_text}\n"
+                "trade_type: {trade_type}\n"
+                "carryover: {carryover_text}".format(index=index, **record)
+            )
 
     return "\n\n".join(blocks)
 
@@ -1224,6 +1335,7 @@ def main() -> None:
 
     idf = compute_idf(chunks)
     structured_shop_records = read_structured_shop_records() if args.use_structured_data else []
+    structured_change_records = read_structured_change_records() if args.use_structured_data else []
     embedding_runner = None
     chunk_vectors: list[list[float]] = []
     reranker = None
@@ -1248,6 +1360,10 @@ def main() -> None:
     print(f"[INDEX] chunks={len(chunks)} docs={len(set(chunk.doc_id for chunk in chunks))}")
     if args.use_structured_data:
         print(f"[STRUCTURED] shop_records={len(structured_shop_records)} source={STRUCTURED_SHOP_FILE}")
+        print(
+            f"[STRUCTURED] change_records={len(structured_change_records)} "
+            f"source={structured_change_file()}"
+        )
 
     rows: list[dict[str, str]] = []
     for row in questions:
@@ -1289,7 +1405,10 @@ def main() -> None:
                     args.reranker_max_length,
                 )
             retrieved_context = format_context(results)
-            structured_records = find_structured_shop_records(row, structured_shop_records)
+            structured_records = [
+                *find_structured_shop_records(row, structured_shop_records),
+                *find_structured_change_records(row, structured_change_records),
+            ]
             structured_context = format_structured_context(structured_records)
             context = combine_context(structured_context, retrieved_context)
 
@@ -1396,6 +1515,10 @@ def main() -> None:
             extra_sources={
                 "structured_shop_file": {
                     **file_source(STRUCTURED_SHOP_FILE, BASE_DIR),
+                    "used": args.use_structured_data,
+                },
+                "structured_change_file": {
+                    **file_source(structured_change_file(), BASE_DIR),
                     "used": args.use_structured_data,
                 },
             },

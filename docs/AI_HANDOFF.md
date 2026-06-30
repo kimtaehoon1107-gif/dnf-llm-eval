@@ -81,6 +81,7 @@
   - Added `--num-ctx` to `scripts/run_rag_local_llm_eval.py`.
   - Without this option, some `top_k=8` RAG prompts exceeded Ollama's default 4096-token context and returned HTTP 400.
   - The successful run used `--num-ctx 8192`.
+  - Structured patch-change records are matched conservatively by option name, before/after percent-second values, or target skill plus field, so generic skill cooldown questions do not automatically inherit option-specific change records.
 - Generated outputs:
   - `eval\rag_v2026_06_bm25_instruct_answers.csv`
   - `eval\rag_v2026_06_bm25_instruct_answers.manifest.json`
@@ -90,10 +91,13 @@
   - `eval\rag_v2026_06_hybrid_instruct_answers.manifest.json`
   - `eval\rag_v2026_06_hybrid_rerank_instruct_answers.csv`
   - `eval\rag_v2026_06_hybrid_rerank_instruct_answers.manifest.json`
+  - `eval\rag_v2026_06_hybrid_structured_instruct_answers.csv`
+  - `eval\rag_v2026_06_hybrid_structured_instruct_answers.manifest.json`
   - `eval\v2026_06_answer_compare_summary.csv`
   - `eval\v2026_06_answer_compare_detail.csv`
   - `eval\v2026_06_retrieval_compare_summary.csv`
   - `eval\v2026_06_retrieval_compare_detail.csv`
+  - `data\snapshots\2026-06-official-updates\structured\change_records.json`
   - Raw dry-run CSV/manifest were generated locally but remain ignored by `eval/*dry_run*`.
   - BGE-M3 embedding cache was generated locally under ignored `data/cache/`.
 - Results:
@@ -101,6 +105,7 @@
   - BGE-M3 generation: factual 13/20, format 20/20, meta reasoning 0, refusal 3, average latency 4.219s.
   - Hybrid generation: factual 15/20, format 20/20, meta reasoning 0, refusal 2, average latency 4.613s.
   - Hybrid + BGE reranker generation: factual 15/20, format 20/20, meta reasoning 0, refusal 0, average latency 20.868s.
+  - Hybrid + structured change records generation: factual 16/20, format 20/20, meta reasoning 0, refusal 0, average latency 4.273s.
   - BM25 retrieval: evidence hit 19/20, top-1 evidence hit 18/20, avg token recall 0.974.
   - BGE-M3 retrieval: evidence hit 20/20, top-1 evidence hit 18/20, avg token recall 0.997.
   - Hybrid retrieval: evidence hit 20/20, top-1 evidence hit 18/20, avg token recall 1.000.
@@ -110,9 +115,10 @@
   - `report\benchmark_questions_v2026_06_design.md`
   - `report\README.md`
 - Remaining follow-up:
-  - Treat hybrid as the current best speed/accuracy setting for `benchmark_questions_v2026_06`.
+  - Treat hybrid + structured change records as the current best speed/accuracy setting for `benchmark_questions_v2026_06`.
   - Treat hybrid + BGE reranker as a useful retrieval-quality reference, but not as the default generation setting because latency rose without factual proxy gain.
-  - Review Q012 and Q013 manually because generation still missed those answers despite retrieved context.
-  - Check Q003, Q014, and Q018 as likely proxy false negatives or partial-answer cases.
-  - Next likely technical path: structured patch-note change records for before/after skill changes.
+  - Q012 improved with structured change records.
+  - Q013 is close under structured records because the answer includes `격랑`, `훅 샷`, and 15.8% -> 17.6%, but the token/phrase proxy still marks it as failed.
+  - Check Q003, Q013, Q014, and Q018 as likely proxy false negatives or partial-answer cases.
+  - Next likely technical path: strengthen the scorer with manual rubric review or LLM-as-judge for close answers.
   - Use manual rubric or LLM-as-judge to separate proxy false negatives from real answer failures.
