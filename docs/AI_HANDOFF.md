@@ -67,3 +67,46 @@
   - Keep URL parsing as fallback and `DOC-xx` as final fallback.
   - Reject duplicate non-empty `source_post_id` values.
   - Move third-party collector imports into runtime functions so smoke check can import and test stable-ID helpers without installing Selenium/requests.
+
+## 2026-06-30 Ollama PC Continuation
+
+- Branch: `codex/v2026-06-results`.
+- Base commit: `4df4022 Add v2026_06 benchmark questions`.
+- Goal: run the staged 2026-06 corpus evaluation that required an Ollama machine, then record results separately from the active 2026-05 benchmark.
+- Environment:
+  - Python 3.14.4.
+  - Ollama model available: `qwen3:4b-instruct-2507-q4_K_M`.
+  - `python scripts\smoke_check.py` passed.
+- Implementation note:
+  - Added `--num-ctx` to `scripts/run_rag_local_llm_eval.py`.
+  - Without this option, some `top_k=8` RAG prompts exceeded Ollama's default 4096-token context and returned HTTP 400.
+  - The successful run used `--num-ctx 8192`.
+- Generated outputs:
+  - `eval\rag_v2026_06_bm25_instruct_answers.csv`
+  - `eval\rag_v2026_06_bm25_instruct_answers.manifest.json`
+  - `eval\rag_v2026_06_bge_m3_instruct_answers.csv`
+  - `eval\rag_v2026_06_bge_m3_instruct_answers.manifest.json`
+  - `eval\rag_v2026_06_hybrid_instruct_answers.csv`
+  - `eval\rag_v2026_06_hybrid_instruct_answers.manifest.json`
+  - `eval\v2026_06_answer_compare_summary.csv`
+  - `eval\v2026_06_answer_compare_detail.csv`
+  - `eval\v2026_06_retrieval_compare_summary.csv`
+  - `eval\v2026_06_retrieval_compare_detail.csv`
+  - Raw dry-run CSV/manifest were generated locally but remain ignored by `eval/*dry_run*`.
+  - BGE-M3 embedding cache was generated locally under ignored `data/cache/`.
+- Results:
+  - BM25 generation: factual 13/20, format 20/20, meta reasoning 0, refusal 3, average latency 6.061s.
+  - BGE-M3 generation: factual 13/20, format 20/20, meta reasoning 0, refusal 3, average latency 4.219s.
+  - Hybrid generation: factual 15/20, format 20/20, meta reasoning 0, refusal 2, average latency 4.613s.
+  - BM25 retrieval: evidence hit 19/20, top-1 evidence hit 18/20, avg token recall 0.974.
+  - BGE-M3 retrieval: evidence hit 20/20, top-1 evidence hit 18/20, avg token recall 0.997.
+  - Hybrid retrieval: evidence hit 20/20, top-1 evidence hit 18/20, avg token recall 1.000.
+- Documentation updated:
+  - `README.md`
+  - `report\benchmark_questions_v2026_06_design.md`
+  - `report\README.md`
+- Remaining follow-up:
+  - Treat hybrid as the current best automatic-proxy setting for `benchmark_questions_v2026_06`.
+  - Review Q012 and Q013 manually because generation still refused those answers despite retrieved context.
+  - Check Q003, Q014, and Q018 as likely proxy false negatives or partial-answer cases.
+  - Use manual rubric or LLM-as-judge to separate proxy false negatives from real answer failures.

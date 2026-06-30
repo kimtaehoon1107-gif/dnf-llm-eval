@@ -299,6 +299,22 @@ python scripts\run_rag_local_llm_eval.py `
   --dry-run
 ```
 
+실제 LLM 답변까지 생성할 때는 기본 Ollama context window가 긴 RAG prompt보다 작을 수 있으므로 `--num-ctx 8192` 이상을 함께 지정합니다.
+
+```powershell
+python scripts\run_rag_local_llm_eval.py `
+  --questions questions\benchmark_questions_v2026_06.csv `
+  --question-set-id benchmark_questions_v2026_06 `
+  --doc-dir data\snapshots\2026-06-official-updates\processed_md `
+  --metadata data\snapshots\2026-06-official-updates\metadata.csv `
+  --retriever bm25 `
+  --model qwen3:4b-instruct-2507-q4_K_M `
+  --disable-thinking `
+  --num-predict 512 `
+  --num-ctx 8192 `
+  --output eval\rag_v2026_06_bm25_instruct_answers.csv
+```
+
 필요하면 `--manifest-output path\to\run.manifest.json`으로 저장 위치를 직접 지정할 수 있고, 임시 실행에서는 `--no-manifest`로 생성을 끌 수 있습니다.
 
 ## 실험 흐름
@@ -415,6 +431,21 @@ python scripts\run_rag_local_llm_eval.py `
 | BGE-M3 + instruct + service-tone + structured | 17 / 22 | 22 / 22 | 0 | 5.130s |
 
 가장 큰 변화는 생성 모델을 instruct variant로 바꿨을 때 발생했습니다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었습니다. Service-tone과 structured data는 최종 사용자 경험과 표형 정보 보완을 위한 구성 요소이며, token 기반 factual proxy의 false negative 가능성을 함께 고려해 해석했습니다.
+
+### 2026-06 staged corpus 후속 검증
+
+아래 결과는 기존 active `benchmark_questions_v2026_05` 22문항 결과를 대체하지 않는 별도 검증이다. 2026-06 공식 업데이트 8개 문서를 staged corpus로 두고, draft 질문셋 `benchmark_questions_v2026_06` 20문항을 BM25 RAG와 `qwen3:4b-instruct-2507-q4_K_M`으로 실행했다.
+
+| 범위 | 설정 | 결과 |
+|---|---|---:|
+| Retrieval | BM25 full-corpus dry-run | evidence hit 19 / 20, top-1 evidence hit 18 / 20 |
+| Retrieval | BGE-M3 full-corpus dry-run | evidence hit 20 / 20, top-1 evidence hit 18 / 20 |
+| Retrieval | Hybrid full-corpus dry-run | evidence hit 20 / 20, top-1 evidence hit 18 / 20 |
+| Generation | BM25 + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 13 / 20, format proxy 20 / 20, 평균 6.061s |
+| Generation | BGE-M3 + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 13 / 20, format proxy 20 / 20, 평균 4.219s |
+| Generation | Hybrid + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 15 / 20, format proxy 20 / 20, 평균 4.613s |
+
+해석은 [`report/benchmark_questions_v2026_06_design.md`](report/benchmark_questions_v2026_06_design.md)에 정리했다. BGE-M3 단독은 검색 hit과 속도는 개선했지만 factual proxy는 BM25와 같았고, hybrid 검색은 factual proxy를 15/20까지 올렸다. 남은 실패 중 Q003, Q014, Q018은 token/phrase proxy의 false negative 가능성이 있으며, Q012와 Q013은 모델이 근거를 보고도 보수적으로 거절한 실제 개선 대상이다.
 
 ## 오류 분석 요약
 

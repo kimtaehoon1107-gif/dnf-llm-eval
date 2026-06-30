@@ -1,0 +1,4 @@
+﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
+bge_m3_instruct,20,13,0.650,20,1.000,0,0,3,0.505,0.633,0.985,4.219
+bm25_instruct,20,13,0.650,20,1.000,0,0,3,0.553,0.689,0.987,6.061
+hybrid_instruct,20,15,0.750,20,1.000,0,0,2,0.550,0.686,0.983,4.613

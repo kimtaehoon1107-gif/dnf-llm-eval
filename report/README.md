@@ -20,6 +20,7 @@
 | `retriever_comparison_report.md` | BM25 heuristic과 BGE-M3 검색 성능 비교 |
 | `answer_retriever_comparison_report.md` | 검색기별 답변 품질 proxy 비교 |
 | `ablation_study_report.md` | BGE-M3를 고정하고 생성 설정을 단계적으로 바꾼 변수 통제 실험 |
+| `benchmark_questions_v2026_06_design.md` | 2026-06 staged corpus 질문셋 설계와 BM25/BGE-M3/hybrid 후속 실행 결과 |
 | `representative_manual_scoring.md` | 대표 문항을 사람이 읽을 수 있게 수동 채점한 진단 문서 |
 | `structured_data_and_safety_gate_update.md` | 상점표 구조화 데이터와 safety gate 추가 내용 |
 | `paraphrase_safety_gate_test.md` | 단순 키워드 우회 공격에 대한 보강 실험 |

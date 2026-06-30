@@ -869,6 +869,7 @@ def call_ollama(
     service_tone: bool,
     service_tone_examples: bool,
     num_predict: int,
+    num_ctx: int,
     disable_thinking: bool,
 ) -> str:
     system_prompt = SYSTEM_PROMPT
@@ -887,6 +888,9 @@ def call_ollama(
 
     if num_predict > 0:
         options["num_predict"] = num_predict
+
+    if num_ctx > 0:
+        options["num_ctx"] = num_ctx
 
     payload = {
         "model": model,
@@ -975,6 +979,12 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--num-predict", type=int, default=0, help="Optional Ollama output token limit.")
+    parser.add_argument(
+        "--num-ctx",
+        type=int,
+        default=0,
+        help="Optional Ollama context window size. Increase when RAG prompts exceed the model server default.",
+    )
     parser.add_argument(
         "--use-structured-data",
         action="store_true",
@@ -1065,6 +1075,7 @@ def main() -> None:
         f"service_tone={args.service_tone} "
         f"service_tone_examples={args.service_tone_examples} "
         f"disable_thinking={args.disable_thinking} "
+        f"num_ctx={args.num_ctx} "
         f"fast_service_profile={args.fast_service_profile}"
     )
 
@@ -1156,6 +1167,7 @@ def main() -> None:
                     args.service_tone,
                     args.service_tone_examples,
                     args.num_predict,
+                    args.num_ctx,
                     args.disable_thinking,
                 )
                 if answer:
