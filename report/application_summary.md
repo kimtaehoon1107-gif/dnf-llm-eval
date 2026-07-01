@@ -6,6 +6,8 @@
 
 후속으로 2026-06 staged corpus 20문항을 추가해 snapshot 구조화 근거와 답변 완전성 규칙을 보강했고, `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정에서 factual proxy와 format proxy 20/20을 확인했습니다. Safety는 keyword gate의 stealth 한계를 확인한 뒤 intent gate를 붙였고, 실제 RAG 생성 경로 100문항에서 공격 50/50 차단, 정상 50/50 통과를 기록했습니다.
 
+주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않습니다. (held-out not yet validated)
+
 ## 30초 면접 답변
 
 이 프로젝트는 던파 업데이트 문서를 기반으로 LLM 답변 품질을 평가하는 포트폴리오입니다. 단순히 챗봇을 만든 것이 아니라, 실제 유저 질문을 벤치마크로 만들고, 정답 근거와 평가 루브릭을 붙여 모델 답변을 채점했습니다. baseline에서는 긴 문서 안에서 근거를 못 찾아 평균 11.27점이었지만, RAG를 붙인 뒤 18.86점까지 개선됐습니다. 이후 BGE-M3 검색과 상점표 구조화 데이터를 추가해 검색과 표 기반 질문의 병목을 따로 분석했고, 최종 instruct 모델과 서비스 톤 프롬프트로 답변 형식 문제를 개선했습니다. 후속 2026-06 staged corpus에서는 structured fix로 factual/format proxy 20/20을 만들었고, intent safety gate는 end-to-end 100문항에서 공격 차단과 정상 질문 통과를 모두 만족했습니다.

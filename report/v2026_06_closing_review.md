@@ -14,6 +14,8 @@
 
 `eval/v2026_06_answer_compare_summary.csv` 기준이다.
 
+주의: 2026-07-01 structured fix 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 답변 완전성 규칙을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않는다. (held-out not yet validated)
+
 | Run | Factual proxy | Format proxy | Refusal | Avg gold token recall | Avg latency |
 |---|---:|---:|---:|---:|---:|
 | BM25 + instruct | 13/20 | 20/20 | 3 | 0.553 | 6.061s |
@@ -21,7 +23,7 @@
 | Hybrid + instruct | 15/20 | 20/20 | 2 | 0.550 | 4.613s |
 | Hybrid + BGE reranker + instruct | 15/20 | 20/20 | 0 | 0.577 | 20.868s |
 | Hybrid + structured records + instruct | 16/20 | 20/20 | 0 | 0.597 | 4.273s |
-| Hybrid + structured fix + instruct | 20/20 | 20/20 | 0 | - | 4.399s |
+| Hybrid + structured fix + instruct | dev/test-informed 20/20 | 20/20 | 0 | - | 4.399s |
 
 핵심 관찰:
 

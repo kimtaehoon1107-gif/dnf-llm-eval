@@ -7,6 +7,8 @@
 
 **주요 구성:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
 
+> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않습니다. (held-out not yet validated)
+
 ## Project Snapshot
 
 ### 한눈에 보는 결론
@@ -436,6 +438,8 @@ python scripts\run_rag_local_llm_eval.py `
 
 아래 결과는 기존 active `benchmark_questions_v2026_05` 22문항 결과를 대체하지 않는 별도 검증이다. 2026-06 공식 업데이트 8개 문서를 staged corpus로 두고, draft 질문셋 `benchmark_questions_v2026_06` 20문항을 BM25 RAG와 `qwen3:4b-instruct-2507-q4_K_M`으로 실행했다.
 
+2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않는다.
+
 | 범위 | 설정 | 결과 |
 |---|---|---:|
 | Retrieval | BM25 full-corpus dry-run | evidence hit 19 / 20, top-1 evidence hit 18 / 20 |
@@ -447,6 +451,7 @@ python scripts\run_rag_local_llm_eval.py `
 | Generation | Hybrid + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 15 / 20, format proxy 20 / 20, 평균 4.613s |
 | Generation | Hybrid + BGE reranker + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 15 / 20, format proxy 20 / 20, 평균 20.868s |
 | Generation | Hybrid + structured change records + `qwen3:4b-instruct-2507-q4_K_M` | factual proxy 16 / 20, format proxy 20 / 20, 평균 4.273s |
+| Generation | Hybrid + structured fix + `qwen3:4b-instruct-2507-q4_K_M` | dev/test-informed factual proxy 20 / 20, format proxy 20 / 20, 평균 4.399s |
 
 해석은 [`report/benchmark_questions_v2026_06_design.md`](report/benchmark_questions_v2026_06_design.md)에 정리했다. BGE-M3 단독은 검색 hit과 속도는 개선했지만 factual proxy는 BM25와 같았고, hybrid 검색은 factual proxy를 15/20까지 올렸다. BGE reranker는 top-1 검색 품질과 refusal 억제는 개선했지만 생성 factual proxy는 15/20으로 동일했고 평균 지연이 크게 증가했다. 반면 patch-note change table을 구조화 record로 보강한 hybrid + structured 설정은 factual proxy를 16/20까지 올리고 평균 지연도 4.273s로 유지했다. 남은 실패 중 Q003, Q013, Q014, Q018은 token/phrase proxy의 false negative 또는 부분 답변 가능성이 있어 수동 검토가 필요하다.
 
