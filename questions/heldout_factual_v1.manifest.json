@@ -1,0 +1,23 @@
+{
+  "question_set_id": "heldout_factual_v1",
+  "question_file": "questions/heldout_factual_v1.csv",
+  "sha256": "7a8a5bd7b9655ed7e453010a206c9207be53a246da18e1d8ba7274511b7242c1",
+  "row_count": 25,
+  "created_at": "2026-07-01T21:52:30.8003238+10:00",
+  "protocol": {
+    "purpose": "Blind factual held-out set for v2026-06 structured RAG ablation.",
+    "source_rule": "Questions were authored from processed markdown patch notes only.",
+    "forbidden_during_authoring": [
+      "data/snapshots/2026-06-official-updates/structured/change_records.json",
+      "scripts/safety_intent.py"
+    ],
+    "gold_qa": "Each gold answer was cross-checked against the evidence field, and every evidence fragment was verified to exist in the source processed_md document.",
+    "freeze_rule": "Do not tune records, prompts, thresholds, judge logic, or safety intent logic after viewing held-out results."
+  },
+  "source_docs": [
+    "DNF-2927822",
+    "DNF-2927810",
+    "DNF-2927522",
+    "DNF-2927399"
+  ]
+}
