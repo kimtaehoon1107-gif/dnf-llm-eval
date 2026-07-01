@@ -1,0 +1,4 @@
+﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
+probe_atomic_records,35,30,0.857,35,1.000,0,0,0,0.699,0.781,0.990,4.524
+probe_no_structured,35,24,0.686,35,1.000,0,0,2,0.590,0.698,0.990,4.543
+probe_structured_fix,35,32,0.914,35,1.000,0,0,0,0.717,0.789,0.990,4.729
