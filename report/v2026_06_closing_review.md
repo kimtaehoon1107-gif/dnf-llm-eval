@@ -1,7 +1,7 @@
 # 2026-06 Staged Corpus 평가 마무리 리뷰
 
 작성일: 2026-06-30
-후속 업데이트: 2026-07-01 structured fix 결과 반영
+후속 업데이트: 2026-07-01 structured fix 및 held-out factual ablation 결과 반영
 대상 브랜치: `codex/v2026-06-results`
 기준 커밋: `5fff72b Add structured v2026_06 change records`
 질문셋: `benchmark_questions_v2026_06` (20문항, staged corpus `dnf-official-updates-2026-06-staged`)
@@ -14,7 +14,7 @@
 
 `eval/v2026_06_answer_compare_summary.csv` 기준이다.
 
-주의: 2026-07-01 structured fix 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 답변 완전성 규칙을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않는다. (held-out not yet validated)
+주의: 2026-07-01 structured fix 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 답변 완전성 규칙을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다.
 
 | Run | Factual proxy | Format proxy | Refusal | Avg gold token recall | Avg latency |
 |---|---:|---:|---:|---:|---:|
@@ -30,18 +30,19 @@
 - Hybrid가 단일 retriever(BM25, BGE-M3)보다 factual proxy와 token recall 모두 높다.
 - Reranker는 검색 품질 지표(token recall 0.577)는 올리지만 factual proxy는 hybrid와 동일한 15/20이고, latency가 4.6s에서 20.9s로 약 4.5배 늘었다.
 - Structured records는 factual proxy 16/20, token recall 0.597로 최고이면서 latency는 4.273s로 가장 빠른 축에 든다.
-- 2026-07-01 structured fix에서는 snapshot shop record, change record 5건, 답변 완전성 규칙을 더해 factual proxy와 format proxy가 모두 20/20이 됐다. 상세 내역은 `report/structured_fix_iteration_v2026_06.md`를 기준으로 본다.
+- 2026-07-01 structured fix에서는 snapshot shop record, change record 5건, 답변 완전성 규칙을 더해 dev factual proxy와 format proxy가 모두 20/20이 됐다. 다만 held-out ablation에서는 record가 0/25 문항에 발동해 structured 조건 간 차이가 관찰되지 않았다. 상세 내역은 `report/structured_fix_iteration_v2026_06.md`와 `report/heldout_factual_ablation_v1.md`를 함께 본다.
 
 ## 3. 검토 질문에 대한 답
 
 ### Q1. `hybrid + structured records`를 2026-06 평가의 기본값으로 둘 만한가?
 
-그렇다. 6/30 기준으로도 같은 instruct 모델 위에서 factual proxy 최고(16/20), token recall 최고(0.597), refusal 0, latency 최저급(4.273s)을 동시에 만족하는 유일한 설정이었다. 7/1 structured fix 이후에는 factual proxy가 20/20까지 올라, 2026-06 staged corpus의 기본 생성 경로로 둘 근거가 더 강해졌다. 다만 "기본값"이라는 표현은 두 가지 의미를 분리해서 기록하는 것이 정확하다.
+그렇다. 6/30 기준으로도 같은 instruct 모델 위에서 factual proxy 최고(16/20), token recall 최고(0.597), refusal 0, latency 최저급(4.273s)을 동시에 만족하는 유일한 설정이었다. 7/1 structured fix 이후에는 dev factual proxy가 20/20까지 올랐지만, held-out에서는 record가 발동하지 않아 일반화 우위가 확인되지는 않았다. 따라서 "기본값"이라는 표현은 두 가지 의미를 분리해서 기록하는 것이 정확하다.
 
-- 자동 proxy 기준 best 설정: `hybrid + structured fix`.
+- dev 자동 proxy 기준 best 설정: `hybrid + structured fix`.
+- held-out 일반화 주장: 보류. blind held-out에서는 모든 조건이 23/25 동률이며 structured record 발동이 0/25였다.
 - 검색 품질 상한 참조용: `hybrid + reranker`. 답변 proxy 이득은 없지만 top-1 evidence hit 19/20으로 retriever 능력의 천장을 보여주는 진단 지표로 남긴다.
 
-결론은 reranker를 기본 생성 경로에서 빼고 검색 품질 레퍼런스로만 유지하라는 Codex 권고와 동일하다. 6/30의 16 대 15 차이는 표본 크기상 "동률 이상이면서 비용이 더 싸다"로 해석하는 것이 맞았고, 7/1 후속 fix는 그 structured 경로를 더 정밀하게 다듬었을 때의 개선 여지를 보여준다.
+결론은 reranker를 기본 생성 경로에서 빼고 검색 품질 레퍼런스로만 유지하라는 Codex 권고와 동일하다. 6/30의 16 대 15 차이는 표본 크기상 "동률 이상이면서 비용이 더 싸다"로 해석하는 것이 맞았고, 7/1 후속 fix는 dev set에서 structured 경로를 더 정밀하게 다듬었을 때의 개선 여지를 보여준다. 단, held-out에서는 이 record가 새 문항에 전이되지 않았으므로 extractor 또는 blind record 작성 조건에서 다시 검증해야 한다.
 
 ### Q2. structured record 매칭 규칙이 충분히 안전한가, 더 엄격해야 하는가?
 
@@ -93,10 +94,11 @@
 
 ## 4. 마무리 의사결정
 
-- 2026-06 기본 설정: `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`로 확정.
+- 2026-06 dev 기본 설정: `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`로 둔다.
+- held-out 해석: `hybrid + structured fix`의 일반화 우위는 보류한다. blind held-out에서는 record 발동 0/25와 조건 간 23/25 동률을 확인했다.
 - reranker: 검색 품질 상한 레퍼런스로 동결. 기본 생성 경로 제외.
 - false negative 및 완전성 이슈: Q003, Q010, Q013, Q014, Q018을 후속 regression으로 묶어 5/5 통과 확인.
-- 다음 단계: structured record 충돌 처리 보강, LLM-as-judge triage 도입.
+- 다음 단계: blind safety held-out, LLM-as-judge validation, held-out에 record가 실제 발동하는 blind/자동 extractor mini-test.
 - 표본 한계: 20문항 기준이므로 1~2문항 차이는 우열 단정 대신 "동률 이상 + 저비용" 프레임으로 보고한다.
 
 ## 5. 다음 작업으로의 연결

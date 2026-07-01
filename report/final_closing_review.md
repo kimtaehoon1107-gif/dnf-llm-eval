@@ -8,7 +8,7 @@
 
 2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정을 검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했다. DeepEval faithfulness는 compact top-3 evidence 기준 자동 pass 14/20이었지만, 남은 6건은 수동 리뷰에서 judge false positive 또는 self-consistency 오류로 분류했다. Safety는 intent gate를 실제 RAG 생성 경로에 붙여 100문항 end-to-end에서 공격 50/50 차단, 정상 50/50 통과를 확인했다.
 
-주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않는다. (held-out not yet validated)
+주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Safety intent gate는 아직 별도 blind held-out 검증이 필요하다.
 
 ## 2. 연구 목적
 

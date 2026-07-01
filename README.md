@@ -7,7 +7,7 @@
 
 **주요 구성:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
 
-> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않습니다. (held-out not yet validated)
+> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. 이후 factual blind held-out 25문항을 freeze해 검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었습니다. Safety intent gate는 아직 별도 blind held-out이 필요합니다.
 
 ## Project Snapshot
 
@@ -19,6 +19,7 @@
 | 검색기는 무엇을 최종 선택했나? | BGE-M3 | Top-1 evidence hit이 21 / 22로 BM25 heuristic의 19 / 22보다 높았다. |
 | 생성 모델 병목은 무엇이었나? | format proxy 9 / 22 -> 22 / 22 | 기존 `qwen3:4b`의 영어 추론/메타 발화 문제를 instruct variant로 줄였다. |
 | 최종 설정의 현실적 성능은? | factual proxy 17 / 22, 평균 5.130s | 경량 로컬 모델로 재현 가능한 수준의 답변 품질과 응답 시간을 확인했다. |
+| 2026-06 structured fix는 일반화됐나? | dev 20/20, held-out 23/25 | 높은 dev 점수를 그대로 주장하지 않고, record 비전이(9/20 -> 0/25)를 held-out으로 검출했다. |
 | Safety는 어디까지 됐나? | 명시적 공격 10 / 10, stealth 사전 차단 0 / 10 | 규칙 기반 safety gate의 효과와 한계를 분리해서 기록했다. |
 
 **읽는 법:** 이 프로젝트의 숫자는 한 가지 점수가 아니라 `검색 품질`, `답변 생성 품질`, `서비스 답변 형식`, `safety 한계`를 따로 측정한 결과입니다. 예를 들어 `BGE-M3 top-1 hit 21/22`는 검색기가 정답 근거를 잘 찾는지를 본 값이고, `최종 factual proxy 17/22`는 그 근거를 받은 LLM이 최종 답변을 얼마나 맞게 생성했는지를 본 값입니다.
@@ -438,7 +439,7 @@ python scripts\run_rag_local_llm_eval.py `
 
 아래 결과는 기존 active `benchmark_questions_v2026_05` 22문항 결과를 대체하지 않는 별도 검증이다. 2026-06 공식 업데이트 8개 문서를 staged corpus로 두고, draft 질문셋 `benchmark_questions_v2026_06` 20문항을 BM25 RAG와 `qwen3:4b-instruct-2507-q4_K_M`으로 실행했다.
 
-2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 held-out 일반화 성능으로 해석하지 않는다.
+2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다.
 
 | 범위 | 설정 | 결과 |
 |---|---|---:|
@@ -454,6 +455,8 @@ python scripts\run_rag_local_llm_eval.py `
 | Generation | Hybrid + structured fix + `qwen3:4b-instruct-2507-q4_K_M` | dev/test-informed factual proxy 20 / 20, format proxy 20 / 20, 평균 4.399s |
 
 해석은 [`report/benchmark_questions_v2026_06_design.md`](report/benchmark_questions_v2026_06_design.md)에 정리했다. BGE-M3 단독은 검색 hit과 속도는 개선했지만 factual proxy는 BM25와 같았고, hybrid 검색은 factual proxy를 15/20까지 올렸다. BGE reranker는 top-1 검색 품질과 refusal 억제는 개선했지만 생성 factual proxy는 15/20으로 동일했고 평균 지연이 크게 증가했다. 반면 patch-note change table을 구조화 record로 보강한 hybrid + structured 설정은 factual proxy를 16/20까지 올리고 평균 지연도 4.273s로 유지했다. 남은 실패 중 Q003, Q013, Q014, Q018은 token/phrase proxy의 false negative 또는 부분 답변 가능성이 있어 수동 검토가 필요하다.
+
+후속 감사 실험은 [`report/heldout_factual_ablation_v1.md`](report/heldout_factual_ablation_v1.md)에 정리했다. Blind held-out 25문항에서는 structured record가 0/25 문항에 발동해 structured on/off 토글이 사실상 no-op이었고, no-structured baseline을 포함한 모든 조건이 23/25로 동률이었다. 따라서 20/20은 dev/test-informed 개선으로만 표시하고, 이 프로젝트의 강점은 높은 점수 자체보다 freeze + manifest + ablation으로 비전이를 검출한 절차에 둔다.
 
 ## 오류 분석 요약
 
