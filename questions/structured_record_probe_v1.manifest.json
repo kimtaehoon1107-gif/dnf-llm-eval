@@ -1,0 +1,36 @@
+{
+  "question_set_id": "structured_record_probe_v1",
+  "question_file": "questions/structured_record_probe_v1.csv",
+  "sha256": "af658297f9dc5985a001b7af308c2aacd896d942e8d83eec16be1fd59a9e6094",
+  "row_count": 35,
+  "created_at": "2026-07-02T00:45:49.3573319+10:00",
+  "purpose": "Diagnostic/probe set to test whether structured data helps when records actually fire. This is not a new blind held-out set.",
+  "interpretation_rule": "Do not use this set as held-out generalization evidence. Use it to diagnose target, paraphrase, completeness, near-miss, and control behavior around existing structured records.",
+  "record_firing_dry_run": {
+    "output": "eval/structured_record_probe_v1_dry_run.csv",
+    "matched_rows": 25,
+    "total_rows": 35,
+    "unique_record_ids": [
+      "DNF-2927691-CHANGE-01",
+      "DNF-2927756-CHANGE-01",
+      "DNF-2927756-CHANGE-02",
+      "DNF-2927810-CHANGE-01",
+      "DNF-2927810-SHOP-01",
+      "DNF-2927810-SHOP-02",
+      "DNF-2927822-CHANGE-01"
+    ]
+  },
+  "design": {
+    "target_records": "Direct, paraphrase, and completeness questions targeting the 7 existing structured records.",
+    "near_miss": "Same-document or over-trigger questions that should reveal whether record matching is too broad.",
+    "controls": "Questions from documents without structured records, used to ensure normal RAG behavior is still measured."
+  },
+  "source_docs": [
+    "DNF-2927399",
+    "DNF-2927522",
+    "DNF-2927691",
+    "DNF-2927756",
+    "DNF-2927810",
+    "DNF-2927822"
+  ]
+}
