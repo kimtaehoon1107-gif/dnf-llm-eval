@@ -1,0 +1,3 @@
+﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
+after,20,17,0.850,20,1.000,0,0,0,0.608,0.753,0.983,4.178
+before,20,16,0.800,20,1.000,0,0,0,0.597,0.745,0.983,4.273

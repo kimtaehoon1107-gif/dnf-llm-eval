@@ -1,0 +1,61 @@
+[
+  {
+    "record_id": "DNF-2927810-SHOP-01",
+    "doc_id": "DNF-2927810",
+    "title": "6/25(목) 정기점검 업데이트 안내",
+    "source_post_id": "2927810",
+    "posted_date": "2026.06.24",
+    "table_type": "npc_shop_item",
+    "change_type": "new_item",
+    "npc": "전리품 상점",
+    "item_name": "검은 재앙 1개 상자(초월의 의지)",
+    "description": "사용 시 검은 재앙 1개를 획득할 수 있습니다.",
+    "trade_type": "계정귀속",
+    "carryover_text": "",
+    "price_currency": "초월의 의지",
+    "price_quantity": 50,
+    "price_text": "초월의 의지 50개",
+    "purchase_limit_period": "weekly",
+    "purchase_limit_count": 10,
+    "purchase_limit_text": "계정당 주 10회",
+    "source_relation": "전리품 상점에 신규 물품 검은 재앙 1개 상자(초월의 의지)가 추가되며, 가격은 초월의 의지 50개이고 구매 제한은 계정당 주 10회다.",
+    "match_terms": [
+      "전리품 상점",
+      "신규 물품",
+      "새로 추가",
+      "가격",
+      "구매 제한",
+      "검은 재앙 1개 상자",
+      "초월의 의지 50개",
+      "계정당 주 10회"
+    ]
+  },
+  {
+    "record_id": "DNF-2927810-SHOP-02",
+    "doc_id": "DNF-2927810",
+    "title": "6/25(목) 정기점검 업데이트 안내",
+    "source_post_id": "2927810",
+    "posted_date": "2026.06.24",
+    "table_type": "npc_shop_item",
+    "change_type": "price_adjustment",
+    "npc": "전리품 상점",
+    "item_name": "보이드 소울 2개(초월의 의지)",
+    "description": "물품 판매 가격이 조정됩니다.",
+    "trade_type": "",
+    "carryover_text": "",
+    "price_currency": "초월의 의지",
+    "price_quantity": 25,
+    "price_text": "초월의 의지 50개 → 초월의 의지 25개",
+    "purchase_limit_period": "",
+    "purchase_limit_count": null,
+    "purchase_limit_text": "",
+    "source_relation": "보이드 소울 2개(초월의 의지)의 판매 가격은 초월의 의지 50개에서 초월의 의지 25개로 조정된다.",
+    "match_terms": [
+      "보이드 소울 2개(초월의 의지)",
+      "판매 가격",
+      "가격 조정",
+      "초월의 의지 50개",
+      "초월의 의지 25개"
+    ]
+  }
+]
