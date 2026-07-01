@@ -7,7 +7,7 @@
 
 **주요 구성:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
 
-> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. 이후 factual blind held-out 25문항을 freeze해 검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었습니다. Safety intent gate는 아직 별도 blind held-out이 필요합니다.
+> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. 이후 factual blind held-out 25문항을 freeze해 검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었습니다. 별도 structured record diagnostic/probe에서는 record가 의도적으로 발동하는 조건에서 24/35 -> 30/35 -> 32/35로 개선되어, 남은 병목이 구조화 메커니즘 자체가 아니라 record coverage/extraction임을 분리했습니다. 이 probe는 held-out 일반화 근거가 아닙니다. Safety intent gate는 아직 별도 blind held-out이 필요합니다.
 
 ## Project Snapshot
 
@@ -20,6 +20,7 @@
 | 생성 모델 병목은 무엇이었나? | format proxy 9 / 22 -> 22 / 22 | 기존 `qwen3:4b`의 영어 추론/메타 발화 문제를 instruct variant로 줄였다. |
 | 최종 설정의 현실적 성능은? | factual proxy 17 / 22, 평균 5.130s | 경량 로컬 모델로 재현 가능한 수준의 답변 품질과 응답 시간을 확인했다. |
 | 2026-06 structured fix는 일반화됐나? | dev 20/20, held-out 23/25 | 높은 dev 점수를 그대로 주장하지 않고, record 비전이(9/20 -> 0/25)를 held-out으로 검출했다. |
+| record가 발동하면 구조화가 도움 되나? | diagnostic probe 24/35 -> 30/35 -> 32/35 | 새 held-out이 아니라 메커니즘 진단이다. record가 붙으면 품질은 오르지만, 다음 병목은 coverage/extractor다. |
 | Safety는 어디까지 됐나? | 명시적 공격 10 / 10, stealth 사전 차단 0 / 10 | 규칙 기반 safety gate의 효과와 한계를 분리해서 기록했다. |
 
 **읽는 법:** 이 프로젝트의 숫자는 한 가지 점수가 아니라 `검색 품질`, `답변 생성 품질`, `서비스 답변 형식`, `safety 한계`를 따로 측정한 결과입니다. 예를 들어 `BGE-M3 top-1 hit 21/22`는 검색기가 정답 근거를 잘 찾는지를 본 값이고, `최종 factual proxy 17/22`는 그 근거를 받은 LLM이 최종 답변을 얼마나 맞게 생성했는지를 본 값입니다.
@@ -135,6 +136,8 @@ flowchart LR
 | [`index.html`](index.html) | GitHub Pages 배포용 HTML 포트폴리오 첫 화면 |
 | [`report/final_closing_review.md`](report/final_closing_review.md) | 제출용 최종 요약과 최신 결과 리뷰 |
 | [`report/final_portfolio_report.md`](report/final_portfolio_report.md) | 전체 실험 과정과 결과를 정리한 통합 보고서 |
+| [`report/heldout_factual_ablation_v1.md`](report/heldout_factual_ablation_v1.md) | blind held-out 25문항과 record 비전이 감사 |
+| [`report/structured_record_probe_v1.md`](report/structured_record_probe_v1.md) | record가 실제 발동하는 조건에서 구조화 데이터 효과를 진단한 probe |
 | [`report/ablation_study_report.md`](report/ablation_study_report.md) | BGE-M3 고정 후 모델/톤/구조화 데이터 효과를 분리한 추가 실험 |
 | [`report/README.md`](report/README.md) | 보고서 폴더의 권장 읽기 순서 |
 | [`report/application_summary.md`](report/application_summary.md) | 지원서와 면접에서 바로 설명할 수 있는 요약문 |
@@ -457,6 +460,8 @@ python scripts\run_rag_local_llm_eval.py `
 해석은 [`report/benchmark_questions_v2026_06_design.md`](report/benchmark_questions_v2026_06_design.md)에 정리했다. BGE-M3 단독은 검색 hit과 속도는 개선했지만 factual proxy는 BM25와 같았고, hybrid 검색은 factual proxy를 15/20까지 올렸다. BGE reranker는 top-1 검색 품질과 refusal 억제는 개선했지만 생성 factual proxy는 15/20으로 동일했고 평균 지연이 크게 증가했다. 반면 patch-note change table을 구조화 record로 보강한 hybrid + structured 설정은 factual proxy를 16/20까지 올리고 평균 지연도 4.273s로 유지했다. 남은 실패 중 Q003, Q013, Q014, Q018은 token/phrase proxy의 false negative 또는 부분 답변 가능성이 있어 수동 검토가 필요하다.
 
 후속 감사 실험은 [`report/heldout_factual_ablation_v1.md`](report/heldout_factual_ablation_v1.md)에 정리했다. Blind held-out 25문항에서는 structured record가 0/25 문항에 발동해 structured on/off 토글이 사실상 no-op이었고, no-structured baseline을 포함한 모든 조건이 23/25로 동률이었다. 따라서 20/20은 dev/test-informed 개선으로만 표시하고, 이 프로젝트의 강점은 높은 점수 자체보다 freeze + manifest + ablation으로 비전이를 검출한 절차에 둔다.
+
+별도 진단 실험은 [`report/structured_record_probe_v1.md`](report/structured_record_probe_v1.md)에 정리했다. 이 실험은 새 held-out이 아니라 structured record가 실제로 발동하도록 만든 diagnostic/probe이며, no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. 해석은 "구조화 메커니즘은 record가 붙으면 도움이 된다"와 "blind held-out에서는 hand-authored record가 붙지 않았다"를 분리하는 것이다. 따라서 다음 개선 방향은 손으로 쓴 hint를 늘리는 것이 아니라, 원문 패치노트에서 atomic before/after/unchanged record를 blind 또는 자동으로 추출하는 coverage/extractor 검증이다.
 
 ## 오류 분석 요약
 

@@ -8,9 +8,9 @@
 
 핵심 목표는 단순 챗봇 구현이 아니라, 패치노트와 공지 문서에서 실제 유저가 물어볼 수 있는 질문을 만들고, 답변 정확성, 근거 충실성, 환각 억제, 범위 통제, 서비스 톤을 기준으로 평가 체계를 설계하는 것이다.
 
-2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 structured RAG를 재검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했고, intent safety gate는 실제 RAG 생성 경로 100문항에서 공격 50/50 차단, 정상 50/50 통과를 기록했다.
+2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 structured RAG를 재검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했고, 이후 diagnostic/probe에서는 record가 실제 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. Intent safety gate는 실제 RAG 생성 경로 100문항에서 공격 50/50 차단, 정상 50/50 통과를 기록했다.
 
-주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Safety intent gate는 아직 별도 blind held-out 검증이 필요하다.
+주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Structured record probe는 held-out 일반화 근거가 아니라 record 발동 조건에서 구조화 메커니즘을 분리한 진단으로만 해석한다. Safety intent gate는 아직 별도 blind held-out 검증이 필요하다.
 
 ## 2. 데이터 수집과 전처리
 
@@ -182,7 +182,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 | 한계 | 개선 방향 |
 |---|---|
-| 표형 정보 혼입 | structured record 우선 규칙 또는 answer template 추가 |
+| Record coverage / 표형 정보 혼입 | hand-authored record 추가보다 blind/automatic extractor로 atomic before/after/unchanged record coverage 검증 |
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
@@ -200,7 +200,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 이 프로젝트의 결론은 “가벼운 로컬 LLM도 게임 문서 QA에 사용할 수 있지만, 문서 검색, 구조화 데이터, 안전 게이트, 평가 루브릭이 함께 있어야 한다”이다.
 
-특히 RAG는 baseline보다 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수를 높였다. 생성 설정 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적이었다. 2026-06 staged corpus 후속 실험에서는 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`이 dev 20문항 factual/format proxy 20/20을 기록했지만, blind held-out ablation에서는 record 비전이(9/20 -> 0/25)와 조건 간 23/25 동률을 확인했다. 최종적으로 structured RAG와 intent safety gate를 함께 쓰는 방향을 제출용 통합 설정으로 정하되, 자동 proxy와 DeepEval judge는 수동 리뷰를 보조하는 지표로 해석한다.
+특히 RAG는 baseline보다 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수를 높였다. 생성 설정 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적이었다. 2026-06 staged corpus 후속 실험에서는 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`이 dev 20문항 factual/format proxy 20/20을 기록했지만, blind held-out ablation에서는 record 비전이(9/20 -> 0/25)와 조건 간 23/25 동률을 확인했다. 별도 structured record probe에서는 record가 실제 발동하면 24/35에서 32/35로 개선됨을 확인해, 남은 병목이 구조화 메커니즘보다 record coverage/extraction임을 분리했다. 최종적으로 structured RAG와 intent safety gate를 함께 쓰는 방향을 제출용 통합 설정으로 정하되, 자동 proxy와 DeepEval judge는 수동 리뷰를 보조하는 지표로 해석한다.
 
 ## 10. 참고문헌
 

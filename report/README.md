@@ -8,10 +8,12 @@
 |---:|---|---|
 | 1 | `final_closing_review.md` | 제출 전 최종 상태, 핵심 수치, 남은 한계를 짧게 확인 |
 | 2 | `final_portfolio_report.md` | 전체 프로젝트의 문제 정의, 실험 설계, 결과, 한계를 통합 설명 |
-| 3 | `ablation_study_report.md` | BGE-M3 고정 후 모델/톤/구조화 데이터 효과를 분리한 추가 실험 |
-| 4 | `application_summary.md` | 지원서와 면접에서 바로 말할 수 있는 요약문 |
-| 5 | `model_selection_and_benchmark_rationale.md` | Qwen3, BGE-M3, RAG 평가 지표를 선택한 이유 |
-| 6 | `references.md` | RAG 평가, 검색 모델, safety 설계 참고문헌 |
+| 3 | `heldout_factual_ablation_v1.md` | dev 20/20과 blind held-out 23/25, record 0/25 비전이 감사 |
+| 4 | `structured_record_probe_v1.md` | record가 실제 발동하는 조건에서 structured data가 도움 되는지 진단 |
+| 5 | `ablation_study_report.md` | BGE-M3 고정 후 모델/톤/구조화 데이터 효과를 분리한 추가 실험 |
+| 6 | `application_summary.md` | 지원서와 면접에서 바로 말할 수 있는 요약문 |
+| 7 | `model_selection_and_benchmark_rationale.md` | Qwen3, BGE-M3, RAG 평가 지표를 선택한 이유 |
+| 8 | `references.md` | RAG 평가, 검색 모델, safety 설계 참고문헌 |
 
 ## 2. 세부 실험 문서
 
@@ -25,12 +27,15 @@
 | `deepeval_faithfulness_manual_review.md` | DeepEval faithfulness fail 7건을 실제 생성 오류와 judge 오류로 분리한 수동 리뷰 |
 | `deepeval_compact_evidence_calibration_v2026_06.md` | Structured fix 이후 compact evidence로 DeepEval faithfulness judge를 재보정한 결과 |
 | `structured_fix_iteration_v2026_06.md` | DeepEval 수동 리뷰 후 structured 근거와 답변 완전성을 보강해 2026-06 factual proxy 20/20을 만든 재실행 결과 |
+| `heldout_factual_ablation_v1.md` | blind held-out 25문항에서 structured record가 0/25 발동했음을 확인한 감사 실험 |
+| `structured_record_probe_v1.md` | held-out이 아니라 record 발동 조건에서 structured data 효과를 분리한 diagnostic/probe |
 | `representative_manual_scoring.md` | 대표 문항을 사람이 읽을 수 있게 수동 채점한 진단 문서 |
 | `structured_data_and_safety_gate_update.md` | 상점표 구조화 데이터와 safety gate 추가 내용 |
 | `paraphrase_safety_gate_test.md` | 단순 키워드 우회 공격에 대한 보강 실험 |
 | `stealth_safety_gate_test.md` | 직접 키워드를 피한 held-out 우회 공격 실험 |
 | `safety_design_rationale.md` | rule-based safety gate를 선택한 이유와 한계 |
 | `safety_intent_e2e_gate_test.md` | intent safety gate를 실제 RAG 생성 경로에서 end-to-end 실행한 결과 |
+| `safety_heldout_instruction_v1.md` | 규칙을 보지 않은 fresh context가 blind safety held-out을 만들기 위한 실행 지시 |
 | `session_2026_07_01_structured_deepeval_safety_handoff.md` | 2026-07-01 structured fix, DeepEval compact calibration, intent safety e2e 진행 요약 |
 | `service_tone_guideline.md` | 서비스 답변 톤과 few-shot 예시 설계 |
 | `baseline_and_ablation_design.md` | baseline, RAG, structured data ablation 설계 |

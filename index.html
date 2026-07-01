@@ -468,6 +468,7 @@
           <strong>Latest audit:</strong> 2026-06 structured fix는 dev 20/20을 기록했지만,
           blind held-out에서는 structured record가 dev 9/20 문항에서는 발동했지만 held-out 25문항에서는 하나도 발동하지 않았고
           모든 ablation 조건이 23/25로 동률이었습니다. headline 숫자는 일반화 성능이 아니라 감사 대상 결과로 표시합니다.
+          <br><strong>Diagnostic probe:</strong> record가 의도적으로 발동하는 조건에서는 no structured 24/35, atomic records 30/35, structured fix 32/35로 개선되어, 남은 병목을 record coverage/extraction으로 분리했습니다.
         </p>
         <div class="quick-actions">
           <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval">GitHub Repository</a>
@@ -559,6 +560,7 @@
               <tr><th>Generator</th><td>qwen3:4b-instruct-2507-q4_K_M</td></tr>
               <tr><th>Dev Result</th><td>2026-06 structured fix는 dev/test-informed factual proxy 20/20</td></tr>
               <tr><th>Held-out Audit</th><td>record가 held-out 25문항 중 0건 발동해 조건 간 23/25 동률. 일반화 우위 주장은 보류</td></tr>
+              <tr><th>Diagnostic Probe</th><td>record 발동 조건에서는 no structured 24/35 -> atomic 30/35 -> structured fix 32/35. 일반화 근거가 아니라 메커니즘 진단</td></tr>
             </tbody></table>
           </div>
         </div>
@@ -579,6 +581,7 @@
             <tr><td>Dev structured fix</td><td>factual proxy 20 / 20</td><td>실패 분석 뒤 보강한 dev/test-informed 결과</td></tr>
             <tr><td>Blind held-out</td><td>모든 조건 23 / 25</td><td>조건 간 차이 없음. 1~2문항 차이도 아닌 완전 동률</td></tr>
             <tr><td>Record firing</td><td>dev 9 / 20, held-out 0 / 25</td><td>hand-authored record가 새 문항으로 전이되지 않음을 검출</td></tr>
+            <tr><td>Structured record probe</td><td>24 / 35 -> 30 / 35 -> 32 / 35</td><td>record가 발동하면 structured data가 도움. 남은 병목은 coverage/extraction</td></tr>
             <tr><td>Reporting rule</td><td>headline 일반화 주장 보류</td><td>높은 점수보다 점수의 신뢰 범위와 오염 가능성을 표시</td></tr>
           </tbody></table>
         </div>
@@ -605,6 +608,7 @@
           <tr><td>긴 문서 근거 누락</td><td>Non-RAG baseline은 최신 패치노트 세부 조건을 안정적으로 찾지 못했습니다.</td><td>RAG를 붙여 문서 질문 평균을 11.27에서 18.86으로 개선했습니다.</td></tr>
           <tr><td>표형 정보 혼입</td><td>상점표에서 인접 상품의 가격, 구매 제한이 섞이는 문제가 있었습니다.</td><td><code>shop_items.json</code>을 만들어 표 행 단위 근거를 별도 제공했습니다.</td></tr>
           <tr><td>Dev 점수 과신 위험</td><td>2026-06 structured fix는 dev 20/20이었지만, held-out에서는 record가 25문항 중 0건 발동했습니다.</td><td>freeze, manifest, ablation으로 dev/test-informed 결과와 held-out 일반화 주장을 분리했습니다.</td></tr>
+          <tr><td>Record coverage 병목</td><td>held-out은 record 0/25, diagnostic probe는 record 발동 시 24/35 -> 32/35였습니다.</td><td>구조화 메커니즘과 coverage 문제를 분리하고, 다음 개선을 자동 extractor 검증으로 좁혔습니다.</td></tr>
           <tr><td>서비스 답변 형식 실패</td><td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td><td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td></tr>
           <tr><td>Safety gate 우회</td><td>복합 조건 규칙은 paraphrase set을 10 / 10 차단했지만, 직접 키워드를 피한 stealth set은 0 / 10만 사전 차단했습니다.</td><td>규칙 기반 1차 필터의 한계를 기록하고, semantic classifier와 output safety check를 후속 개선으로 남겼습니다.</td></tr>
         </tbody></table>
@@ -612,11 +616,11 @@
     </section>
 
     <section>
-      <div class="shell"><div class="section-head"><div><h2>Next Extension</h2><p class="section-note">현재 결과는 offline benchmark입니다. 다음 단계는 blind 안전성 검증, judge 검증, 자동 추출기 mini-test입니다.</p></div></div>
+      <div class="shell"><div class="section-head"><div><h2>Next Extension</h2><p class="section-note">현재 결과는 offline benchmark입니다. 다음 단계는 blind 안전성 검증, judge 검증, 자동 record extractor 검증입니다.</p></div></div>
         <div class="grid">
           <article class="card"><span class="tag">Safety Held-out</span><h3>keyword vs intent 같은 세트 비교</h3><p>규칙을 보지 않은 fresh context에서 공격/정상 held-out을 만들고, 두 gate의 attack recall과 benign false positive를 같이 봅니다.</p></article>
           <article class="card"><span class="tag">Judge Validation</span><h3>자동 평가는 보조 지표로 사용</h3><p>LLM-as-a-Judge는 최종 판정자가 아니라 human label과의 일치율을 먼저 검증한 triage 도구로 둡니다.</p></article>
-          <article class="card"><span class="tag">Extractor Mini-test</span><h3>record가 실제 발동하는 조건 검증</h3><p>hand-authored hint를 늘리기 전에, held-out 문항에 blind 또는 자동 record가 붙을 때 구조화가 실제로 도움이 되는지 확인합니다.</p></article>
+          <article class="card"><span class="tag">Extractor Coverage</span><h3>자동 record 추출로 전환</h3><p>diagnostic probe로 record 발동 시 효과를 확인했으므로, 다음은 원문에서 atomic record를 blind/자동으로 추출해 coverage를 검증합니다.</p></article>
         </div>
       </div>
     </section>
@@ -626,7 +630,7 @@
         <div class="section-head">
           <div>
             <h2>Portfolio Artifacts</h2>
-            <p class="section-note">Held-out Factual Ablation, Final Closing Review, Final Portfolio Report 순서로 보는 것을 권장합니다.</p>
+            <p class="section-note">Held-out Factual Ablation, Structured Record Probe, Final Closing Review 순서로 보는 것을 권장합니다.</p>
           </div>
           <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval">GitHub Repository 보기</a>
         </div>
@@ -634,6 +638,7 @@
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_closing_review.md"><span><strong>Final Closing Review</strong><span>최종 요약과 핵심 결론</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_portfolio_report.md"><span><strong>Final Portfolio Report</strong><span>전체 실험 과정과 결과</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/heldout_factual_ablation_v1.md"><span><strong>Held-out Factual Ablation</strong><span>dev 20/20과 held-out 23/25 감사</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/structured_record_probe_v1.md"><span><strong>Structured Record Probe</strong><span>record 발동 조건에서 24/35 -> 32/35 진단</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/safety_heldout_instruction_v1.md"><span><strong>Safety Held-out Protocol</strong><span>fresh context용 blind 작성 지시</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/model_selection_and_benchmark_rationale.md"><span><strong>Model Rationale</strong><span>모델과 검색기 선택 근거</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/eval/evaluation_rubric.md"><span><strong>Evaluation Rubric</strong><span>점수 항목 + critical gate</span></span><span class="open">Open</span></a>
