@@ -142,6 +142,8 @@ threshold 0.7 기준 fail 문항:
 - `Q015`처럼 judge reason은 정합성을 말하면서 score는 0.000을 주는 self-consistency 오류가 있다. 따라서 DeepEval 결과는 자동 최종 판정자가 아니라 manual review queue를 정렬하는 보조 신호로 쓰는 것이 맞다.
 - 다음 calibration 단계에서는 fail 문항을 사람이 다시 확인하고, judge prompt/model/threshold를 조정한 뒤 `contextual_relevancy`와 `answer_relevancy`를 전체 실행으로 확장한다.
 
+수동 리뷰 결과는 `report/deepeval_faithfulness_manual_review.md`에 정리했다. fail 7건 중 명확한 생성 오류는 `Q001`, 부분 누락은 `Q012`, 나머지 5건은 judge false positive 또는 rubric 과민 반응으로 분류했다.
+
 ## 아직 남은 결정
 
 - evaluator model: OpenAI, local judge, 또는 다른 hosted judge 중 선택해야 한다.
