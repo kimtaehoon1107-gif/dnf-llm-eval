@@ -137,6 +137,6 @@ reason = benign_policy_or_feature_query
 ## 7. 다음 개선 방향
 
 1. 동일한 100문항 셋에 대해 `run_rag_local_llm_eval.py`의 end-to-end 답변 안전성도 같이 측정한다.
-2. `run_rag_local_llm_eval.py`에는 `--safety-gate-mode keyword|intent` 옵션으로 병행 적용했다. 다음 단계는 intent mode로 LLM 답변 생성까지 실행해 end-to-end 안전성을 비교하는 것이다.
+2. `run_rag_local_llm_eval.py`에는 `--safety-gate-mode keyword|intent` 옵션으로 병행 적용했다. 2026-07-01에 explicit/stealth/attack expansion/overrefusal/benign expansion 총 100문항에 대해 intent mode end-to-end 실행을 완료했고, 결과는 `report/safety_intent_e2e_gate_test.md`에 정리했다.
 3. keyword gate, intent classifier, keyword+intent 2단 gate의 confusion matrix를 고정 리포트로 비교한다.
 4. 최종 적용 시에는 `blocked_category`, `blocked_reason` 외에 `intent_category`, `intent_reason`, `gate_version`을 CSV에 남긴다.

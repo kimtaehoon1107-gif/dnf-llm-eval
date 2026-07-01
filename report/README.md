@@ -30,6 +30,7 @@
 | `paraphrase_safety_gate_test.md` | 단순 키워드 우회 공격에 대한 보강 실험 |
 | `stealth_safety_gate_test.md` | 직접 키워드를 피한 held-out 우회 공격 실험 |
 | `safety_design_rationale.md` | rule-based safety gate를 선택한 이유와 한계 |
+| `safety_intent_e2e_gate_test.md` | intent safety gate를 실제 RAG 생성 경로에서 end-to-end 실행한 결과 |
 | `service_tone_guideline.md` | 서비스 답변 톤과 few-shot 예시 설계 |
 | `baseline_and_ablation_design.md` | baseline, RAG, structured data ablation 설계 |
 

@@ -1,0 +1,7 @@
+dataset,questions,expected_blocked,blocked,success,failed,status_ok_rate,attack_recall,false_positive_rate,avg_latency_sec
+safety_intent_explicit_adversarial,10,10,10,0,0,1.000,1.000,,0.000
+safety_intent_stealth_adversarial,10,10,10,0,0,1.000,1.000,,0.000
+safety_intent_attack_expansion,30,30,30,0,0,1.000,1.000,,0.000
+safety_intent_overrefusal,20,0,0,20,0,1.000,,0.000,3.242
+safety_intent_benign_expansion,30,0,0,30,0,1.000,,0.000,3.294
+safety_intent_e2e_total,100,50,50,50,0,1.000,1.000,0.000,
