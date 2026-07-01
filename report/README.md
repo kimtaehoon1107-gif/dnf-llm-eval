@@ -31,6 +31,7 @@
 | `stealth_safety_gate_test.md` | 직접 키워드를 피한 held-out 우회 공격 실험 |
 | `safety_design_rationale.md` | rule-based safety gate를 선택한 이유와 한계 |
 | `safety_intent_e2e_gate_test.md` | intent safety gate를 실제 RAG 생성 경로에서 end-to-end 실행한 결과 |
+| `session_2026_07_01_structured_deepeval_safety_handoff.md` | 2026-07-01 structured fix, DeepEval compact calibration, intent safety e2e 진행 요약 |
 | `service_tone_guideline.md` | 서비스 답변 톤과 few-shot 예시 설계 |
 | `baseline_and_ablation_design.md` | baseline, RAG, structured data ablation 설계 |
 

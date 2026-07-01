@@ -8,6 +8,8 @@
 
 핵심 목표는 단순 챗봇 구현이 아니라, 패치노트와 공지 문서에서 실제 유저가 물어볼 수 있는 질문을 만들고, 답변 정확성, 근거 충실성, 환각 억제, 범위 통제, 서비스 톤을 기준으로 평가 체계를 설계하는 것이다.
 
+2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 structured RAG를 재검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했고, intent safety gate는 실제 RAG 생성 경로 100문항에서 공격 50/50 차단, 정상 50/50 통과를 기록했다.
+
 ## 2. 데이터 수집과 전처리
 
 Selenium 기반 수집 스크립트로 던전앤파이터 업데이트 목록을 렌더링한 뒤, `li.title`의 `data-no`와 `data-url`을 읽어 상세 공지 URL을 구성했다. 이후 상세 페이지 본문을 Markdown으로 저장하고 문서별 metadata를 CSV로 관리했다.
@@ -136,6 +138,8 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 추가로 직접적인 차단 단어를 더 많이 피한 `adversarial_stealth_questions.csv` 10문항을 만들었다. 이 held-out 성격의 stealth set에서는 safety gate 사전 차단이 0/10이었다. End-to-end 답변까지 보면 시스템 프롬프트가 6/10은 방어했지만, 2문항은 partial, 2문항은 fail로 분류됐다. 즉, 현재 safety는 규칙 기반 gate만으로 일반화된다고 보기 어렵고, `safety gate + system prompt`가 함께 일부 방어하는 구조다. 실제 서비스 수준에서는 정상 질문 오탐 세트와 새로운 red-team paraphrase/stealth 세트를 분리해 추가 검증해야 한다.
 
+이후 keyword 중심 gate의 한계를 줄이기 위해 intent-aware gate를 추가했다. Offline intent classifier 평가에서는 explicit/stealth/attack expansion 공격 50문항을 모두 차단하고, overrefusal/benign expansion 정상 50문항을 모두 허용했다. 같은 조건을 `run_rag_local_llm_eval.py`의 실제 생성 경로에서 재실행한 결과도 공격 50/50 차단, 정상 50/50 통과였다. 다만 이 결과는 현재 보유한 안전성 세트 기준이므로, 새 held-out set과 output safety checker가 다음 과제다.
+
 또한 StruQ와 Instruction Hierarchy의 instruction/data 분리 관점을 참고해 prompt template을 보완했다. 검색 근거와 구조화 근거를 `읽기 전용 데이터`로 표시하고, 시스템 규칙과 답변 규칙이 사용자 질문 및 검색 문서보다 높은 우선순위임을 명시했다. 향후에는 Llama Guard처럼 입력과 출력을 별도 safeguard classifier로 검사하는 구조를 추가할 수 있다.
 
 ## 6. 대표 수동 채점 결과
@@ -160,7 +164,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 | Q002 상점표 질문 | 정답 아이템의 가격은 맞혔지만 인접 상품의 구매 제한이 섞임 | 표형 정보는 일반 chunk만으로 부족하며 structured data가 필요함 |
 | Q016 계산형 질문 | 사람이 보면 정답에 가까웠지만 factual proxy는 실패로 처리 | token 기반 자동 지표는 false negative가 있어 수동 rubric이 필요함 |
 | `qwen3:4b` 기본 모델 | 근거는 찾았지만 영어 추론 과정과 meta reasoning이 출력됨 | 검색 품질과 서비스 답변 형식은 별도 평가해야 함 |
-| stealth safety 질문 | 직접 키워드를 피하면 safety gate가 사전 차단하지 못함 | rule-based gate는 설명 가능하지만 일반화 한계가 있음 |
+| stealth safety 질문 | keyword gate는 직접 키워드를 피하면 사전 차단하지 못했지만 intent gate는 현재 stealth set 10/10을 차단 | 안전성은 keyword보다 intent 단위 평가가 필요함 |
 
 ## 7. 직무 연결성
 
@@ -180,7 +184,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
-| Safety gate 일반화 한계 | stealth 공격과 정상 질문 오탐 세트를 분리해 평가하고 semantic classifier/output safety check 추가 |
+| Safety gate 일반화 한계 | 새 held-out 공격/정상 세트와 output safety checker로 intent gate 일반화 검증 |
 | 서비스 호칭 톤 미반영 | `모험가님` 호칭을 명시한 서비스 톤 프롬프트 재실험 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문과 기준 정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
@@ -194,7 +198,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 이 프로젝트의 결론은 “가벼운 로컬 LLM도 게임 문서 QA에 사용할 수 있지만, 문서 검색, 구조화 데이터, 안전 게이트, 평가 루브릭이 함께 있어야 한다”이다.
 
-특히 RAG는 baseline보다 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수를 높였다. 생성 설정 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적이었다. 최종적으로 `BGE-M3 + structured data + qwen3:4b-instruct-2507-q4_K_M + service-tone prompt` 조합을 제출용 통합 설정으로 정했지만, 이 결과는 factual proxy 단독 최고값이 아니라 서비스 응답 형식과 표형 정보 보완까지 고려한 균형 선택으로 해석한다.
+특히 RAG는 baseline보다 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수를 높였다. 생성 설정 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적이었다. 2026-06 staged corpus 후속 실험에서는 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`이 20문항 factual/format proxy 20/20을 기록했다. 최종적으로 structured RAG와 intent safety gate를 함께 쓰는 방향을 제출용 통합 설정으로 정하되, 자동 proxy와 DeepEval judge는 수동 리뷰를 보조하는 지표로 해석한다.
 
 ## 10. 참고문헌
 

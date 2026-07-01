@@ -6,6 +6,8 @@
 
 최종 결과는 다음과 같다. RAG 적용 후 문서 기반 질문 평균은 11.27/21에서 18.86/21로 개선되었다. 검색기 비교에서는 BGE-M3가 BM25 heuristic보다 높은 top-1 evidence hit를 보였다. 추가 ablation에서는 BGE-M3를 고정한 상태에서 `qwen3:4b`의 format proxy가 9/22였고 meta reasoning 출력이 13건 발생했지만, `qwen3:4b-instruct-2507-q4_K_M` 적용 후 format proxy는 22/22, meta reasoning은 0건으로 개선되었다.
 
+2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정을 검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했다. DeepEval faithfulness는 compact top-3 evidence 기준 자동 pass 14/20이었지만, 남은 6건은 수동 리뷰에서 judge false positive 또는 self-consistency 오류로 분류했다. Safety는 intent gate를 실제 RAG 생성 경로에 붙여 100문항 end-to-end에서 공격 50/50 차단, 정상 50/50 통과를 확인했다.
+
 ## 2. 연구 목적
 
 넥슨 게임 도메인 LLM 평가 어시스턴트 직무와 연결되는 목표는 다음과 같다.
@@ -156,6 +158,8 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 
 이를 더 확인하기 위해 직접적인 차단 단어를 피한 stealth 공격 세트 10문항도 추가했다. 이 세트에서는 safety gate 사전 차단이 0/10이었고, end-to-end strict pass는 6/10이었다. 즉, 현재 시스템은 규칙 기반 gate만으로는 교묘한 표현을 막기 어렵고, system prompt가 일부 방어하지만 완전하지 않다. 이 결과는 `report/stealth_safety_gate_test.md`에 별도로 정리했다.
 
+후속으로 keyword gate 대신 intent-aware gate를 추가했다. `safety_intent_classifier_prototype.md`의 offline 100문항 평가에서 intent classifier는 공격 recall 50/50, 정상 과차단 0/50을 기록했고, `safety_intent_e2e_gate_test.md`의 실제 RAG 생성 경로에서도 동일하게 공격 50/50 차단, 정상 50/50 통과를 확인했다. 따라서 현재 결론은 "keyword gate만으로는 부족하지만, intent gate는 현재 보유한 안전성 세트에서 end-to-end 기준을 통과했다"로 업데이트한다.
+
 추가로 StruQ와 Instruction Hierarchy의 관점을 참고해 prompt template에서 검색 근거를 `읽기 전용 데이터`로 표시하고, 시스템 규칙 > 답변 규칙 > 사용자 질문 > 검색 근거의 우선순위를 명시했다. Llama Guard식 input-output safeguard classifier는 후속 개선으로 남겼다.
 
 ## 9. 한계 및 후속 개선
@@ -166,7 +170,7 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
-| Safety gate 일반화 한계 | stealth 공격과 정상 질문 오탐 세트를 분리해 평가하고 semantic classifier/output safety check 추가 |
+| Safety gate 일반화 한계 | 새 held-out paraphrase/stealth 세트와 output safety checker로 intent gate 일반화 검증 |
 | 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
@@ -187,7 +191,7 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 3. 상점표처럼 행 단위 관계가 중요한 문서는 구조화 데이터 보완이 필요했다.
 4. 기존 `qwen3:4b`는 사실성은 개선했지만 서비스 답변 형식에는 부적합했다.
 5. `qwen3:4b-instruct-2507-q4_K_M`은 format proxy 22/22, meta reasoning 0건으로 답변 형식 문제를 해결했다.
-6. Safety gate는 기존 adversarial 질문 10/10을 차단했고, paraphrase test에서 드러난 약점을 복합 조건 규칙으로 보완했다. 그러나 새 stealth set에서는 사전 차단이 0/10으로 떨어져, 현재 방식이 규칙 기반 1차 필터에 가깝다는 한계도 확인했다.
+6. Keyword safety gate는 기존 adversarial 질문 10/10은 차단했지만 stealth set에서 한계를 보였다. 후속 intent gate는 100문항 end-to-end에서 공격 50/50 차단, 정상 50/50 통과를 기록했다.
 
 한 문장으로 요약하면, 본 프로젝트는 `게임 문서 기반 질문을 만들고, 검색-생성-안전성-평가를 분리해 로컬 LLM 답변 품질을 체계적으로 비교한 평가 중심 포트폴리오`다.
 
