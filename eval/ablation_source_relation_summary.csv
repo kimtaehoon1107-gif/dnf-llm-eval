@@ -1,0 +1,11 @@
+﻿retriever,questions,factual_proxy_pass_count,factual_proxy_pass_rate,format_proxy_pass_count,format_proxy_pass_rate,meta_reasoning_count,non_korean_cjk_count,refusal_count,avg_gold_token_recall,avg_evidence_token_recall,avg_korean_char_ratio,avg_latency_sec
+dev_atomic_completeness,20,19,0.950,20,1.000,0,0,0,0.729,0.840,0.982,4.403
+dev_atomic_no_completeness,20,19,0.950,20,1.000,0,0,0,0.716,0.838,0.983,4.428
+dev_full_completeness,20,20,1.000,20,1.000,0,0,0,0.766,0.875,0.983,4.400
+dev_full_no_completeness,20,19,0.950,20,1.000,0,0,0,0.745,0.870,0.981,4.298
+dev_no_structured,20,17,0.850,20,1.000,0,0,1,0.675,0.811,0.983,4.628
+heldout_atomic_completeness,25,23,0.920,25,1.000,0,0,0,0.727,0.877,0.992,4.073
+heldout_atomic_no_completeness,25,23,0.920,25,1.000,0,0,0,0.734,0.860,0.988,4.127
+heldout_full_completeness,25,23,0.920,25,1.000,0,0,0,0.727,0.877,0.990,4.119
+heldout_full_no_completeness,25,23,0.920,25,1.000,0,0,0,0.738,0.871,0.992,4.031
+heldout_no_structured,25,23,0.920,25,1.000,0,0,0,0.727,0.877,0.990,4.205
