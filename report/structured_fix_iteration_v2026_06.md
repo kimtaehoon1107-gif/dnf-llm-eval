@@ -26,11 +26,14 @@ DeepEval faithfulness fail 7건을 수동 리뷰한 뒤, 실제 생성 품질 �
 3. Prompt 규칙 강화
    - 구조화 근거가 있으면 `item_name`, `price`, `purchase_limit`, `before`, `after`, `unchanged` 관계를 일반 chunk보다 우선한다.
    - `patch_change` 구조화 근거의 `unchanged`가 있으면 질문이 특정 field 변경만 묻더라도 before/after와 함께 unchanged 조건도 포함하도록 했다.
-   - patch_change formatted context에 `answer_requirement`를 추가했다.
+   - patch_change formatted context에 `must_include`, `answer_hint`, `answer_requirement`를 추가했다.
+   - 단답형 값만 출력하지 않고 질문의 대상 명사, 직업명, 콘텐츠명, 아이템명, 기능 조건을 함께 답하도록 answer completeness rule을 추가했다.
 
 4. Regression 질문셋 추가
    - `questions/regression_questions_v2026_06_structured_fix.csv`
    - `Q001`, `Q012` 2문항만 포함해 빠른 재검증이 가능하게 했다.
+   - `questions/regression_questions_v2026_06_answer_completeness.csv`
+   - `Q003`, `Q010`, `Q013`, `Q014`, `Q018` 5문항을 포함해 짧은 답변/관계 누락을 빠르게 재검증한다.
 
 ## 검증 결과
 
@@ -56,7 +59,7 @@ python scripts\run_rag_local_llm_eval.py `
 | run | factual proxy | format proxy | meta reasoning | avg latency |
 |---|---:|---:|---:|---:|
 | before | 16 / 20 | 20 / 20 | 0 | 4.273s |
-| after | 17 / 20 | 20 / 20 | 0 | 4.178s |
+| after | 20 / 20 | 20 / 20 | 0 | 4.399s |
 
 Target regression:
 
@@ -65,11 +68,21 @@ Target regression:
 | `Q001` | `검은 재앙 1개 상자(초월의 의지)` 가격 `초월의 의지 50개`, 구매 제한 `계정당 주 10회`로 정상 답변 |
 | `Q012` | `12초 → 9초` 변경과 `공격력 11.5% 감소 조건 유지`를 함께 답변 |
 
+Answer completeness regression:
+
+| QID | 결과 |
+|---|---|
+| `Q003` | `프라임 스텔라 10개 → 재료를 소모하지 않음`, 경험치 소모량 유지까지 답변 |
+| `Q010` | GBL 연구소의 `보유 세트`, `보유 서약` 서비스 제거를 답변 |
+| `Q013` | 브레이커의 `격랑` 개화 옵션, 대상 스킬 `훅 샷`, `15.8% → 17.6%` 변경을 답변 |
+| `Q014` | 아라드 나침반에서 수령 가능한 보상이 있을 때 `모두 받기` 버튼으로 일괄 획득 가능함을 답변 |
+| `Q018` | 115레벨 앵커 무기 최대 내구도 `48`을 대상과 함께 답변 |
+
 부작용 확인:
 
 - factual proxy가 떨어진 문항은 없었다.
-- `Q013`은 structured `unchanged` 포함 규칙 덕분에 proxy 기준으로 추가 개선됐다.
-- 남은 proxy fail은 `Q003`, `Q014`, `Q018` 3건이다. 답변이 매우 짧아 phrase proxy가 낮게 잡힌 성격이 있어 다음 단계에서 사람이 다시 확인해야 한다.
+- 2026-06 structured fix after-run은 20문항 모두 factual proxy와 format proxy를 통과했다.
+- 다만 이 수치는 자동 proxy 기준이다. Q010, Q014처럼 의미상 맞지만 표현 차이에 민감한 문항이 있었으므로, 최종 보고에서는 proxy와 수동 리뷰를 함께 제시하는 편이 안전하다.
 
 ## 산출물
 
@@ -81,9 +94,13 @@ Target regression:
 - `eval/rag_v2026_06_structured_fix_regression_answers.manifest.json`
 - `eval/v2026_06_structured_fix_regression_answer_summary.csv`
 - `eval/v2026_06_structured_fix_regression_answer_detail.csv`
+- `eval/rag_v2026_06_answer_completeness_regression_answers.csv`
+- `eval/rag_v2026_06_answer_completeness_regression_answers.manifest.json`
+- `eval/v2026_06_answer_completeness_regression_summary.csv`
+- `eval/v2026_06_answer_completeness_regression_detail.csv`
 
 ## 다음 단계
 
-1. 남은 proxy fail `Q003`, `Q014`, `Q018`을 수동 리뷰한다.
-2. 답변이 사실상 맞지만 너무 짧아 proxy가 실패한 경우, answer proxy/rubric을 보정한다.
-3. 실제 누락이면 질문 유형별 answer completeness rule을 추가한다.
+1. DeepEval judge를 compact evidence 기반으로 다시 calibration한다.
+2. intent safety gate를 실제 LLM 답변 생성 경로에서 end-to-end 실행한다.
+3. 최종 보고서에 2026-06 structured fix 결과를 반영한다.

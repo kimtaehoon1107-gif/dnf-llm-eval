@@ -120,6 +120,14 @@ Q013은 초안에서 6/11 공지와 6/18 공지의 브레이커 `격랑` 변경�
 | Hybrid + BGE reranker + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 15 / 20 | 20 / 20 | 0 | 0 | 20.868s |
 | Hybrid + structured change records + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 16 / 20 | 20 / 20 | 0 | 0 | 4.273s |
 
+2026-07-01 후속 structured fix:
+
+| 설정 | 문항 수 | status success | factual proxy | format proxy | meta reasoning | refusal | 평균 지연 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Hybrid + structured fix + `qwen3:4b-instruct-2507-q4_K_M` | 20 | 20 / 20 | 20 / 20 | 20 / 20 | 0 | 0 | 4.399s |
+
+후속 실행은 snapshot 전용 shop structured data, patch change `unchanged` 보존, 답변 완전성 규칙을 추가한 결과다. 상세 변경과 regression 결과는 `report/structured_fix_iteration_v2026_06.md`에 기록했다.
+
 검색 proxy:
 
 | 설정 | 문항 수 | evidence hit | top-1 evidence hit | avg token recall | avg top-1 token recall |
@@ -155,7 +163,7 @@ Raw dry-run output인 `eval/v2026_06_*_full_dry_run.csv`와 manifest는 `eval/*d
 - Hybrid는 factual proxy를 15/20으로 올렸고 refusal도 3건에서 2건으로 줄였다.
 - Hybrid + BGE reranker는 top-1 evidence hit을 19/20으로 올리고 refusal을 0건으로 줄였지만, factual proxy는 15/20으로 hybrid와 같았다. 평균 지연은 20.868s로 크게 늘어, 현재 자동 proxy 기준에서는 기본 hybrid 대비 비용 대비 이득이 작다.
 - Hybrid + structured change records는 factual proxy를 16/20으로 올리고 refusal 0건, 평균 지연 4.273s를 기록했다. 현재 2026-06 staged corpus의 가장 나은 속도/정확도 균형 설정이다.
+- 2026-07-01 structured fix 후에는 같은 hybrid + structured 계열이 factual proxy 20/20, format proxy 20/20, refusal 0건을 기록했다. Q001, Q003, Q010, Q012, Q013, Q014, Q018을 별도 regression으로 묶어 재검증했다.
 - Q001, Q015는 BM25 대비 hybrid에서 개선됐다. Q017은 BGE-M3 단독에서는 실패했지만 hybrid에서는 BM25와 같이 통과했다.
 - Structured change record는 Q012를 통과로 바꿨다. `질풍` 개화 옵션의 타이드 바운드 기본 쿨타임이 12초에서 9초로 변경된다는 관계를 record로 고정한 효과다.
-- Q013도 structured 설정에서 사실상 정답에 가까운 답을 생성했지만, token/phrase proxy에서는 실패로 남았다. 답변은 `격랑` 옵션, `훅 샷`, 15.8%에서 17.6% 변경을 포함한다.
-- 남은 structured 실패 중 Q003, Q013, Q014, Q018은 답변이 부분적으로 맞거나 핵심 수치를 포함하지만 token/phrase 기반 proxy가 보수적으로 실패 처리한 false negative 가능성이 있다. 다음 단계는 이 네 문항을 수동 rubric 또는 LLM-as-judge로 분리 검토하는 것이다.
+- 6/30 structured run의 남은 실패였던 Q003, Q013, Q014, Q018은 수동 리뷰와 후속 structured fix에서 각각 원인을 분리했다. Q003/Q014는 완전성 보강 대상, Q013/Q018은 표현과 대상 명시 문제로 처리했고, 후속 run에서는 모두 proxy를 통과했다.

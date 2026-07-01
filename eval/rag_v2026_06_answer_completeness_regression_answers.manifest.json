@@ -22,9 +22,9 @@
     "no_manifest": false,
     "num_ctx": 8192,
     "num_predict": 512,
-    "output": "eval/rag_v2026_06_hybrid_structured_fix_instruct_answers.csv",
-    "question_set_id": "benchmark_questions_v2026_06",
-    "questions": "questions/benchmark_questions_v2026_06.csv",
+    "output": "eval/rag_v2026_06_answer_completeness_regression_answers.csv",
+    "question_set_id": "regression_questions_v2026_06_answer_completeness",
+    "questions": "questions/regression_questions_v2026_06_answer_completeness.csv",
     "rerank_candidates": 0,
     "reranker_batch_size": 16,
     "reranker_max_length": 512,
@@ -43,7 +43,7 @@
     "use_structured_data": true,
     "window_lines": 15
   },
-  "created_at": "2026-07-01T05:14:00.667043+00:00",
+  "created_at": "2026-07-01T05:12:00.081535+00:00",
   "dates": {
     "answer_reference_date": "2026-07-01",
     "checked_at": "2026-07-01",
@@ -56,20 +56,20 @@
     "temperature": 0.0
   },
   "git_commit": "af73051bf4ff9f890df65408f652c84c749136b7",
-  "output_csv": "eval/rag_v2026_06_hybrid_structured_fix_instruct_answers.csv",
+  "output_csv": "eval/rag_v2026_06_answer_completeness_regression_answers.csv",
   "python_version": "3.14.4",
   "questions": {
-    "bytes": 9621,
+    "bytes": 2385,
     "exists": true,
-    "id": "benchmark_questions_v2026_06",
-    "path": "questions/benchmark_questions_v2026_06.csv",
-    "row_count": 20,
-    "sha256": "eacb869b885c0aa5b22ea0de1504f2ee7982b9af9a6a351bf3ed874c7aa56ea5"
+    "id": "regression_questions_v2026_06_answer_completeness",
+    "path": "questions/regression_questions_v2026_06_answer_completeness.csv",
+    "row_count": 5,
+    "sha256": "9a290f8d544e9ba7b95e5ab49af83d98b4a891b51feb0628ee95b7de7be2108e"
   },
   "results": {
-    "row_count": 20,
+    "row_count": 5,
     "status_counts": {
-      "success": 20
+      "success": 5
     }
   },
   "run_type": "rag_local_llm_eval",

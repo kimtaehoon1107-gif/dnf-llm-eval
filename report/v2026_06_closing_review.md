@@ -1,6 +1,7 @@
 # 2026-06 Staged Corpus 평가 마무리 리뷰
 
 작성일: 2026-06-30
+후속 업데이트: 2026-07-01 structured fix 결과 반영
 대상 브랜치: `codex/v2026-06-results`
 기준 커밋: `5fff72b Add structured v2026_06 change records`
 질문셋: `benchmark_questions_v2026_06` (20문항, staged corpus `dnf-official-updates-2026-06-staged`)
@@ -20,23 +21,25 @@
 | Hybrid + instruct | 15/20 | 20/20 | 2 | 0.550 | 4.613s |
 | Hybrid + BGE reranker + instruct | 15/20 | 20/20 | 0 | 0.577 | 20.868s |
 | Hybrid + structured records + instruct | 16/20 | 20/20 | 0 | 0.597 | 4.273s |
+| Hybrid + structured fix + instruct | 20/20 | 20/20 | 0 | - | 4.399s |
 
 핵심 관찰:
 
 - Hybrid가 단일 retriever(BM25, BGE-M3)보다 factual proxy와 token recall 모두 높다.
 - Reranker는 검색 품질 지표(token recall 0.577)는 올리지만 factual proxy는 hybrid와 동일한 15/20이고, latency가 4.6s에서 20.9s로 약 4.5배 늘었다.
 - Structured records는 factual proxy 16/20, token recall 0.597로 최고이면서 latency는 4.273s로 가장 빠른 축에 든다.
+- 2026-07-01 structured fix에서는 snapshot shop record, change record 5건, 답변 완전성 규칙을 더해 factual proxy와 format proxy가 모두 20/20이 됐다. 상세 내역은 `report/structured_fix_iteration_v2026_06.md`를 기준으로 본다.
 
 ## 3. 검토 질문에 대한 답
 
 ### Q1. `hybrid + structured records`를 2026-06 평가의 기본값으로 둘 만한가?
 
-그렇다. 같은 instruct 모델 위에서 factual proxy 최고(16/20), token recall 최고(0.597), refusal 0, latency 최저급(4.273s)을 동시에 만족하는 유일한 설정이다. 다른 설정은 셋 중 하나를 희생한다. 다만 "기본값"이라는 표현은 두 가지 의미를 분리해서 기록하는 것이 정확하다.
+그렇다. 6/30 기준으로도 같은 instruct 모델 위에서 factual proxy 최고(16/20), token recall 최고(0.597), refusal 0, latency 최저급(4.273s)을 동시에 만족하는 유일한 설정이었다. 7/1 structured fix 이후에는 factual proxy가 20/20까지 올라, 2026-06 staged corpus의 기본 생성 경로로 둘 근거가 더 강해졌다. 다만 "기본값"이라는 표현은 두 가지 의미를 분리해서 기록하는 것이 정확하다.
 
-- 자동 proxy 기준 best 설정: `hybrid + structured records`.
+- 자동 proxy 기준 best 설정: `hybrid + structured fix`.
 - 검색 품질 상한 참조용: `hybrid + reranker`. 답변 proxy 이득은 없지만 top-1 evidence hit 19/20으로 retriever 능력의 천장을 보여주는 진단 지표로 남긴다.
 
-결론은 reranker를 기본 생성 경로에서 빼고 검색 품질 레퍼런스로만 유지하라는 Codex 권고와 동일하다. 다만 16 대 15라는 1문항 차이가 20문항 표본에서 나온 값이므로, "structured가 우월하다"보다 "structured가 동률 이상이면서 비용이 더 싸다"로 표현하는 것이 표본 크기에 맞다.
+결론은 reranker를 기본 생성 경로에서 빼고 검색 품질 레퍼런스로만 유지하라는 Codex 권고와 동일하다. 6/30의 16 대 15 차이는 표본 크기상 "동률 이상이면서 비용이 더 싸다"로 해석하는 것이 맞았고, 7/1 후속 fix는 그 structured 경로를 더 정밀하게 다듬었을 때의 개선 여지를 보여준다.
 
 ### Q2. structured record 매칭 규칙이 충분히 안전한가, 더 엄격해야 하는가?
 
@@ -65,6 +68,8 @@
 
 이 분석 자체가 포트폴리오의 강점 포인트다. "자동 지표가 16/20이라고 끝내지 않고, 4건의 fail을 답변 단위로 열어 false negative와 진짜 누락을 분리했다"는 흐름은 평가 담당자가 보여줘야 할 핵심 역량이다.
 
+후속 structured fix에서는 이 분류를 그대로 작업 단위로 삼았다. Q003/Q014는 구조화 record와 답변 완전성 규칙으로 보강했고, Q013/Q018은 대상 명시와 관계 표현을 강화했다. 추가로 Q010도 regression에 포함해 서비스 제거 관계를 고정했다. 결과적으로 Q003, Q010, Q013, Q014, Q018 regression은 5/5를 통과했다.
+
 ### Q4. 짧은 한국어 패치 QA에 현실적인 rubric 또는 LLM-as-judge 설계는?
 
 기존 `eval/evaluation_rubric.md`의 6항목 + 4 critical gate 구조를 그대로 재사용하되, 자동화 가능한 형태로 좁힌 LLM-as-judge를 권장한다.
@@ -86,9 +91,9 @@
 
 ## 4. 마무리 의사결정
 
-- 2026-06 기본 설정: `hybrid + structured records + qwen3:4b-instruct-2507-q4_K_M`로 확정.
+- 2026-06 기본 설정: `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`로 확정.
 - reranker: 검색 품질 상한 레퍼런스로 동결. 기본 생성 경로 제외.
-- false negative: Q013, Q018은 정답 재분류, Q014는 부분 점수, Q003은 완전성 개선 과제로 기록.
+- false negative 및 완전성 이슈: Q003, Q010, Q013, Q014, Q018을 후속 regression으로 묶어 5/5 통과 확인.
 - 다음 단계: structured record 충돌 처리 보강, LLM-as-judge triage 도입.
 - 표본 한계: 20문항 기준이므로 1~2문항 차이는 우열 단정 대신 "동률 이상 + 저비용" 프레임으로 보고한다.
 

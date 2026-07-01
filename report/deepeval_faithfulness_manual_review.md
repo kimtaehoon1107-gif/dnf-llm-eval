@@ -53,4 +53,4 @@ DeepEval 원점수만 보면 pass 13/20, fail 7/20이다. 수동 리뷰 기준�
 
 추천 진행은 `Q001`과 `Q012`를 먼저 고치는 것이다. 이 둘은 실제 RAG 답변 품질과 연결된다. 나머지 5건은 answer generation보다 judge calibration 문제에 가깝기 때문에, 생성 파이프라인 수정 전에 judge context 축약 실험으로 따로 다루는 편이 낫다.
 
-2026-07-01 후속 수정 결과는 `report/structured_fix_iteration_v2026_06.md`에 정리했다. `Q001`은 shop structured record 보강으로, `Q012`는 `unchanged` 조건 포함 규칙 강화로 목표 답변이 개선됐다.
+2026-07-01 후속 수정 결과는 `report/structured_fix_iteration_v2026_06.md`에 정리했다. `Q001`은 shop structured record 보강으로, `Q012`는 `unchanged` 조건 포함 규칙 강화로 목표 답변이 개선됐다. 이어서 Q003, Q010, Q013, Q014, Q018을 answer completeness regression으로 묶어 재검증했고, 최종 structured fix run은 factual proxy와 format proxy 모두 20/20을 통과했다.

@@ -1,5 +1,77 @@
 [
   {
+    "record_id": "DNF-2927810-CHANGE-01",
+    "record_type": "patch_change",
+    "doc_id": "DNF-2927810",
+    "title": "6/25(목) 정기점검 업데이트 안내",
+    "source_post_id": "2927810",
+    "posted_date": "2026.06.24",
+    "character": "",
+    "option_name": "빛의 서약 확정 획득",
+    "target_skill": "",
+    "field": "필요 재료",
+    "before": "프라임 스텔라 10개",
+    "after": "재료를 소모하지 않음",
+    "unchanged": "경험치 소모량은 기존과 동일",
+    "source_relation": "빛의 서약 확정 획득 진행 시 필요 재료는 프라임 스텔라 10개에서 재료를 소모하지 않음으로 변경되며, 경험치 소모량은 기존과 동일하다.",
+    "match_terms": [
+      "빛의 서약 확정 획득",
+      "필요 재료",
+      "재료",
+      "경험치 소모량",
+      "프라임 스텔라 10개",
+      "재료를 소모하지 않음"
+    ]
+  },
+  {
+    "record_id": "DNF-2927691-CHANGE-01",
+    "record_type": "patch_change",
+    "doc_id": "DNF-2927691",
+    "title": "6/11(목) 정기점검 업데이트 안내",
+    "source_post_id": "2927691",
+    "posted_date": "2026.06.10",
+    "character": "아라드 나침반",
+    "option_name": "보상 수령",
+    "target_skill": "모두 받기 버튼",
+    "field": "일괄 획득 버튼",
+    "before": "없음",
+    "after": "수령 가능한 보상이 있을 때 일괄 획득할 수 있는 '모두 받기' 버튼 추가",
+    "unchanged": "없음",
+    "source_relation": "아라드 나침반에서 수령 가능한 보상이 있다면 일괄 획득할 수 있도록 '모두 받기' 버튼이 추가된다.",
+    "match_terms": [
+      "아라드 나침반",
+      "보상 수령",
+      "수령 가능한 보상",
+      "일괄 획득",
+      "모두 받기",
+      "버튼"
+    ]
+  },
+  {
+    "record_id": "DNF-2927822-CHANGE-01",
+    "record_type": "patch_change",
+    "doc_id": "DNF-2927822",
+    "title": "6/25(목) 던파ON 업데이트 안내",
+    "source_post_id": "2927822",
+    "posted_date": "2026.06.24",
+    "character": "GBL 연구소",
+    "option_name": "무기고 조회 서비스 추가",
+    "target_skill": "보유 세트 / 보유 서약 서비스",
+    "field": "서비스 제거",
+    "before": "GBL 연구소의 보유 세트 서비스와 보유 서약 서비스",
+    "after": "제거",
+    "unchanged": "없음",
+    "source_relation": "무기고 조회 서비스 추가에 따라 GBL 연구소의 보유 세트 서비스와 보유 서약 서비스가 제거된다.",
+    "match_terms": [
+      "무기고 조회 서비스",
+      "GBL 연구소",
+      "보유 세트",
+      "보유 서약",
+      "서비스",
+      "제거"
+    ]
+  },
+  {
     "record_id": "DNF-2927756-CHANGE-01",
     "record_type": "patch_change",
     "doc_id": "DNF-2927756",
@@ -39,7 +111,7 @@
     "before": "[훅 샷] 공격력 15.8% 감소",
     "after": "[훅 샷] 공격력 17.6% 감소",
     "unchanged": "[타이드 바운드] 적 추적 범위 20% 증가, 시전 시 훅 샷 스킬의 쿨타임 초기화 / [훅 샷] 적 추적 범위 20% 증가",
-    "source_relation": "'격랑' 스킬 개화 옵션에서 대상 스킬은 훅 샷이며, 훅 샷의 공격력 감소 수치가 15.8%에서 17.6%로 변경된다.",
+    "source_relation": "브레이커의 '격랑' 스킬 개화 옵션에서 대상 스킬은 훅 샷이며, 훅 샷의 공격력 감소 수치가 15.8%에서 17.6%로 변경된다.",
     "match_terms": [
       "브레이커",
       "격랑",
