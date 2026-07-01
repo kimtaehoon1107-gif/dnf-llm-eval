@@ -144,6 +144,19 @@ threshold 0.7 기준 fail 문항:
 
 수동 리뷰 결과는 `report/deepeval_faithfulness_manual_review.md`에 정리했다. fail 7건 중 명확한 생성 오류는 `Q001`, 부분 누락은 `Q012`, 나머지 5건은 judge false positive 또는 rubric 과민 반응으로 분류했다.
 
+## 2026-07-01 compact evidence calibration
+
+Structured fix 이후 `scripts/export_deepeval_rag_cases.py`에 `--context-mode compact`와 `--compact-top-k`를 추가했다. Compact mode는 `structured_context`, 사람이 만든 `evidence`, top retrieved chunk를 합쳐 judge context를 줄인다.
+
+`eval/rag_v2026_06_hybrid_structured_fix_instruct_answers.csv` 기준 결과:
+
+| setting | context blocks avg | faithfulness pass | avg score | errors |
+|---|---:|---:|---:|---:|
+| compact top-1 | 2.45 | 12 / 20 | 0.690 | 0 |
+| compact top-3 | 4.45 | 14 / 20 | 0.735 | 0 |
+
+Top-3가 top-1보다 안정적이었다. 다만 top-3의 남은 fail 6건은 수동 리뷰에서 모두 생성 수정 대상이 아닌 judge false positive 또는 self-consistency 오류로 분류했다. 상세 내역은 `report/deepeval_compact_evidence_calibration_v2026_06.md`에 정리했다.
+
 ## 아직 남은 결정
 
 - evaluator model: OpenAI, local judge, 또는 다른 hosted judge 중 선택해야 한다.

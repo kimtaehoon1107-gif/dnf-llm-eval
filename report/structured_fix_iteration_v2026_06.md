@@ -101,6 +101,6 @@ Answer completeness regression:
 
 ## 다음 단계
 
-1. DeepEval judge를 compact evidence 기반으로 다시 calibration한다.
+1. DeepEval judge compact evidence calibration은 `report/deepeval_compact_evidence_calibration_v2026_06.md`에 완료 기록했다.
 2. intent safety gate를 실제 LLM 답변 생성 경로에서 end-to-end 실행한다.
-3. 최종 보고서에 2026-06 structured fix 결과를 반영한다.
+3. 최종 보고서에 2026-06 structured fix와 DeepEval compact calibration 결과를 반영한다.

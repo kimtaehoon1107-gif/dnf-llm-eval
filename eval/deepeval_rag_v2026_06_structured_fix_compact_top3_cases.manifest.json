@@ -1,0 +1,40 @@
+{
+  "schema_version": "deepeval_rag_case_adapter_v1",
+  "source_answers": "eval/rag_v2026_06_hybrid_structured_fix_instruct_answers.csv",
+  "output": "eval/deepeval_rag_v2026_06_structured_fix_compact_top3_cases.jsonl",
+  "case_count": 20,
+  "source_row_count": 20,
+  "skipped_non_success": 0,
+  "status_counts": {
+    "success": 20
+  },
+  "retrieval_context_blocks": {
+    "min": 4,
+    "max": 5,
+    "avg": 4.45
+  },
+  "context_mode": "compact",
+  "compact_top_k": 3,
+  "deepeval_mapping": {
+    "input": "question",
+    "actual_output": "model_answer",
+    "expected_output": "gold_answer",
+    "retrieval_context": "structured_context + metadata.gold_evidence + top retrieved context blocks",
+    "metadata.gold_evidence": "evidence"
+  },
+  "recommended_metrics": [
+    "AnswerRelevancyMetric",
+    "FaithfulnessMetric",
+    "ContextualRelevancyMetric",
+    "ContextualPrecisionMetric",
+    "ContextualRecallMetric"
+  ],
+  "deepeval_docs": [
+    "https://deepeval.com/docs/evaluation-test-cases",
+    "https://deepeval.com/docs/metrics-answer-relevancy",
+    "https://deepeval.com/docs/metrics-faithfulness",
+    "https://deepeval.com/docs/metrics-contextual-relevancy",
+    "https://deepeval.com/docs/metrics-contextual-precision",
+    "https://deepeval.com/docs/metrics-contextual-recall"
+  ]
+}

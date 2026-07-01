@@ -1,0 +1,2 @@
+﻿metric,cases,scored,passed,errors,avg_score,min_score,max_score
+faithfulness,20,20,12,0,0.690,0.000,1.000

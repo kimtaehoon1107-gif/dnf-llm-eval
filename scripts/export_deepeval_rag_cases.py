@@ -12,6 +12,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_ANSWERS = BASE_DIR / "eval" / "rag_v2026_06_hybrid_structured_instruct_answers.csv"
 DEFAULT_OUTPUT = BASE_DIR / "eval" / "deepeval_rag_v2026_06_hybrid_structured_cases.jsonl"
 SCHEMA_VERSION = "deepeval_rag_case_adapter_v1"
+CONTEXT_MODES = ("full", "compact")
 
 METADATA_COLUMNS = (
     "question_id",
@@ -74,6 +75,10 @@ def starts_context_block(line: str) -> bool:
     return stripped.startswith("[") and ("chunk_id=" in stripped or "record_id=" in stripped)
 
 
+def is_structured_block(block: str) -> bool:
+    return block.lstrip().startswith("[구조화 근거")
+
+
 def split_context_blocks(text: str) -> list[str]:
     text = (text or "").strip()
     if not text:
@@ -106,6 +111,53 @@ def full_prompt_context(row: dict[str, str]) -> str:
     return context
 
 
+def dedupe_blocks(blocks: list[str]) -> list[str]:
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for block in blocks:
+        normalized = "\n".join(line.rstrip() for line in block.strip().splitlines())
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(block.strip())
+    return deduped
+
+
+def gold_evidence_block(row: dict[str, str]) -> str:
+    evidence = row.get("evidence", "").strip()
+    if not evidence:
+        return ""
+    return f"[정답 기준 근거]\n{evidence}"
+
+
+def compact_prompt_context(row: dict[str, str], top_k_context: int) -> list[str]:
+    structured_blocks = split_context_blocks(row.get("structured_context", ""))
+    full_blocks = split_context_blocks(full_prompt_context(row))
+    chunk_blocks = [block for block in full_blocks if not is_structured_block(block)]
+
+    blocks: list[str] = []
+    blocks.extend(structured_blocks)
+
+    evidence_block = gold_evidence_block(row)
+    if evidence_block:
+        blocks.append(evidence_block)
+
+    if top_k_context > 0:
+        blocks.extend(chunk_blocks[:top_k_context])
+
+    if not blocks:
+        blocks = full_blocks[: max(top_k_context, 1)]
+    return dedupe_blocks(blocks)
+
+
+def case_context_blocks(row: dict[str, str], context_mode: str, compact_top_k: int) -> list[str]:
+    if context_mode == "full":
+        return split_context_blocks(full_prompt_context(row))
+    if context_mode == "compact":
+        return compact_prompt_context(row, compact_top_k)
+    raise ValueError(f"Unsupported context_mode: {context_mode}")
+
+
 def non_empty_metadata(row: dict[str, str]) -> dict[str, str]:
     metadata: dict[str, str] = {}
     for column in METADATA_COLUMNS:
@@ -118,10 +170,20 @@ def non_empty_metadata(row: dict[str, str]) -> dict[str, str]:
     return metadata
 
 
-def build_case(row: dict[str, str], row_number: int) -> dict[str, Any]:
+def build_case(
+    row: dict[str, str],
+    row_number: int,
+    *,
+    context_mode: str,
+    compact_top_k: int,
+) -> dict[str, Any]:
     question_id = row.get("question_id", "").strip()
     name = question_id or f"row_{row_number}"
-    context_blocks = split_context_blocks(full_prompt_context(row))
+    context_blocks = case_context_blocks(row, context_mode, compact_top_k)
+    metadata = non_empty_metadata(row)
+    metadata["context_mode"] = context_mode
+    if context_mode == "compact":
+        metadata["compact_top_k"] = str(compact_top_k)
     return {
         "schema_version": SCHEMA_VERSION,
         "name": name,
@@ -129,7 +191,7 @@ def build_case(row: dict[str, str], row_number: int) -> dict[str, Any]:
         "actual_output": row.get("model_answer", "").strip(),
         "expected_output": row.get("gold_answer", "").strip(),
         "retrieval_context": context_blocks,
-        "metadata": non_empty_metadata(row),
+        "metadata": metadata,
     }
 
 
@@ -149,6 +211,8 @@ def write_manifest(
     cases: list[dict[str, Any]],
     rows: list[dict[str, str]],
     skipped_non_success: int,
+    context_mode: str,
+    compact_top_k: int,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     status_counts = Counter(row.get("status", "").strip() or "missing" for row in rows)
@@ -166,11 +230,17 @@ def write_manifest(
             "max": max(context_sizes) if context_sizes else 0,
             "avg": round(sum(context_sizes) / len(context_sizes), 3) if context_sizes else 0,
         },
+        "context_mode": context_mode,
+        "compact_top_k": compact_top_k if context_mode == "compact" else None,
         "deepeval_mapping": {
             "input": "question",
             "actual_output": "model_answer",
             "expected_output": "gold_answer",
-            "retrieval_context": "retrieved_context split into ordered evidence blocks",
+            "retrieval_context": (
+                "retrieved_context split into ordered evidence blocks"
+                if context_mode == "full"
+                else "structured_context + metadata.gold_evidence + top retrieved context blocks"
+            ),
             "metadata.gold_evidence": "evidence",
         },
         "recommended_metrics": [
@@ -192,6 +262,8 @@ def export_cases(
     include_failed: bool,
     limit: int | None,
     fail_on_empty_context: bool,
+    context_mode: str,
+    compact_top_k: int,
 ) -> tuple[int, int]:
     rows = read_csv_rows(answers_path)
     cases: list[dict[str, Any]] = []
@@ -201,7 +273,12 @@ def export_cases(
         if not include_failed and not is_success_row(row):
             skipped_non_success += 1
             continue
-        case = build_case(row, row_number)
+        case = build_case(
+            row,
+            row_number,
+            context_mode=context_mode,
+            compact_top_k=compact_top_k,
+        )
         if fail_on_empty_context and not case["retrieval_context"]:
             raise SystemExit(f"{relative(answers_path)} row {row_number} has empty retrieval_context")
         cases.append(case)
@@ -216,6 +293,8 @@ def export_cases(
         cases=cases,
         rows=rows,
         skipped_non_success=skipped_non_success,
+        context_mode=context_mode,
+        compact_top_k=compact_top_k,
     )
     return len(cases), skipped_non_success
 
@@ -255,6 +334,18 @@ def main() -> None:
     )
     parser.add_argument("--limit", type=int, default=None, help="Export at most this many cases.")
     parser.add_argument(
+        "--context-mode",
+        choices=CONTEXT_MODES,
+        default="full",
+        help="Use full prompt context or compact evidence for retrieval_context. Defaults to full.",
+    )
+    parser.add_argument(
+        "--compact-top-k",
+        type=int,
+        default=1,
+        help="When --context-mode compact is used, include this many top retrieved chunk blocks after structured/gold evidence.",
+    )
+    parser.add_argument(
         "--fail-on-empty-context",
         action="store_true",
         help="Fail if an exported row has no retrieval_context.",
@@ -276,6 +367,8 @@ def main() -> None:
         include_failed=args.include_failed,
         limit=args.limit,
         fail_on_empty_context=args.fail_on_empty_context,
+        context_mode=args.context_mode,
+        compact_top_k=max(args.compact_top_k, 0),
     )
     print(
         "[OK] exported "

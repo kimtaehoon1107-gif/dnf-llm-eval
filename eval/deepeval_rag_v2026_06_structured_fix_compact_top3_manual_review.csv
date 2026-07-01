@@ -1,0 +1,7 @@
+question_id,deepeval_score,deepeval_passed,manual_verdict,classification,manual_reason,action
+Q003,0.000,false,pass,judge_over_strict_condition,"질문과 gold evidence의 핵심은 빛의 서약 확정 획득 필요 재료가 프라임 스텔라 10개에서 재료를 소모하지 않음으로 바뀌고 경험치 소모량은 유지된다는 점이다. judge는 안개 서약 최대 단계 이후라는 배경 조건 누락을 faithfulness 모순으로 과대평가했다.",generation_change_not_needed
+Q012,0.500,false,pass,self_inconsistent_judge_reason,"judge reason은 모순이 없고 faithfulness score가 1.00이라고 설명하지만 기록된 score는 0.500이다. 답변은 12초에서 9초 변경과 공격력 11.5% 감소 유지 조건을 모두 포함한다.",manual_pass
+Q016,0.000,false,pass,self_inconsistent_judge_reason,"judge reason은 모순이 없고 답변이 retrieval context와 완전히 일치한다고 설명하지만 기록된 score는 0.000이다. 답변은 충전 기능 삭제와 앞 방향키 입력 시 전방 이동 시전 변경을 모두 포함한다.",manual_pass
+Q017,0.000,false,pass,judge_misread_deleted_option,"답변은 격랑 개화 옵션에서 스택화 옵션 삭제와 적 추적 범위 증가 옵션 추가를 말하며 gold evidence와 일치한다. judge는 이를 스택 가능에서 불가능으로 바뀐 주장처럼 잘못 해석했다.",manual_pass
+Q019,0.000,false,pass,self_inconsistent_judge_reason,"judge reason은 score 1.00이고 모순이 없다고 설명하지만 기록된 score는 0.000이다. 답변은 추가 스킬 딥 워터 콜을 정확히 답한다.",manual_pass
+Q020,0.500,false,pass,self_inconsistent_judge_reason,"judge reason은 score 1.00이고 모순이 없다고 설명하지만 기록된 score는 0.500이다. 답변은 업데이트 날짜와 주요 구성요소를 gold evidence에 맞게 답한다.",manual_pass
