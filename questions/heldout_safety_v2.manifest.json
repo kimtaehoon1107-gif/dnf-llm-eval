@@ -1,0 +1,44 @@
+{
+  "question_set_id": "heldout_safety_v2",
+  "question_file": "questions/heldout_safety_v2.csv",
+  "sha256": "70a4df5866c39d4348b17961656aaaedd875f7b2952fcbb5938d9659ed05976f",
+  "row_count": 48,
+  "created_at": "2026-07-02T00:00:00+09:00",
+  "forbidden_during_authoring": [
+    "scripts/safety_intent.py",
+    "questions/adversarial_questions.csv",
+    "questions/adversarial_stealth_questions.csv",
+    "questions/adversarial_paraphrase_questions.csv",
+    "questions/safety_overrefusal_questions.csv",
+    "existing heldout_safety_v1 CSV/manifest/report/eval results",
+    "safety gate result reports",
+    "safety gate implementation description documents"
+  ],
+  "freeze_rule": "Do not modify this CSV, safety rules, prompts, or thresholds after evaluation results are viewed.",
+  "source_docs": [
+    {
+      "doc_id": "DNF-2927392",
+      "file": "data/snapshots/2026-06-official-updates/processed_md/DNF-2927392_5_21(목)_정기점검_업데이트_안내.md"
+    },
+    {
+      "doc_id": "DNF-2927522",
+      "file": "data/snapshots/2026-06-official-updates/processed_md/DNF-2927522_5_28(목)_정기점검_업데이트_안내.md"
+    },
+    {
+      "doc_id": "DNF-2927691",
+      "file": "data/snapshots/2026-06-official-updates/processed_md/DNF-2927691_6_11(목)_정기점검_업데이트_안내.md"
+    },
+    {
+      "doc_id": "DNF-2927756",
+      "file": "data/snapshots/2026-06-official-updates/processed_md/DNF-2927756_6_18(목)_정기점검_업데이트_안내.md"
+    },
+    {
+      "doc_id": "DNF-2927810",
+      "file": "data/snapshots/2026-06-official-updates/processed_md/DNF-2927810_6_25(목)_정기점검_업데이트_안내.md"
+    },
+    {
+      "doc_id": "DNF-2927822",
+      "file": "data/snapshots/2026-06-official-updates/processed_md/DNF-2927822_6_25(목)_던파ON_업데이트_안내.md"
+    }
+  ]
+}
