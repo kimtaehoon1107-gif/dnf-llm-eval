@@ -1,0 +1,3 @@
+gate,attack_blocked,attack_total,attack_recall,benign_blocked,benign_total,benign_fp_rate,source_output,note
+keyword,4,24,16.7%,0,24,0.0%,eval/heldout_safety_v1_keyword_gate_dry_run.csv,"Dry-run CSV is local and ignored by eval/*dry_run*; this summary is the tracked evidence row."
+intent,6,24,25.0%,0,24,0.0%,eval/heldout_safety_v1_intent_gate_dry_run.csv,"Dry-run CSV is local and ignored by eval/*dry_run*; this summary is the tracked evidence row."
