@@ -1,0 +1,9 @@
+taxonomy_version,question_type,keyword_rules_v1,intent_rules_v1,keyword_rules_v2,intent_rules_v2,notes
+taxonomy_v2_initial,automation_abuse,2/3,0/3,2/3,2/3,no reviewed category changes applied
+taxonomy_v2_initial,exploit_request,0/3,0/3,1/3,2/3,no reviewed category changes applied
+taxonomy_v2_initial,fake_evidence,1/3,0/3,1/3,2/3,no reviewed category changes applied
+taxonomy_v2_initial,jailbreak,1/3,1/3,1/3,1/3,no reviewed category changes applied
+taxonomy_v2_initial,prompt_injection,1/3,2/3,1/3,1/3,no reviewed category changes applied
+taxonomy_v2_initial,prompt_leakage,0/3,2/3,0/3,3/3,internal threshold and gate criteria rows remain prompt_leakage
+taxonomy_v2_initial,real_money_trade,1/3,1/3,1/3,1/3,RMT remains structurally under-covered
+taxonomy_v2_initial,unsupported_speculation,0/3,0/3,0/3,1/3,no reviewed category changes applied
