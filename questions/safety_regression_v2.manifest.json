@@ -1,0 +1,90 @@
+{
+  "question_set_id": "safety_regression_v2",
+  "question_file": "questions/safety_regression_v2.csv",
+  "sha256": "ffbba161414e128637aa0560a6bf473a0d961fc003bf5994feb2f743a6094b4d",
+  "row_count": 48,
+  "created_at": "2026-07-02T22:13:40+09:00",
+  "purpose": "Targeted safety regression set for development and regression testing, focused on weakness patterns observed in earlier safety evaluation results.",
+  "source_docs": [
+    {
+      "kind": "authoring_instruction",
+      "path": "C:/Users/kimdh/Documents/Codex/2026-07-02/new-chat-2/outputs/agent_C_targeted_regression_author.md"
+    },
+    {
+      "kind": "v2_gate_result",
+      "path": "C:/Users/kimdh/Documents/Codex/2026-07-02/frozen-heldout-safety-v2-freeze-commit-4/outputs/heldout_safety_v2_results.md"
+    },
+    {
+      "kind": "v2_attack_type_recall",
+      "path": "C:/Users/kimdh/Documents/Codex/2026-07-02/frozen-heldout-safety-v2-freeze-commit-4/outputs/heldout_safety_v2_attack_type_recall.csv"
+    },
+    {
+      "kind": "patch_doc_ids",
+      "doc_ids": [
+        "DNF-2927392",
+        "DNF-2927522",
+        "DNF-2927691",
+        "DNF-2927756",
+        "DNF-2927810",
+        "DNF-2927822",
+        "GLOBAL"
+      ]
+    }
+  ],
+  "design_note": "This set is a targeted regression set informed by earlier safety evaluation results. It is not claimed as a strict blind held-out set. 이 세트는 이전 평가 결과를 참고해 만든 targeted regression set이며, strict blind held-out으로 주장하지 않는다.",
+  "schema": [
+    "question_id",
+    "doc_id",
+    "question_type",
+    "difficulty",
+    "question",
+    "gold_answer",
+    "evidence",
+    "expected_behavior"
+  ],
+  "distribution": {
+    "total_rows": 48,
+    "attack_total": 24,
+    "benign_total": 24,
+    "matched_pair_count": 24,
+    "attack_by_type": {
+      "prompt_leakage": 5,
+      "fake_evidence": 5,
+      "exploit_request": 5,
+      "automation_abuse": 3,
+      "real_money_trade": 2,
+      "prompt_injection": 2,
+      "jailbreak": 1,
+      "unsupported_speculation": 1
+    },
+    "benign_by_type": {
+      "prompt_leakage": 5,
+      "fake_evidence": 5,
+      "exploit_request": 5,
+      "automation_abuse": 3,
+      "real_money_trade": 2,
+      "prompt_injection": 2,
+      "jailbreak": 1,
+      "unsupported_speculation": 1
+    },
+    "benign_by_difficulty": {
+      "benign-trigger-adjacent": 14,
+      "benign-patch-plain": 10
+    }
+  },
+  "weakness_basis": {
+    "v2_keyword_attack_recall": "33.3%",
+    "v2_intent_attack_recall": "29.2%",
+    "complete_or_major_misses": [
+      "exploit_request",
+      "fake_evidence",
+      "unsupported_speculation",
+      "prompt_leakage"
+    ]
+  },
+  "authoring_notes": [
+    "Attack rows use expected_blocked=1; benign matched-control rows use expected_blocked=0.",
+    "Each attack row has a paired benign row with the same pair_id embedded in expected_behavior.",
+    "The set intentionally references earlier results for regression hardening and must not be reported as strict blind held-out evidence."
+  ]
+}
