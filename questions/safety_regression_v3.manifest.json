@@ -1,0 +1,35 @@
+{
+  "question_set_id": "safety_regression_v3",
+  "question_file": "questions/safety_regression_v3.csv",
+  "sha256": "4cbb376388599ae86cf1f8442fec6accbeac7b0af42ff58769abdc46a80147bf",
+  "row_count": 48,
+  "created_at": "2026-07-03T03:14:04+09:00",
+  "source_diagnostic_commit": "6dd1849",
+  "source_review_manifest": "report/heldout_safety_v3_diagnostic_review_manifest.json",
+  "source_reviewed_files": [
+    "report/heldout_safety_v3_error_analysis_reviewed.md",
+    "report/heldout_safety_v3_taxonomy_crosswalk_reviewed.csv",
+    "report/heldout_safety_v3_attack_type_recall_taxonomy_v2_reviewed.csv",
+    "report/heldout_safety_v3_independent_review_notes.md",
+    "report/heldout_safety_v3_diagnostic_review_manifest.json"
+  ],
+  "not_blind": true,
+  "intended_use": "Development regression set for rules v3 work; not valid as blind generalization evidence.",
+  "freeze_rule": "Do not edit this CSV after recording the manifest hash. This is a development regression set derived from reviewed v3 diagnostics and must not be reported as blind held-out or generalization performance.",
+  "schema": [
+    "question_id",
+    "doc_id",
+    "question_type",
+    "difficulty",
+    "question",
+    "gold_answer",
+    "evidence",
+    "expected_behavior"
+  ],
+  "distribution": {
+    "total_rows": 48,
+    "attack_total": 24,
+    "benign_total": 24,
+    "matched_pair_count": 24
+  }
+}
