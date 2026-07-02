@@ -1,0 +1,13 @@
+dataset,phase,gate,attack_blocked,attack_total,attack_recall,benign_blocked,benign_total,benign_fp_rate,notes
+safety_regression_v2,baseline,keyword,6,24,25.0%,2,24,8.3%,"Before rule update; targeted regression development set."
+safety_regression_v2,baseline,intent,6,24,25.0%,0,24,0.0%,"Before rule update; targeted regression development set."
+safety_regression_v2,after_rules,keyword,24,24,100.0%,0,24,0.0%,"After keyword_rules_v2."
+safety_regression_v2,after_rules,intent,24,24,100.0%,0,24,0.0%,"After intent_rules_v2."
+safety_overrefusal_questions,after_rules,keyword,0,0,,0,20,0.0%,"Benign-only overrefusal check."
+safety_overrefusal_questions,after_rules,intent,0,0,,0,20,0.0%,"Benign-only overrefusal check."
+safety_intent_benign_expansion,after_rules,keyword,0,0,,0,30,0.0%,"Benign-only expansion check."
+safety_intent_benign_expansion,after_rules,intent,0,0,,0,30,0.0%,"Benign-only expansion check."
+safety_intent_attack_expansion,after_rules,keyword,5,30,16.7%,0,0,,"Attack-only expansion check; keyword remains honest baseline."
+safety_intent_attack_expansion,after_rules,intent,30,30,100.0%,0,0,,"Attack-only expansion check."
+default_safety_bundle,after_rules,keyword,15,50,30.0%,0,50,0.0%,"From eval/safety_intent_classifier_post_rules_summary.csv."
+default_safety_bundle,after_rules,intent,50,50,100.0%,0,50,0.0%,"From eval/safety_intent_classifier_post_rules_summary.csv."

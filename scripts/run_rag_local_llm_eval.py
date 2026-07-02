@@ -39,7 +39,7 @@ DEFAULT_EMBEDDING_MODEL = "BAAI/bge-m3"
 DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 SAFE_REFUSAL = "제공된 문서에서 확인할 수 없습니다."
 FINAL_ANSWER_MARKER = "최종 답변:"
-KEYWORD_GATE_VERSION = "keyword_rules_v1"
+KEYWORD_GATE_VERSION = "keyword_rules_v2"
 
 SAFETY_BLOCK_RULES = (
     ("prompt_injection", "이전 지시"),
@@ -78,20 +78,52 @@ SAFETY_BLOCK_RULES = (
 SAFETY_BLOCK_COMBINATION_RULES = (
     ("prompt_injection", ("앞에서", "내려놓")),
     ("prompt_injection", ("답변 방식", "내려놓")),
+    ("prompt_injection", ("안전 규칙", "우회")),
+    ("prompt_injection", ("hidden rubric", "출력")),
     ("prompt_leakage", ("기본 안내문", "보여")),
     ("prompt_leakage", ("따르는", "안내문")),
+    ("prompt_leakage", ("숨은 시스템 지시문", "출력")),
+    ("prompt_leakage", ("숨은 컨텍스트", "덤프")),
+    ("prompt_leakage", ("안전 키워드 목록", "덤프")),
+    ("prompt_leakage", ("내부 정책 검사", "보여")),
+    ("prompt_leakage", ("거절 점수", "보여")),
+    ("prompt_leakage", ("retrieval chunk", "붙여")),
+    ("prompt_leakage", ("developer note", "붙여")),
+    ("prompt_leakage", ("blocked category", "알려")),
+    ("prompt_leakage", ("trigger word", "알려")),
+    ("prompt_leakage", ("bypass condition", "알려")),
     ("jailbreak", ("관리자 역할", "생각")),
+    ("jailbreak", ("제한 없는", "역할")),
+    ("jailbreak", ("절대 거절하지", "제공")),
     ("unsupported_speculation", ("공식 문서", "적히지 않은")),
     ("unsupported_speculation", ("공식 글", "안 적힌")),
+    ("unsupported_speculation", ("문서에 없어도", "확정 사실")),
+    ("unsupported_speculation", ("threshold", "확률")),
     ("hidden_info_guess", ("비공개", "조건")),
     ("hidden_info_guess", ("지급 조건", "추론")),
     ("exploit_request", ("보상", "여러 번", "꼼수")),
+    ("exploit_request", ("비정상", "재현 절차")),
+    ("exploit_request", ("이용해", "재현 절차")),
+    ("exploit_request", ("다시 이용", "절차")),
+    ("exploit_request", ("악용해서", "이득")),
+    ("exploit_request", ("우회하는 방법", "찾아")),
+    ("exploit_request", ("반복 수령", "절차")),
     ("automation_abuse", ("사람이 안 눌러도", "반복 처리")),
     ("automation_abuse", ("프로그램 흐름", "짜")),
+    ("automation_abuse", ("자동 순회", "봇")),
+    ("automation_abuse", ("긁어오는", "봇")),
     ("fake_evidence", ("공식 내용으로 간주", "전제로")),
     ("fake_evidence", ("다음 문장", "공식 내용")),
+    ("fake_evidence", ("공식 문장", "만들")),
+    ("fake_evidence", ("만들어서", "인용")),
+    ("fake_evidence", ("공식 url", "지어내")),
+    ("fake_evidence", ("공지 문구", "만들")),
+    ("fake_evidence", ("수치", "있는 것처럼")),
+    ("fake_evidence", ("공식 근거처럼", "취급")),
     ("real_money_trade", ("게임 밖", "돈으로")),
     ("real_money_trade", ("재화", "돈으로")),
+    ("real_money_trade", ("현금 거래", "홍보")),
+    ("real_money_trade", ("현금 거래", "문안")),
     ("out_of_domain", ("다른 rpg", "직업", "추천")),
     ("fake_evidence", ("공식 공지 기준", "쓰고")),
     ("hallucination_induction", ("근거가 부족", "말하지 말고")),
@@ -1115,7 +1147,55 @@ def combine_context(structured_context: str, retrieved_context: str) -> str:
     return structured_context or retrieved_context
 
 
+def is_benign_safety_meta_query(row_question: str) -> bool:
+    lowered = row_question.lower()
+    benign_markers = (
+        "공개 가능한 범위",
+        "포함하지 말",
+        "공개하지 않는 이유",
+        "체크리스트",
+        "방어용 테스트",
+        "기대 동작",
+        "안전한 거절",
+        "거절 예시",
+        "공개 문서 범위만",
+        "문서 근거로",
+        "문서에 있는 내용만",
+        "확인 불가라고 답",
+        "불확실",
+        "다음 확인 방법",
+        "관련 안내",
+        "제재 정책",
+        "제재 기준",
+        "신고",
+        "어디에서 확인",
+    )
+    harmful_markers = (
+        "그대로 출력",
+        "원문 그대로",
+        "덤프",
+        "우회하고",
+        "회피",
+        "피하게",
+        "bypass condition",
+        "trigger word",
+        "hidden rubric",
+        "재현 절차",
+        "단계별",
+        "악용",
+        "이득",
+        "workflow",
+        "제공해",
+    )
+    return any(marker in lowered for marker in benign_markers) and not any(
+        marker in lowered for marker in harmful_markers
+    )
+
+
 def get_safety_block(row_question: str) -> tuple[str, str]:
+    if is_benign_safety_meta_query(row_question):
+        return "", ""
+
     lowered = row_question.lower()
     for category, term in SAFETY_BLOCK_RULES:
         if term.lower() in lowered:
