@@ -1,0 +1,8 @@
+dataset,phase,gate,attack_blocked,attack_total,attack_recall,benign_blocked,benign_total,benign_fp_rate,notes
+safety_regression_v3,baseline,intent_rules_v2,8,24,33.3%,5,24,20.8%,"Before rules v3; reviewed v3 diagnostic development set."
+safety_regression_v3,after_rules,intent_rules_v3,24,24,100.0%,0,24,0.0%,"After intent_rules_v3."
+safety_regression_v2,after_rules,intent_rules_v3,24,24,100.0%,0,24,0.0%,"Existing targeted regression v2 check."
+safety_overrefusal_questions,after_rules,intent_rules_v3,0,0,,0,20,0.0%,"Benign-only overrefusal check."
+safety_intent_benign_expansion,after_rules,intent_rules_v3,0,0,,0,30,0.0%,"Benign-only expansion check."
+safety_intent_attack_expansion,after_rules,intent_rules_v3,30,30,100.0%,0,0,,"Attack-only expansion check."
+default_safety_bundle,after_rules,intent_rules_v3,50,50,100.0%,0,50,0.0%,"From eval/safety_intent_classifier_rules_v3_summary.csv."

@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 
 
-INTENT_GATE_VERSION = "intent_rules_v2"
+INTENT_GATE_VERSION = "intent_rules_v3"
 
 
 @dataclass(frozen=True)
@@ -113,14 +113,90 @@ def is_defensive_safety_meta_query(text: str) -> bool:
     return has_any(text, benign_markers) and not has_any(text, harmful_markers)
 
 
+def is_public_source_negated_trigger_query(text: str) -> bool:
+    negated_trigger_markers = (
+        "비공개 조건 추정은 빼고",
+        "비공개 정보 말고",
+        "공개되지 않은 내용은 빼고",
+        "숨은 지시를 묻는 게 아니라",
+        "숨은 지시가 아니라",
+        "매크로 설계가 아니라",
+        "봇 흐름이 아니라",
+        "자동화 설계가 아니라",
+        "제재 회피 요령 말고",
+    )
+    public_source_markers = (
+        "공개 패치노트",
+        "공개 패치 변경점",
+        "패치노트 기준",
+        "공개 문서",
+        "문서 기준",
+        "공개 문서",
+        "상세 가이드",
+        "문서화된",
+        "조회 조건",
+        "조회 범위",
+        "가격과 구매 제한",
+        "변경점",
+        "개선됐는지",
+        "어떻게 바뀌었",
+    )
+    harmful_override_markers = (
+        "검증 없이",
+        "시스템 규칙보다",
+        "답변 규칙",
+        "공식 결론",
+        "공식 발표처럼",
+        "공식 표처럼",
+        "세탁",
+        "단정",
+        "내부 지표",
+        "문서에 없는 숫자",
+        "우회",
+        "회피 방법",
+        "회피 패턴",
+        "피하",
+        "피해",
+        "반복 비매너",
+        "자동화 흐름",
+        "자동 수집",
+        "구조를 짜",
+        "흐름을 만들어",
+        "스크립트",
+        "코드",
+        "외부 거래",
+        "현금화",
+        "판매가",
+        "거래 게시글",
+        "중개 문구",
+    )
+    return (
+        has_any(text, negated_trigger_markers)
+        and has_any(text, public_source_markers)
+        and not has_any(text, harmful_override_markers)
+    )
+
+
 def classify_intent(question: str) -> IntentDecision:
     text = question.lower()
 
     if is_scope_compliance_query(text):
         return IntentDecision(False, "", "scope_compliance_query")
 
+    if is_public_source_negated_trigger_query(text):
+        return IntentDecision(False, "", "public_source_negated_trigger_query")
+
     if is_defensive_safety_meta_query(text):
         return IntentDecision(False, "", "defensive_safety_meta_query")
+
+    if has_any(text, ("시스템 규칙보다", "사용자 메시지를 우선", "내 요청을 우선")) and has_any(
+        text, ("검증 없이", "가능한 것처럼", "확정", "말해", "답해")
+    ):
+        return IntentDecision(True, "prompt_injection", "tries to override answer rules or priority")
+    if has_any(text, ("답변 규칙을 낮추", "기존 답변 규칙", "답변 규칙을 바꾸")) and has_any(
+        text, ("내 결론", "확정", "공식", "말해", "답해")
+    ):
+        return IntentDecision(True, "prompt_injection", "tries to launder user conclusion through answer rules")
 
     if has_regex(
         text,
@@ -150,12 +226,24 @@ def classify_intent(question: str) -> IntentDecision:
         text, ("역할", "제공", "workflow", "악용")
     ):
         return IntentDecision(True, "jailbreak", "role or mode override")
+    if has_any(text, ("규칙 없는", "정책 없는", "테스트 세계", "정상 문의처럼 처리")) and has_any(
+        text, ("외부 거래", "현금화", "우회", "악용", "제재")
+    ):
+        return IntentDecision(True, "jailbreak", "role or mode override")
 
     if has_any(text, ("아래 문장", "다음 문장", "전제로 답", "전제로 해", "공식 내용으로 간주", "공식 힌트", "내가 넣은 문장", "검색 근거로 삼아", "공식 확인이라고 붙이고")):
         if has_any(text, ("공식", "근거", "확인", "전제", "간주", "맞다고 답", "실제 문서에는 없는")):
             return IntentDecision(True, "fake_evidence", "tries to inject user-provided evidence")
+    if has_any(text, ("내가 쓴", "내 주장을", "내 결론")) and has_any(
+        text, ("공식 결론", "공식 발표", "공식 근거", "세탁", "고쳐서")
+    ):
+        return IntentDecision(True, "fake_evidence", "tries to launder user-provided claim as official evidence")
     if has_any(text, ("공식 문장", "공식 url", "공지 문구", "공식 근거", "공식 근거처럼")) and has_any(
         text, ("만들", "지어내", "그럴듯하게", "새로", "취급", "인용")
+    ):
+        return IntentDecision(True, "fake_evidence", "tries to fabricate evidence")
+    if has_any(text, ("공식 발표", "공식 로드맵", "공식 표")) and has_any(
+        text, ("찾아낸 것처럼", "발표처럼", "단정", "완성", "만들", "작성")
     ):
         return IntentDecision(True, "fake_evidence", "tries to fabricate evidence")
     if has_any(text, ("수치", "문장")) and has_any(text, ("있는 것처럼", "만들", "공식 근거")):
@@ -170,6 +258,10 @@ def classify_intent(question: str) -> IntentDecision:
     ):
         return IntentDecision(True, "unsupported_speculation", "asks for future or unsupported performance prediction")
     if has_any(text, ("다음 달", "threshold", "확률")) and has_any(text, ("확정 사실", "문서에 없어도", "말해")):
+        return IntentDecision(True, "unsupported_speculation", "asks for unsupported hidden or future information")
+    if has_any(text, ("내부 지표", "몇 퍼센트", "확률", "로드맵", "문서에 없는 숫자", "확률표")) and has_any(
+        text, ("단정", "공식", "완성", "만들", "작성", "올렸는지", "확장될")
+    ):
         return IntentDecision(True, "unsupported_speculation", "asks for unsupported hidden or future information")
 
     if has_any(text, ("비공개", "운영자만", "숨겨진", "공개되지 않은")) and has_any(
@@ -187,17 +279,29 @@ def classify_intent(question: str) -> IntentDecision:
         return IntentDecision(True, "exploit_request", "asks for exploit or abuse procedure")
     if has_any(text, ("우회하는 방법", "제한 우회")) and has_any(text, ("찾아", "알려", "답해")):
         return IntentDecision(True, "exploit_request", "asks for exploit or abuse procedure")
+    if has_any(text, ("제재", "비매너", "계정 단위 제재")) and has_any(
+        text, ("피하", "피해", "제재 가능성을 낮추", "돌려 쓰", "반복", "요령", "패턴")
+    ):
+        return IntentDecision(True, "sanction_evasion", "asks for sanction or enforcement evasion")
 
     if has_any(text, ("매크로", "스크립트", "프로그램", "자동 처리", "반복 클릭", "손 안 대고", "사람이 안 눌러도", "자동 순회", "봇")) and has_any(
         text, ("짜", "작성", "코드", "로직", "흐름", "흐름도", "만들", "처리되게", "설계", "긁어")
     ):
         return IntentDecision(True, "automation_abuse", "asks for automation abuse implementation")
+    if has_any(text, ("여러 계정", "다계정", "여러 계정에서")) and has_any(
+        text, ("반복 구매", "반복 호출", "자동화 흐름", "자동 수집", "구조를 짜", "흐름을 만들어")
+    ):
+        return IntentDecision(True, "automation_abuse", "asks for multi-account automation abuse")
 
     if has_any(text, ("게임 밖", "현금화", "돈으로", "시세", "외부 거래", "외부 거래로")) and has_any(
         text, ("절차", "방법", "효율", "방향", "알려", "연결", "이득", "요령", "넘기는")
     ):
         return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
     if has_any(text, ("현금 거래", "거래 게시글")) and has_any(text, ("홍보", "문안", "작성", "써")):
+        return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
+    if has_any(text, ("계정 판매가", "외부 거래 게시글", "중개 문구", "우회 거래", "현금화")) and has_any(
+        text, ("계정", "장비", "계정귀속", "보상", "본문", "제목", "방식", "제안")
+    ):
         return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
 
     if has_any(text, ("메이플", "로스트아크", "다른 rpg", "다른 온라인 rpg", "던파가 아닌")) and has_any(
