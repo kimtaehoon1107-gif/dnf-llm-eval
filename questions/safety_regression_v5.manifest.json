@@ -1,0 +1,68 @@
+{
+  "question_set_id": "safety_regression_v5",
+  "question_file": "questions/safety_regression_v5.csv",
+  "csv_sha256": "3f8e2c159eae8ab98fa7a0312e1236ef9977e4c64cc71cb49d4a2a65fb5b5e62",
+  "sha256": "3f8e2c159eae8ab98fa7a0312e1236ef9977e4c64cc71cb49d4a2a65fb5b5e62",
+  "row_count": 48,
+  "attack_count": 24,
+  "benign_count": 24,
+  "matched_pair_count": 24,
+  "created_at": "2026-07-03T20:08:15+09:00",
+  "source_diagnostic_commit": "7c302a1",
+  "reviewed_base_diagnostic_commit": "b68ec4e",
+  "source_review_manifest": "report/heldout_safety_v5_diagnostic_review_manifest.json",
+  "source_reviewed_files": [
+    "report/heldout_safety_v5_error_analysis_reviewed.md",
+    "report/heldout_safety_v5_taxonomy_crosswalk_reviewed.csv",
+    "report/heldout_safety_v5_attack_type_recall_taxonomy_v2_reviewed.csv",
+    "report/heldout_safety_v5_independent_review_notes.md",
+    "report/heldout_safety_v5_diagnostic_review_manifest.json"
+  ],
+  "not_blind": true,
+  "intended_use": "Development regression set for rules v5 work; not valid as blind held-out or generalization evidence.",
+  "evaluation_run": false,
+  "gate_modified": false,
+  "official_v5_results_modified": false,
+  "freeze_rule": "Do not edit this CSV after recording the manifest hash. This is a development regression set derived from reviewed v5 diagnostics and must not be reported as blind held-out or generalization performance.",
+  "schema": [
+    "question_id",
+    "doc_id",
+    "question_type",
+    "difficulty",
+    "question",
+    "gold_answer",
+    "evidence",
+    "expected_behavior"
+  ],
+  "distribution": {
+    "total_rows": 48,
+    "attack_total": 24,
+    "benign_total": 24,
+    "matched_pair_count": 24,
+    "attack_by_taxonomy_v2": {
+      "credential_theft_or_phishing": 3,
+      "trade_scam_or_market_fraud": 3,
+      "client_or_reward_manipulation": 3,
+      "data_exfiltration_or_doxxing": 3,
+      "security_detection_evasion": 3,
+      "service_disruption_or_griefing": 3,
+      "access_or_limit_bypass": 3,
+      "automation_or_spam_abuse": 3
+    },
+    "benign_by_guard": {
+      "public_reward_price_purchase_limit_benign": 8,
+      "otp_security_guidance_benign": 2,
+      "first_server_update_notice_benign": 6,
+      "report_channel_benign": 3,
+      "dungeon_condition_hp_time_limit_benign": 5
+    }
+  },
+  "matched_pair_rule": "Each SRV5-P### pair has one attack row and one benign trigger-adjacent public-document guard row with the same pair_id encoded in expected_behavior.",
+  "notes": [
+    "Attack prompts express only request intent and avoid exploit procedures, scripts, bypass steps, phishing copy, or operational detail.",
+    "Benign prompts are matched FP guards grounded in public official documents.",
+    "No gate implementation files were modified.",
+    "No official heldout_safety_v5 result files were modified.",
+    "No evaluation run was performed while authoring this regression set."
+  ]
+}
