@@ -469,6 +469,7 @@
           blind held-out에서는 structured record가 dev 9/20 문항에서는 발동했지만 held-out 25문항에서는 하나도 발동하지 않았고
           모든 ablation 조건이 23/25로 동률이었습니다. headline 숫자는 일반화 성능이 아니라 감사 대상 결과로 표시합니다.
           <br><strong>Diagnostic probe:</strong> record가 의도적으로 발동하는 조건에서는 no structured 24/35, atomic records 30/35, structured fix 32/35로 개선되어, 남은 병목을 record coverage/extraction으로 분리했습니다.
+          <br><strong>Safety final:</strong> dev/regression 100문항의 50/50 통과와 별개로, 최종 fresh v6는 intent_rules_v5 기준 attack recall 12/24, benign FP 0/24로 보고합니다. Semantic classifier의 v6 20/24는 retrospective prototype이며 v7 이후 연구로 미룹니다.
         </p>
         <div class="quick-actions">
           <a class="button primary" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval">GitHub Repository</a>
@@ -493,6 +494,11 @@
             <div class="label">Held-out 감사</div>
             <div class="value">23 / 25</div>
             <div class="note">record 발동 dev 9/20 -> held-out 0/25</div>
+          </article>
+          <article class="stat">
+            <div class="label">Safety fresh v6</div>
+            <div class="value">12 / 24</div>
+            <div class="note">benign false positive 0 / 24</div>
           </article>
           <article class="stat">
             <div class="label">Format proxy 개선</div>
@@ -550,6 +556,7 @@
             <div class="bar-row"><span>BGE-M3 top-1 hit</span><div class="bar blue"><span style="width: 95.5%"></span></div><strong>21 / 22</strong></div>
             <div class="bar-row"><span>Final format proxy</span><div class="bar"><span style="width: 100%"></span></div><strong>22 / 22</strong></div>
             <div class="bar-row"><span>Held-out factual</span><div class="bar gold"><span style="width: 92%"></span></div><strong>23 / 25</strong></div>
+            <div class="bar-row"><span>Safety fresh v6 recall</span><div class="bar gold"><span style="width: 50%"></span></div><strong>12 / 24</strong></div>
           </div>
 
           <div class="panel">
@@ -561,6 +568,7 @@
               <tr><th>Dev Result</th><td>2026-06 structured fix는 dev/test-informed factual proxy 20/20</td></tr>
               <tr><th>Held-out Audit</th><td>record가 held-out 25문항 중 0건 발동해 조건 간 23/25 동률. 일반화 우위 주장은 보류</td></tr>
               <tr><th>Diagnostic Probe</th><td>record 발동 조건에서는 no structured 24/35 -> atomic 30/35 -> structured fix 32/35. 일반화 근거가 아니라 메커니즘 진단</td></tr>
+              <tr><th>Safety</th><td>최종 fresh v6는 intent_rules_v5 기준 12/24, FP 0/24. semantic classifier 20/24는 retrospective prototype</td></tr>
             </tbody></table>
           </div>
         </div>
@@ -597,7 +605,7 @@
           <article class="card"><span class="tag">Proxy Metrics</span><h3>factual / format proxy</h3><p>factual proxy는 답변이 기준 정답·근거의 핵심 정보를 포함하는지, format proxy는 영어 추론·메타 발화 없이 서비스 답변 형식을 지켰는지 자동 확인한 대리 지표입니다.</p></article>
           <article class="card"><span class="tag">Rubric</span><h3>수동 루브릭과 Critical Gate</h3><p>정확성, 근거성, 완전성, 의도 적합성, 표현 품질, 최신성은 점수화하고 환각/과잉추론과 중대 오류는 별도 gate로 봅니다.</p></article>
           <article class="card"><span class="tag">Structured Data</span><h3>표형 정보 보완</h3><p>상점표처럼 행 단위 관계가 중요한 정보는 JSON record로 추가 제공하되, held-out에서는 record 발동 여부까지 따로 확인했습니다.</p></article>
-          <article class="card"><span class="tag">Safety</span><h3>OOD와 공격 질문 통제</h3><p>날씨, 투자, 다른 게임, 현금화, 버그 악용, prompt leakage 질문을 범위 밖으로 제한하고, 다음 단계로 blind safety held-out을 설계했습니다.</p></article>
+          <article class="card"><span class="tag">Safety</span><h3>OOD와 공격 질문 통제</h3><p>날씨, 투자, 다른 게임, 현금화, 버그 악용, prompt leakage 질문을 범위 밖으로 제한하고, regression 결과와 fresh v6 결과를 분리해 보고했습니다.</p></article>
         </div>
       </div>
     </section>
@@ -610,17 +618,17 @@
           <tr><td>Dev 점수 과신 위험</td><td>2026-06 structured fix는 dev 20/20이었지만, held-out에서는 record가 25문항 중 0건 발동했습니다.</td><td>freeze, manifest, ablation으로 dev/test-informed 결과와 held-out 일반화 주장을 분리했습니다.</td></tr>
           <tr><td>Record coverage 병목</td><td>held-out은 record 0/25, diagnostic probe는 record 발동 시 24/35 -> 32/35였습니다.</td><td>구조화 메커니즘과 coverage 문제를 분리하고, 다음 개선을 자동 extractor 검증으로 좁혔습니다.</td></tr>
           <tr><td>서비스 답변 형식 실패</td><td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td><td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td></tr>
-          <tr><td>Safety gate 우회</td><td>복합 조건 규칙은 paraphrase set을 10 / 10 차단했지만, 직접 키워드를 피한 stealth set은 0 / 10만 사전 차단했습니다.</td><td>규칙 기반 1차 필터의 한계를 기록하고, semantic classifier와 output safety check를 후속 개선으로 남겼습니다.</td></tr>
+          <tr><td>Safety gate 우회</td><td>dev/regression에서는 intent gate가 50 / 50을 통과했지만, 최종 fresh v6에서는 12 / 24, FP 0 / 24였습니다.</td><td>높은 regression 수치를 headline으로 쓰지 않고, backward compatibility 90 / 120과 fresh v6 12 / 24를 분리해 보고했습니다.</td></tr>
         </tbody></table>
       </div>
     </section>
 
     <section>
-      <div class="shell"><div class="section-head"><div><h2>Next Extension</h2><p class="section-note">현재 결과는 offline benchmark입니다. 다음 단계는 blind 안전성 검증, judge 검증, 자동 record extractor 검증입니다.</p></div></div>
+      <div class="shell"><div class="section-head"><div><h2>Future Work</h2><p class="section-note">v7 설계와 모델/규칙 개선은 이번 제출 범위 밖으로 미루고, 현재 문서는 결과 전달력과 감사 가능성을 우선합니다.</p></div></div>
         <div class="grid">
-          <article class="card"><span class="tag">Safety Held-out</span><h3>keyword vs intent 같은 세트 비교</h3><p>규칙을 보지 않은 fresh context에서 공격/정상 held-out을 만들고, 두 gate의 attack recall과 benign false positive를 같이 봅니다.</p></article>
+          <article class="card"><span class="tag">Safety v7</span><h3>사전등록 semantic gate 검증</h3><p>semantic classifier는 retrospective prototype으로만 보고, 다음 라운드에서 사전등록한 fresh 세트로 keyword/intent/semantic을 비교합니다.</p></article>
           <article class="card"><span class="tag">Judge Validation</span><h3>자동 평가는 보조 지표로 사용</h3><p>LLM-as-a-Judge는 최종 판정자가 아니라 human label과의 일치율을 먼저 검증한 triage 도구로 둡니다.</p></article>
-          <article class="card"><span class="tag">Extractor Coverage</span><h3>자동 record 추출로 전환</h3><p>diagnostic probe로 record 발동 시 효과를 확인했으므로, 다음은 원문에서 atomic record를 blind/자동으로 추출해 coverage를 검증합니다.</p></article>
+          <article class="card"><span class="tag">Extractor Coverage</span><h3>자동 record 추출로 전환</h3><p>diagnostic probe로 record 발동 시 효과를 확인했으므로, 다음 연구는 원문에서 atomic record를 blind/자동으로 추출하는 coverage 검증입니다.</p></article>
         </div>
       </div>
     </section>
@@ -639,7 +647,9 @@
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/final_portfolio_report.md"><span><strong>Final Portfolio Report</strong><span>전체 실험 과정과 결과</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/heldout_factual_ablation_v1.md"><span><strong>Held-out Factual Ablation</strong><span>dev 20/20과 held-out 23/25 감사</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/structured_record_probe_v1.md"><span><strong>Structured Record Probe</strong><span>record 발동 조건에서 24/35 -> 32/35 진단</span></span><span class="open">Open</span></a>
-          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/safety_heldout_instruction_v1.md"><span><strong>Safety Held-out Protocol</strong><span>fresh context용 blind 작성 지시</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/safety_eval_final_report_v6.md"><span><strong>Safety Final Report v6</strong><span>fresh v6 12/24, FP 0/24 최종 보고</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/safety_eval_process_summary_for_main_project.md"><span><strong>Safety Process Summary</strong><span>v1~v6 개선 라운드와 감사 추적</span></span><span class="open">Open</span></a>
+          <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/docs/PROJECT_REVIEW_BRIEF.md"><span><strong>Project Review Brief</strong><span>리뷰어용 한 장 요약</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/report/model_selection_and_benchmark_rationale.md"><span><strong>Model Rationale</strong><span>모델과 검색기 선택 근거</span></span><span class="open">Open</span></a>
           <a class="artifact" href="https://github.com/kimtaehoon1107-gif/dnf-llm-eval/blob/main/eval/evaluation_rubric.md"><span><strong>Evaluation Rubric</strong><span>점수 항목 + critical gate</span></span><span class="open">Open</span></a>
         </div>

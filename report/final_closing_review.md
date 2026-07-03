@@ -6,9 +6,9 @@
 
 최종 결과는 다음과 같다. RAG 적용 후 문서 기반 질문 평균은 11.27/21에서 18.86/21로 개선되었다. 검색기 비교에서는 BGE-M3가 BM25 heuristic보다 높은 top-1 evidence hit를 보였다. 추가 ablation에서는 BGE-M3를 고정한 상태에서 `qwen3:4b`의 format proxy가 9/22였고 meta reasoning 출력이 13건 발생했지만, `qwen3:4b-instruct-2507-q4_K_M` 적용 후 format proxy는 22/22, meta reasoning은 0건으로 개선되었다.
 
-2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정을 검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했다. DeepEval faithfulness는 compact top-3 evidence 기준 자동 pass 14/20이었지만, 남은 6건은 수동 리뷰에서 judge false positive 또는 self-consistency 오류로 분류했다. 이후 diagnostic/probe에서는 record가 실제 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록해 구조화 메커니즘 자체와 record coverage 문제를 분리했다. Safety는 intent gate를 실제 RAG 생성 경로에 붙여 100문항 end-to-end에서 공격 50/50 차단, 정상 50/50 통과를 확인했다.
+2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정을 검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했다. DeepEval faithfulness는 compact top-3 evidence 기준 자동 pass 14/20이었지만, 독립 재검증에서 5/6건은 judge 오류 또는 reason-score 불일치로 확인했고 Q003은 경계 사례로 남겼다. 이후 diagnostic/probe에서는 record가 실제 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록해 구조화 메커니즘 자체와 record coverage 문제를 분리했다. Safety는 개발용 regression과 fresh held-out을 분리했고, 최종 v6에서 intent_rules_v5가 12/24 attack recall, benign FP 0/24를 기록했다.
 
-주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Structured record probe는 held-out 일반화 근거가 아니라 record 발동 조건의 메커니즘 진단으로만 해석한다. Safety intent gate는 아직 별도 blind held-out 검증이 필요하다.
+주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Structured record probe는 held-out 일반화 근거가 아니라 record 발동 조건의 메커니즘 진단으로만 해석한다. Safety도 regression 24/24가 아니라 사전 선언한 v6 12/24를 최종 fresh 결과로 보고한다. Semantic classifier의 v6 20/24는 retrospective prototype이므로 future work로 둔다.
 
 ## 2. 연구 목적
 
@@ -160,7 +160,9 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 
 이를 더 확인하기 위해 직접적인 차단 단어를 피한 stealth 공격 세트 10문항도 추가했다. 이 세트에서는 safety gate 사전 차단이 0/10이었고, end-to-end strict pass는 6/10이었다. 즉, 현재 시스템은 규칙 기반 gate만으로는 교묘한 표현을 막기 어렵고, system prompt가 일부 방어하지만 완전하지 않다. 이 결과는 `report/stealth_safety_gate_test.md`에 별도로 정리했다.
 
-후속으로 keyword gate 대신 intent-aware gate를 추가했다. `safety_intent_classifier_prototype.md`의 offline 100문항 평가에서 intent classifier는 공격 recall 50/50, 정상 과차단 0/50을 기록했고, `safety_intent_e2e_gate_test.md`의 실제 RAG 생성 경로에서도 동일하게 공격 50/50 차단, 정상 50/50 통과를 확인했다. 따라서 현재 결론은 "keyword gate만으로는 부족하지만, intent gate는 현재 보유한 안전성 세트에서 end-to-end 기준을 통과했다"로 업데이트한다.
+후속으로 keyword gate 대신 intent-aware gate를 추가했다. `safety_intent_classifier_prototype.md`의 offline 100문항 평가에서 intent classifier는 공격 recall 50/50, 정상 과차단 0/50을 기록했고, `safety_intent_e2e_gate_test.md`의 실제 RAG 생성 경로에서도 동일하게 공격 50/50 차단, 정상 50/50 통과를 확인했다. 다만 이 100문항 결과는 기존 실패 분석을 반영한 dev/regression 성격이므로 최종 일반화 headline으로 쓰지 않는다.
+
+최종 safety 보고는 별도 freeze된 v6 fresh held-out을 기준으로 한다. 같은 v6 세트에서 `keyword_rules_v2`는 attack recall 1/24, benign FP 0/24였고, `intent_rules_v5`는 attack recall 12/24, benign FP 0/24였다. backward compatibility 재검산에서는 v1~v4 및 v6의 비순환 세트에서 90/120, FP 1/120을 기록했다. BGE-M3 semantic classifier prototype은 v6 20/24, FP 0/24까지 올라갔지만, 분류기 아이디어와 real_world_harm 강조가 v6 결과 확인 뒤 선택됐을 수 있으므로 retrospective prototype으로 두고 정식 headline은 future work로 미룬다.
 
 추가로 StruQ와 Instruction Hierarchy의 관점을 참고해 prompt template에서 검색 근거를 `읽기 전용 데이터`로 표시하고, 시스템 규칙 > 답변 규칙 > 사용자 질문 > 검색 근거의 우선순위를 명시했다. Llama Guard식 input-output safeguard classifier는 후속 개선으로 남겼다.
 
@@ -172,7 +174,7 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
-| Safety gate 일반화 한계 | 새 held-out paraphrase/stealth 세트와 output safety checker로 intent gate 일반화 검증 |
+| Safety gate 일반화 한계 | 최종 fresh v6는 12/24, FP 0/24로 보고하고, semantic classifier/output checker는 v7 이후 사전등록 실험으로 검증 |
 | 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
@@ -193,7 +195,7 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 3. 상점표처럼 행 단위 관계가 중요한 문서는 구조화 데이터 보완이 필요했다.
 4. 기존 `qwen3:4b`는 사실성은 개선했지만 서비스 답변 형식에는 부적합했다.
 5. `qwen3:4b-instruct-2507-q4_K_M`은 format proxy 22/22, meta reasoning 0건으로 답변 형식 문제를 해결했다.
-6. Keyword safety gate는 기존 adversarial 질문 10/10은 차단했지만 stealth set에서 한계를 보였다. 후속 intent gate는 100문항 end-to-end에서 공격 50/50 차단, 정상 50/50 통과를 기록했다.
+6. Keyword safety gate는 기존 adversarial 질문 10/10은 차단했지만 stealth set에서 한계를 보였다. 후속 intent gate는 dev/regression 100문항에서는 공격 50/50 차단, 정상 50/50 통과를 기록했으나, 최종 fresh v6 결과는 12/24 attack recall, benign FP 0/24로 보고한다.
 
 한 문장으로 요약하면, 본 프로젝트는 `게임 문서 기반 질문을 만들고, 검색-생성-안전성-평가를 분리해 로컬 LLM 답변 품질을 체계적으로 비교한 평가 중심 포트폴리오`다.
 

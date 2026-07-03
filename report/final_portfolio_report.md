@@ -8,9 +8,9 @@
 
 핵심 목표는 단순 챗봇 구현이 아니라, 패치노트와 공지 문서에서 실제 유저가 물어볼 수 있는 질문을 만들고, 답변 정확성, 근거 충실성, 환각 억제, 범위 통제, 서비스 톤을 기준으로 평가 체계를 설계하는 것이다.
 
-2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 structured RAG를 재검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했고, 이후 diagnostic/probe에서는 record가 실제 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. Intent safety gate는 실제 RAG 생성 경로 100문항에서 공격 50/50 차단, 정상 50/50 통과를 기록했다.
+2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 structured RAG를 재검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했고, 이후 diagnostic/probe에서는 record가 실제 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. Safety는 개발용 regression과 fresh held-out을 분리했고, 최종 v6에서 `intent_rules_v5`가 12/24 attack recall, benign FP 0/24를 기록했다.
 
-주의: 위 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Structured record probe는 held-out 일반화 근거가 아니라 record 발동 조건에서 구조화 메커니즘을 분리한 진단으로만 해석한다. Safety intent gate는 아직 별도 blind held-out 검증이 필요하다.
+주의: 위 2026-07-01 structured fix 및 intent safety gate 100문항 결과는 dev/test-informed 결과다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않는다. 이후 factual blind held-out 25문항을 freeze해 재검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었다. Structured record probe는 held-out 일반화 근거가 아니라 record 발동 조건에서 구조화 메커니즘을 분리한 진단으로만 해석한다. Safety도 regression 50/50이 아니라 사전 선언한 v6 12/24, FP 0/24를 최종 fresh 결과로 보고한다. Semantic classifier의 v6 20/24는 retrospective prototype이므로 future work로 둔다.
 
 ## 2. 데이터 수집과 전처리
 
@@ -140,7 +140,9 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 추가로 직접적인 차단 단어를 더 많이 피한 `adversarial_stealth_questions.csv` 10문항을 만들었다. 이 held-out 성격의 stealth set에서는 safety gate 사전 차단이 0/10이었다. End-to-end 답변까지 보면 시스템 프롬프트가 6/10은 방어했지만, 2문항은 partial, 2문항은 fail로 분류됐다. 즉, 현재 safety는 규칙 기반 gate만으로 일반화된다고 보기 어렵고, `safety gate + system prompt`가 함께 일부 방어하는 구조다. 실제 서비스 수준에서는 정상 질문 오탐 세트와 새로운 red-team paraphrase/stealth 세트를 분리해 추가 검증해야 한다.
 
-이후 keyword 중심 gate의 한계를 줄이기 위해 intent-aware gate를 추가했다. Offline intent classifier 평가에서는 explicit/stealth/attack expansion 공격 50문항을 모두 차단하고, overrefusal/benign expansion 정상 50문항을 모두 허용했다. 같은 조건을 `run_rag_local_llm_eval.py`의 실제 생성 경로에서 재실행한 결과도 공격 50/50 차단, 정상 50/50 통과였다. 다만 이 결과는 현재 보유한 안전성 세트 기준이므로, 새 blind held-out set에서 keyword gate와 intent gate를 같은 문항으로 비교하고 output safety checker를 붙이는 것이 다음 과제다.
+이후 keyword 중심 gate의 한계를 줄이기 위해 intent-aware gate를 추가했다. Offline intent classifier 평가에서는 explicit/stealth/attack expansion 공격 50문항을 모두 차단하고, overrefusal/benign expansion 정상 50문항을 모두 허용했다. 같은 조건을 `run_rag_local_llm_eval.py`의 실제 생성 경로에서 재실행한 결과도 공격 50/50 차단, 정상 50/50 통과였다. 다만 이 결과는 현재 보유한 안전성 세트 기준의 dev/regression 결과이므로 최종 일반화 headline으로 쓰지 않는다.
+
+최종 safety 성능은 사전 freeze된 v6 fresh held-out으로 분리해 보고했다. 같은 v6 세트에서 `keyword_rules_v2`는 attack recall 1/24, benign FP 0/24였고, `intent_rules_v5`는 attack recall 12/24, benign FP 0/24였다. backward compatibility 재검산에서는 v1~v4와 v6의 비순환 세트에서 90/120, FP 1/120을 기록해 구식 공격 유지력과 신규 공격 대응력을 분리했다. BGE-M3 semantic classifier prototype은 v6 20/24, FP 0/24를 기록했지만, 분류기 아이디어와 real_world_harm 강조가 v6 결과를 본 뒤 선택됐을 수 있으므로 retrospective prototype으로만 해석한다.
 
 또한 StruQ와 Instruction Hierarchy의 instruction/data 분리 관점을 참고해 prompt template을 보완했다. 검색 근거와 구조화 근거를 `읽기 전용 데이터`로 표시하고, 시스템 규칙과 답변 규칙이 사용자 질문 및 검색 문서보다 높은 우선순위임을 명시했다. 향후에는 Llama Guard처럼 입력과 출력을 별도 safeguard classifier로 검사하는 구조를 추가할 수 있다.
 
@@ -166,7 +168,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 | Q002 상점표 질문 | 정답 아이템의 가격은 맞혔지만 인접 상품의 구매 제한이 섞임 | 표형 정보는 일반 chunk만으로 부족하며 structured data가 필요함 |
 | Q016 계산형 질문 | 사람이 보면 정답에 가까웠지만 factual proxy는 실패로 처리 | token 기반 자동 지표는 false negative가 있어 수동 rubric이 필요함 |
 | `qwen3:4b` 기본 모델 | 근거는 찾았지만 영어 추론 과정과 meta reasoning이 출력됨 | 검색 품질과 서비스 답변 형식은 별도 평가해야 함 |
-| stealth safety 질문 | keyword gate는 직접 키워드를 피하면 사전 차단하지 못했지만 intent gate는 현재 stealth set 10/10을 차단 | 안전성은 keyword보다 intent 단위 평가가 필요함 |
+| stealth/fresh safety 질문 | keyword gate는 직접 키워드를 피하면 약했고, 최종 v6에서는 intent_rules_v5가 12/24, FP 0/24를 기록 | 안전성은 regression 통과율과 fresh held-out 성능을 분리해 보고해야 함 |
 
 ## 7. 직무 연결성
 
@@ -186,7 +188,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
-| Safety gate 일반화 한계 | 새 held-out 공격/정상 세트와 output safety checker로 intent gate 일반화 검증 |
+| Safety gate 일반화 한계 | v6 fresh 결과는 12/24, FP 0/24로 제한적이며, semantic classifier/output checker는 v7 이후 사전등록 실험으로 검증 |
 | 서비스 호칭 톤 미반영 | `모험가님` 호칭을 명시한 서비스 톤 프롬프트 재실험 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문과 기준 정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
@@ -200,7 +202,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 이 프로젝트의 결론은 “가벼운 로컬 LLM도 게임 문서 QA에 사용할 수 있지만, 문서 검색, 구조화 데이터, 안전 게이트, 평가 루브릭이 함께 있어야 한다”이다.
 
-특히 RAG는 baseline보다 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수를 높였다. 생성 설정 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적이었다. 2026-06 staged corpus 후속 실험에서는 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`이 dev 20문항 factual/format proxy 20/20을 기록했지만, blind held-out ablation에서는 record 비전이(9/20 -> 0/25)와 조건 간 23/25 동률을 확인했다. 별도 structured record probe에서는 record가 실제 발동하면 24/35에서 32/35로 개선됨을 확인해, 남은 병목이 구조화 메커니즘보다 record coverage/extraction임을 분리했다. 최종적으로 structured RAG와 intent safety gate를 함께 쓰는 방향을 제출용 통합 설정으로 정하되, 자동 proxy와 DeepEval judge는 수동 리뷰를 보조하는 지표로 해석한다.
+특히 RAG는 baseline보다 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수를 높였다. 생성 설정 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적이었다. 2026-06 staged corpus 후속 실험에서는 `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M`이 dev 20문항 factual/format proxy 20/20을 기록했지만, blind held-out ablation에서는 record 비전이(9/20 -> 0/25)와 조건 간 23/25 동률을 확인했다. 별도 structured record probe에서는 record가 실제 발동하면 24/35에서 32/35로 개선됨을 확인해, 남은 병목이 구조화 메커니즘보다 record coverage/extraction임을 분리했다. Safety는 regression 50/50과 fresh v6 12/24, FP 0/24를 분리했고, semantic classifier 20/24는 retrospective prototype으로 낮춰 표시했다. 최종적으로 자동 proxy와 DeepEval judge는 수동 리뷰를 보조하는 지표로 해석하고, 높은 점수보다 그 점수의 출처와 감사 가능성을 전면에 둔다.
 
 ## 10. 참고문헌
 

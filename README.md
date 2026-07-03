@@ -7,7 +7,7 @@
 
 **주요 구성:** Python 3.10+, Selenium, BM25 heuristic, BGE-M3, Ollama, Qwen3 4B Instruct, rule-based safety gate, manual rubric evaluation
 
-> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. 이후 factual blind held-out 25문항을 freeze해 검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었습니다. 별도 structured record diagnostic/probe에서는 record가 의도적으로 발동하는 조건에서 24/35 -> 30/35 -> 32/35로 개선되어, 남은 병목이 구조화 메커니즘 자체가 아니라 record coverage/extraction임을 분리했습니다. 이 probe는 held-out 일반화 근거가 아닙니다. Safety intent gate는 아직 별도 blind held-out이 필요합니다.
+> **주의:** 2026-07-01 structured fix 및 intent safety gate 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. 이후 factual blind held-out 25문항을 freeze해 검증한 결과, structured record는 dev 9/20 문항에 발동했지만 held-out에서는 0/25 문항에 발동했고 모든 ablation 조건이 23/25로 동률이었습니다. 별도 structured record diagnostic/probe에서는 record가 의도적으로 발동하는 조건에서 24/35 -> 30/35 -> 32/35로 개선되어, 남은 병목이 구조화 메커니즘 자체가 아니라 record coverage/extraction임을 분리했습니다. Safety는 최종 fresh v6에서 intent_rules_v5가 12/24 attack recall, benign FP 0/24를 기록해 제한적 개선으로 보고합니다. Semantic classifier는 v6 20/24, FP 0/24를 재현했지만 retrospective prototype이므로 정식 headline은 future work로 둡니다.
 
 ## Project Snapshot
 
@@ -21,7 +21,7 @@
 | 최종 설정의 현실적 성능은? | factual proxy 17 / 22, 평균 5.130s | 경량 로컬 모델로 재현 가능한 수준의 답변 품질과 응답 시간을 확인했다. |
 | 2026-06 structured fix는 일반화됐나? | dev 20/20, held-out 23/25 | 높은 dev 점수를 그대로 주장하지 않고, record 비전이(9/20 -> 0/25)를 held-out으로 검출했다. |
 | record가 발동하면 구조화가 도움 되나? | diagnostic probe 24/35 -> 30/35 -> 32/35 | 새 held-out이 아니라 메커니즘 진단이다. record가 붙으면 품질은 오르지만, 다음 병목은 coverage/extractor다. |
-| Safety는 어디까지 됐나? | 명시적 공격 10 / 10, stealth 사전 차단 0 / 10 | 규칙 기반 safety gate의 효과와 한계를 분리해서 기록했다. |
+| Safety는 어디까지 됐나? | fresh v6 12/24, FP 0/24 | regression 100%를 최종 성능처럼 쓰지 않고, 사전 선언한 fresh blind 결과를 그대로 보고했다. |
 
 **읽는 법:** 이 프로젝트의 숫자는 한 가지 점수가 아니라 `검색 품질`, `답변 생성 품질`, `서비스 답변 형식`, `safety 한계`를 따로 측정한 결과입니다. 예를 들어 `BGE-M3 top-1 hit 21/22`는 검색기가 정답 근거를 잘 찾는지를 본 값이고, `최종 factual proxy 17/22`는 그 근거를 받은 LLM이 최종 답변을 얼마나 맞게 생성했는지를 본 값입니다.
 
@@ -58,10 +58,13 @@
 | Paraphrase safety | 0 / 10 -> 10 / 10 | 사후 보강 규칙으로 개선했지만 test-informed 한계가 있음 |
 | Stealth safety 사전 차단 | 0 / 10 | 직접 키워드를 피하면 규칙 기반 gate가 약함 |
 | Stealth end-to-end strict pass | 6 / 10 | 생성 답변 단계까지 포함하면 일부는 안전하게 거절 |
+| Final safety v6 | 12 / 24, FP 0 / 24 | 사전 선언한 fresh blind 검증. 제한적 개선으로 보고 |
+| Backward compatibility | 90 / 120, FP 1 / 120 | 과거 진단 공격 스타일 유지력. fresh 일반화 성능과 분리 |
+| Semantic prototype | v6 20 / 24, FP 0 / 24 | BGE-M3 1-NN retrospective 결과. 정식 headline은 future work |
 
 </details>
 
-**Safety 해석:** rule-based safety gate는 설명 가능하고 빠른 baseline으로는 유용하지만, 완성된 보안 장치가 아닙니다. 특히 stealth set 결과는 semantic classifier와 output safety check가 후속 개선 과제임을 보여줍니다.
+**Safety 해석:** rule-based safety gate는 설명 가능하고 빠른 baseline으로는 유용하지만, 완성된 보안 장치가 아닙니다. 이번 프로젝트는 regression set 100% 같은 개발 성과와 fresh blind v6의 12/24를 분리해 보고합니다. BGE-M3 semantic prototype은 v6에서 20/24를 재현했지만 retrospective 결과이므로, 다음 연구 후보로만 남깁니다.
 
 ## Final Pipeline
 
@@ -138,6 +141,9 @@ flowchart LR
 | [`report/final_portfolio_report.md`](report/final_portfolio_report.md) | 전체 실험 과정과 결과를 정리한 통합 보고서 |
 | [`report/heldout_factual_ablation_v1.md`](report/heldout_factual_ablation_v1.md) | blind held-out 25문항과 record 비전이 감사 |
 | [`report/structured_record_probe_v1.md`](report/structured_record_probe_v1.md) | record가 실제 발동하는 조건에서 구조화 데이터 효과를 진단한 probe |
+| [`report/safety_eval_final_report_v6.md`](report/safety_eval_final_report_v6.md) | safety 최종 fresh v6 결과: 12/24, benign FP 0/24 |
+| [`report/safety_eval_process_summary_for_main_project.md`](report/safety_eval_process_summary_for_main_project.md) | safety v1~v6 개선 라운드와 regression/held-out 분리 과정 |
+| [`docs/PROJECT_REVIEW_BRIEF.md`](docs/PROJECT_REVIEW_BRIEF.md) | 리뷰어/면접관용 1-page 핵심 설명 |
 | [`report/ablation_study_report.md`](report/ablation_study_report.md) | BGE-M3 고정 후 모델/톤/구조화 데이터 효과를 분리한 추가 실험 |
 | [`report/README.md`](report/README.md) | 보고서 폴더의 권장 읽기 순서 |
 | [`report/application_summary.md`](report/application_summary.md) | 지원서와 면접에서 바로 설명할 수 있는 요약문 |
@@ -463,6 +469,10 @@ python scripts\run_rag_local_llm_eval.py `
 
 별도 진단 실험은 [`report/structured_record_probe_v1.md`](report/structured_record_probe_v1.md)에 정리했다. 이 실험은 새 held-out이 아니라 structured record가 실제로 발동하도록 만든 diagnostic/probe이며, no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. 해석은 "구조화 메커니즘은 record가 붙으면 도움이 된다"와 "blind held-out에서는 hand-authored record가 붙지 않았다"를 분리하는 것이다. 따라서 다음 개선 방향은 손으로 쓴 hint를 늘리는 것이 아니라, 원문 패치노트에서 atomic before/after/unchanged record를 blind 또는 자동으로 추출하는 coverage/extractor 검증이다.
 
+Safety 최종 라운드는 [`report/safety_eval_final_report_v6.md`](report/safety_eval_final_report_v6.md)와 [`report/safety_eval_process_summary_for_main_project.md`](report/safety_eval_process_summary_for_main_project.md)에 정리했다. 개발용 regression에서는 intent_rules_v5가 24/24를 달성했지만, 최종 보고는 사전 선언한 fresh v6 결과만 기준으로 삼았다. v6에서 intent_rules_v5는 intent_rules_v4 대비 attack block rate를 10/24에서 12/24로 올렸고 benign false positive는 0/24로 유지했다. 별도 재검산에서는 과거 진단 공격 스타일 유지력은 90/120(75.0%)이지만, 신규 fresh v6 대응은 12/24(50.0%)로 분리해 보고했다.
+
+BGE-M3 embedding 기반 semantic safety classifier 프로토타입은 [`report/semantic_safety_classifier_prototype_v1.md`](report/semantic_safety_classifier_prototype_v1.md)에 정리했다. 이 프로토타입은 held-out 문항을 학습/프로토타입 구성에 쓰지 않았고 v6에서 20/24, FP 0/24를 재현했지만, 분류기 아이디어 선택 자체가 v6 결과 이후 이뤄졌을 수 있으므로 retrospective 결과로만 해석한다. 정식 headline은 future work로 남긴다.
+
 ## 오류 분석 요약
 
 - Q002: `태초 광휘의 의지`의 가격과 계정 제한은 맞혔지만, 인접 상품인 `태초 소울 1개 상자`의 월 4회/이월 조건이 섞였습니다. 구조화 근거가 있어도 generator가 인접 행 정보를 혼합할 수 있음을 보여줍니다.
@@ -477,7 +487,7 @@ python scripts\run_rag_local_llm_eval.py `
 | 자동 proxy 오판 | 수동 채점 확대 또는 LLM-as-judge 추가 |
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
-| Safety gate 일반화 한계 | stealth 공격과 정상 질문 오탐 세트를 분리해 평가하고 semantic classifier/output safety check 추가 |
+| Safety gate 일반화 한계 | v6 12/24를 최종 fresh 결과로 유지하고, semantic classifier는 retrospective prototype으로만 보고 |
 | 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set으로 확장 |
