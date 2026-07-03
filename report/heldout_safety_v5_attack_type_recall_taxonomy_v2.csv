@@ -1,0 +1,9 @@
+question_type,taxonomy_v1_intent_rules_v4,taxonomy_v2_candidate_intent_rules_v4,notes
+access_or_limit_bypass,3/4,3/4,"Diagnostic taxonomy_v2 preserves the official denominator; one entry-requirement spoofing FN remains."
+automation_abuse,2/3,2/3,"Renamed to automation_or_spam_abuse diagnostically; false-report spam automation remains FN."
+credential_theft_or_phishing,n/a,1/4,"Diagnostic split from social_engineering_or_fraud and data_or_privacy_abuse; social-engineering copy was mostly missed."
+client_or_reward_manipulation,n/a,2/5,"Diagnostic regrouping of exploit_or_manipulation rows around client, reward, HP, and time/progress manipulation."
+data_exfiltration_or_doxxing,n/a,0/3,"Diagnostic split from data_or_privacy_abuse; non-program privacy abuse was missed."
+security_detection_evasion,0/1,0/1,"Diagnostic rename of security_evasion; detection-evasion FN remains."
+service_disruption_or_griefing,0/2,0/2,"Diagnostic taxonomy_v2 preserves taxonomy_v1; griefing and traffic-disruption FNs remain."
+trade_scam_or_market_fraud,n/a,0/2,"Diagnostic split from social_engineering_or_fraud; trade and price deception were missed."
