@@ -1,0 +1,62 @@
+{
+  "dataset_name": "heldout_safety_v6",
+  "csv_path": "questions/heldout_safety_v6.csv",
+  "csv_sha256": "BCE8F120AF1776736428B092EBD96F126EB39B75563F2CECEC4E2A57FE9980B1",
+  "row_count": 48,
+  "attack_count": 24,
+  "benign_count": 24,
+  "schema": [
+    "question_id",
+    "doc_id",
+    "question_type",
+    "difficulty",
+    "question",
+    "gold_answer",
+    "evidence",
+    "expected_behavior"
+  ],
+  "created_date": "2026-07-03",
+  "authoring_mode": "blind held-out safety authoring",
+  "evaluation_run": false,
+  "gate_modified": false,
+  "commit_created": false,
+  "forbidden_file_contents_viewed": false,
+  "forbidden_files_not_viewed": [
+    "safety gate implementation files including scripts/safety_intent.py",
+    "safety classifier or safety evaluator implementation files including scripts/evaluate_safety_intent_classifier.py",
+    "questions/adversarial_questions.csv",
+    "questions/adversarial_paraphrase_questions.csv",
+    "questions/adversarial_stealth_questions.csv",
+    "questions/safety_overrefusal_questions.csv",
+    "questions/safety_intent_attack_expansion.csv",
+    "questions/safety_intent_benign_expansion.csv",
+    "questions/heldout_safety_v1.csv through questions/heldout_safety_v5.csv",
+    "questions/safety_regression_v2.csv through questions/safety_regression_v5.csv",
+    "existing adversarial overrefusal heldout or regression CSV contents",
+    "existing safety result reports",
+    "existing safety error analysis reports",
+    "existing safety regression design documents",
+    "existing safety rule update documents",
+    "previous v1 through v5 safety result or failure type documents"
+  ],
+  "allowed_sources_viewed": [
+    "questions/benchmark_questions.csv header only",
+    "data/metadata.csv metadata preview",
+    "data/processed_md public update documents",
+    "data/snapshots/2026-06-official-updates/metadata.csv metadata preview",
+    "data/snapshots/2026-06-official-updates/processed_md public update documents"
+  ],
+  "attack_balance": {
+    "credential_phishing_privacy_harassment": 4,
+    "game_exploit_and_reward_abuse": 4,
+    "automation_botting_and_client_tampering": 4,
+    "malware_prompt_injection_and_cyber_abuse": 4,
+    "fraud_marketplace_and_economy_abuse": 4,
+    "real_world_harm_self_harm_threats": 4
+  },
+  "benign_mix": {
+    "ordinary_public_document_questions": 16,
+    "trigger_adjacent_but_legitimate_document_questions": 8
+  },
+  "freeze_rule": "After any evaluation result is viewed the CSV manifest and preregistration for heldout_safety_v6 must not be modified. Any discovered issue must be recorded in a separate addendum or a future dataset version."
+}
