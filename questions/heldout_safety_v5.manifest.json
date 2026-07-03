@@ -1,0 +1,94 @@
+{
+  "dataset": "heldout_safety_v5",
+  "csv_path": "questions/heldout_safety_v5.csv",
+  "csv_sha256": "1a0fcdc4ef2b89da0d66960f2cf18a1e950e34e3a30268645ba2ff9a78e5dd97",
+  "row_count": 48,
+  "attack_count": 24,
+  "benign_count": 24,
+  "schema": [
+    "question_id",
+    "doc_id",
+    "question_type",
+    "difficulty",
+    "question",
+    "gold_answer",
+    "evidence",
+    "expected_behavior"
+  ],
+  "source_documents_used": [
+    {
+      "doc_id": "DOC-01",
+      "title": "5/28(목) 정기점검 업데이트 안내",
+      "source_url": "https://df.nexon.com/community/news/update/2927522"
+    },
+    {
+      "doc_id": "DOC-02",
+      "title": "5/20(수) 퍼스트 서버 업데이트 안내",
+      "source_url": "https://df.nexon.com/community/news/update/2927399"
+    },
+    {
+      "doc_id": "DOC-03",
+      "title": "5/21(목) 정기점검 업데이트 안내",
+      "source_url": "https://df.nexon.com/community/news/update/2927392"
+    },
+    {
+      "doc_id": "DOC-04",
+      "title": "최후의 과업 업데이트",
+      "source_url": "https://df.nexon.com/community/news/update/2927335"
+    }
+  ],
+  "blindness_attestation": {
+    "evaluation_run_by_author": false,
+    "gate_improvement_by_author": false,
+    "forbidden_file_contents_viewed": false,
+    "filenames_enumerated_only": true
+  },
+  "forbidden_files_not_viewed": [
+    "scripts/safety_intent.py",
+    "scripts/evaluate_safety_intent_classifier.py",
+    "questions/adversarial_questions.csv",
+    "questions/adversarial_paraphrase_questions.csv",
+    "questions/adversarial_stealth_questions.csv",
+    "questions/safety_overrefusal_questions.csv",
+    "questions/safety_intent_attack_expansion.csv",
+    "questions/safety_intent_benign_expansion.csv",
+    "questions/safety_regression_v2.csv",
+    "questions/safety_regression_v3.csv",
+    "questions/safety_regression_v4.csv",
+    "questions/heldout_safety_v1.csv",
+    "questions/heldout_safety_v2.csv",
+    "questions/heldout_safety_v3.csv",
+    "questions/heldout_safety_v4.csv",
+    "questions/heldout_factual_v1.csv",
+    "questions/regression_questions_v2026_06_answer_completeness.csv",
+    "questions/regression_questions_v2026_06_structured_fix.csv",
+    "eval/*safety*",
+    "eval/*heldout_safety*",
+    "eval/*adversarial*",
+    "eval/*overrefusal*",
+    "report/heldout_safety_v*_results.md",
+    "report/heldout_safety_v*_gate_summary.csv",
+    "report/heldout_safety_v*_error_analysis*.md",
+    "report/heldout_safety_v*_attack_type_recall*.csv",
+    "report/heldout_safety_v*_taxonomy_crosswalk*.csv",
+    "report/heldout_safety_v*_diagnostic*.json",
+    "report/heldout_safety_v*_independent_review_notes.md",
+    "report/heldout_safety_v*_preregistration.md",
+    "report/safety_regression_v*_design.md",
+    "report/safety_regression_v*_baseline*.md",
+    "report/safety_regression_v*_baseline*.csv",
+    "report/safety_regression_v*_rules_v*_attack_type_recall.csv",
+    "report/safety_regression_v*_source_trace.csv",
+    "report/safety_regression_v*_rule_update*.md",
+    "report/safety_regression_v*_rule_update*.csv",
+    "report/safety_rules_v*_update.md",
+    "report/safety_rules_v*_update_summary.csv",
+    "report/safety_intent_*.md",
+    "report/safety_design_rationale.md",
+    "report/safety_heldout_instruction_v1.md",
+    "report/*safety_gate_test.md",
+    "report/*safety*error*",
+    "report/*regression*design*"
+  ],
+  "freeze_rule": "After any evaluation result is viewed, do not modify questions/heldout_safety_v5.csv, questions/heldout_safety_v5.manifest.json, or report/heldout_safety_v5_preregistration.md. Keyword, intent, and rules version comparisons must all use this same frozen CSV."
+}
