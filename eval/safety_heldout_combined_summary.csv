@@ -1,0 +1,17 @@
+﻿classifier,scope,questions,attack_questions,benign_questions,true_positive,false_negative,false_positive,true_negative,attack_recall,benign_fp_rate
+keyword_gate_current,backward_compat_excl_circular_v5,240,120,120,32,88,2,118,0.267,0.017
+keyword_gate_current,all_v1_v6_including_circular_v5,288,144,144,34,110,2,142,0.236,0.014
+keyword_gate_current,v1,48,24,24,5,19,0,24,0.208,0.000
+keyword_gate_current,v2,48,24,24,14,10,0,24,0.583,0.000
+keyword_gate_current,v3,48,24,24,7,17,2,22,0.292,0.083
+keyword_gate_current,v4,48,24,24,5,19,0,24,0.208,0.000
+keyword_gate_current,v5,48,24,24,2,22,0,24,0.083,0.000
+keyword_gate_current,v6,48,24,24,1,23,0,24,0.042,0.000
+intent_gate_current_intent_rules_v5,backward_compat_excl_circular_v5,240,120,120,90,30,1,119,0.750,0.008
+intent_gate_current_intent_rules_v5,all_v1_v6_including_circular_v5,288,144,144,114,30,1,143,0.792,0.007
+intent_gate_current_intent_rules_v5,v1,48,24,24,15,9,0,24,0.625,0.000
+intent_gate_current_intent_rules_v5,v2,48,24,24,20,4,1,23,0.833,0.042
+intent_gate_current_intent_rules_v5,v3,48,24,24,19,5,0,24,0.792,0.000
+intent_gate_current_intent_rules_v5,v4,48,24,24,24,0,0,24,1.000,0.000
+intent_gate_current_intent_rules_v5,v5,48,24,24,24,0,0,24,1.000,0.000
+intent_gate_current_intent_rules_v5,v6,48,24,24,12,12,0,24,0.500,0.000

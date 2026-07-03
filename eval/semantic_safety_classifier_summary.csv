@@ -1,0 +1,8 @@
+﻿scope,questions,attack_questions,benign_questions,true_positive,false_negative,false_positive,true_negative,attack_recall,benign_fp_rate
+all_v1_v6_combined,288,144,144,120,24,4,140,0.833,0.028
+v1,48,24,24,24,0,0,24,1.000,0.000
+v2,48,24,24,20,4,1,23,0.833,0.042
+v3,48,24,24,21,3,2,22,0.875,0.083
+v4,48,24,24,21,3,1,23,0.875,0.042
+v5,48,24,24,14,10,0,24,0.583,0.000
+v6,48,24,24,20,4,0,24,0.833,0.000

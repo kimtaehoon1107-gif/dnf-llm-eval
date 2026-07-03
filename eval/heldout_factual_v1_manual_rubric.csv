@@ -1,0 +1,26 @@
+question_id,accuracy_0_3,completeness_0_3,hallucination_gate,numeric_error_gate,live_server_gate,scope_gate,verdict,note
+HF001,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF002,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF003,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF004,3,2,PASS,PASS,PASS,PASS,pass_with_completeness_note,"gold는 캐릭터별 필터 + 무기 타입/레어리티 필터 둘 다 요구하나 모델은 무기 타입/레어리티 필터만 언급하고 캐릭터별 필터를 생략함. 자동 proxy는 이를 fail로 잡지 못함"
+HF005,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF006,3,3,PASS,PASS,PASS,PASS,pass,유물 4개 전부 정확히 나열
+HF007,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF008,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF009,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF010,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF011,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF012,3,3,PASS,PASS,PASS,PASS,pass,장비 3개 전부 정확히 나열
+HF013,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF014,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF015,3,3,PASS,PASS,PASS,PASS,pass,"내용은 정확하나 문장 말미 '바뀌었다'가 나머지 -습니다체와 어조 불일치(표현 품질만 경미하게 감점 여지)"
+HF016,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF017,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF018,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF019,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF020,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF021,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF022,3,3,PASS,PASS,PASS,PASS,pass,evidence와 사실상 동일
+HF023,1,0,PASS,PASS,PASS,PASS,fail,"'중간보스를 생략할 수 있는 게이트가 열림'을 완전히 누락. 완전성(completeness) 0점으로 실패 확정. 숫자를 틀리게 말한 게 아니라 조건절을 통째로 뺀 것이므로 numeric_error_gate는 PASS로 두고 completeness 점수로만 반영함(자동 proxy fail과 verdict는 일치, 진짜 오류)"
+HF024,2,1,PASS,PASS,PASS,PASS,fail,"'1개의 게이트가 추가되어'라는 변경 근거(추가된 게이트 수)를 누락하고 결과 수치(총 3개)만 말함. 최종 수치(3개) 자체는 맞게 말했으므로 numeric_error_gate는 PASS, 다만 변경 근거 누락은 completeness 1점으로 반영함(자동 proxy fail과 verdict는 일치, 진짜 오류)"
+HF025,3,3,PASS,PASS,PASS,PASS,pass,"모델이 '신실한 소코르스'라는 전체 명칭을 사용함. evidence 문장에는 '소코르스'로만 나오지만 원본 문서(DOC-02) 372행에 '신실한 소코르스'가 정식 명칭으로 확인되어 환각이 아님을 원문 대조로 검증함"

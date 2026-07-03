@@ -1,0 +1,247 @@
+[
+  {
+    "doc_id": "DNF-2927392",
+    "pattern": "prose_add_remove",
+    "subject": "그래플러(여)",
+    "detail": "와일드 캐넌 스파이크 스킬 커맨드에 사용 조건이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927392",
+    "pattern": "prose_add_remove",
+    "subject": "엘레멘탈마스터",
+    "detail": "칠링 팬스 스킬의 재입력 기능이",
+    "change_type": "제거"
+  },
+  {
+    "doc_id": "DNF-2927392",
+    "pattern": "prose_add_remove",
+    "subject": "최후의 과업",
+    "detail": "샤피로 그라시아 : 일부 효과음이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927392",
+    "pattern": "prose_add_remove",
+    "subject": "역설의 미궁",
+    "detail": "기록없는 성채 던전에서 베리디쿠스 등장 연출이",
+    "change_type": "제거"
+  },
+  {
+    "doc_id": "DNF-2927392",
+    "pattern": "prose_add_remove",
+    "subject": "코스믹 어드벤처 패키지",
+    "detail": "일부 구성품 툴팁에 6월 4일 업데이트 예정인 신규 캐릭터/전직 관련 안내가",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927392",
+    "pattern": "prose_add_remove",
+    "subject": "단진의 특별 상점",
+    "detail": "일부 구성품 툴팁에 6월 4일 업데이트 예정인 신규 캐릭터/전직 관련 안내가",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927399",
+    "pattern": "prose_add_remove",
+    "subject": "아바타 프리셋",
+    "detail": "아바타 부위 슬롯 선택 시, 선택한 부위만 모아볼 수 있는 기능이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927399",
+    "pattern": "prose_add_remove",
+    "subject": "'레이드 상점",
+    "detail": "검은 질병의 디레지에'에 다음 신규 물품이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927399",
+    "pattern": "prose_add_remove",
+    "subject": "캐릭터 컬렉션",
+    "detail": "일러스트 카드 내 아라드 어드벤처 관련 아이콘이",
+    "change_type": "제거"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "(추가) 다음 단어가 포함된 아바타명의 띄어쓰기 오탈자가 수정됩니다.",
+    "before": "나비장식",
+    "after": "나비 장식"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "- 나비장식 -> 나비 장식",
+    "before": "나비날개",
+    "after": "나비 날개"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "- 나비날개 -> 나비 날개",
+    "before": "나비브로치",
+    "after": "나비 브로치"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "- 나비브로치 -> 나비 브로치",
+    "before": "장식팬츠",
+    "after": "장식 팬츠"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "- 장식팬츠 -> 장식 팬츠",
+    "before": "허리벨트",
+    "after": "허리 벨트"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "- 허리벨트 -> 허리 벨트",
+    "before": "더비슈즈",
+    "after": "더비 슈즈"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "arrow_bullet",
+    "context": "- 더비슈즈 -> 더비 슈즈",
+    "before": "정장코트",
+    "after": "정장 코트"
+  },
+  {
+    "doc_id": "DNF-2927522",
+    "pattern": "prose_add_remove",
+    "subject": "세리아의 환영",
+    "detail": "일부 구성품 툴팁에 6월 4일 업데이트 예정인 신규 캐릭터/전직 관련 안내가",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "arrow_bullet",
+    "context": "아라드 오디세이 - 일부 몬스터의 이름이 수정됩니다.",
+    "before": "로즈베리론",
+    "after": "청면수라 로즈베리론"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "arrow_bullet",
+    "context": "- 로즈베리론 → 청면수라 로즈베리론",
+    "before": "지젤로건",
+    "after": "GB-1 햅스"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "arrow_bullet",
+    "context": "다음 단어가 포함된 마법부여 아이템의 띄어쓰기 오탈자가 수정됩니다.",
+    "before": "제 6사도",
+    "after": "제6사도"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "arrow_bullet",
+    "context": "역설의 미궁 기대 보상 물품 중 일부 토벌권 아이템의 명칭이 수정됩니다.",
+    "before": "아포칼립스 : 안티엔바이 토벌권",
+    "after": "종말이 드리운 나침반 토벌권"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "prose_add_remove",
+    "subject": "아라드 나침반",
+    "detail": "수령 가능한 보상이 있다면, 일괄 획득할 수 있도록 '모두 받기' 버튼이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "prose_add_remove",
+    "subject": "인파이터(여)",
+    "detail": "스크류 스트레이트 스킬 앞 방향키 입력 시전 시의 전진 거리가 이동 속도의 영향을 받는다는 툴팁 안내가",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "prose_add_remove",
+    "subject": "아라드 오디세이",
+    "detail": "일렁이는 군도 던전의 보스 맵 배경에서 일각수 크라켄의 촉수가",
+    "change_type": "제거"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "prose_add_remove",
+    "subject": "제국기사",
+    "detail": "포인트 쓰러스트 스킬 시전 후 무적시간이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "prose_add_remove",
+    "subject": "브레이커",
+    "detail": "피어스 임팩트 스킬의 개화 옵션인 노바 임팩트의 툴팁에 받는 데미지 감소량 값이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927691",
+    "pattern": "prose_add_remove",
+    "subject": "브레이커",
+    "detail": "플래티넘 엠블렘, 모험가의 의지 칭호 보주, 아바타 선택 능력치에 스킬 1종이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927756",
+    "pattern": "arrow_bullet",
+    "context": "브레이커",
+    "before": "타이드 바운드 - 쿨타임이 감소합니다. (20초",
+    "after": "18초)"
+  },
+  {
+    "doc_id": "DNF-2927756",
+    "pattern": "prose_add_remove",
+    "subject": "결투장",
+    "detail": "캐릭터 생성 불가 안내 툴팁이",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927756",
+    "pattern": "before_after_block",
+    "skill_or_option": "타이드 바운드",
+    "before_block_text": "적 타격 시 타이드 바운드의 남은 쿨타임이 감소하지 않도록 변경 / 기본 쿨타임 12초로 변경 / - 공격력 11.5% 감소",
+    "after_block_text": "적 타격 시 타이드 바운드의 남은 쿨타임이 감소하지 않도록 변경 / 기본 쿨타임 / 9초 / 로 변경 / - 공격력 11.5% 감소"
+  },
+  {
+    "doc_id": "DNF-2927756",
+    "pattern": "before_after_block",
+    "skill_or_option": "타이드 바운드",
+    "before_block_text": "적 추적 범위 20% 증가 / 시전 시 훅 샷 스킬의 쿨타임 초기화",
+    "after_block_text": "적 추적 범위 20% 증가 / 공격력 15.8% 감소 / [타이드 바운드] / 적 추적 범위 20% 증가 / 시전 시 훅 샷 스킬의 쿨타임 초기화 / [훅 샷] / 적 추적 범위 20% 증가 / 공격력 / 17.6% / 감소"
+  },
+  {
+    "doc_id": "DNF-2927810",
+    "pattern": "arrow_bullet",
+    "context": "'보이드 소울 2개(초월의 의지)' 물품 판매 가격이 조정됩니다.",
+    "before": "초월의 의지 50개",
+    "after": "초월의 의지 25개"
+  },
+  {
+    "doc_id": "DNF-2927810",
+    "pattern": "arrow_bullet",
+    "context": "안개 서약 최대 단계 이후 진행 가능한 '빛의 서약 확정 획득' 진행 시 필요 재료가 삭제됩니다.",
+    "before": "프라임 스텔라 10개",
+    "after": "재료를 소모하지 않음"
+  },
+  {
+    "doc_id": "DNF-2927810",
+    "pattern": "prose_add_remove",
+    "subject": "트리니티",
+    "detail": "유리스에 보이스가",
+    "change_type": "추가"
+  },
+  {
+    "doc_id": "DNF-2927810",
+    "pattern": "prose_add_remove",
+    "subject": "역설의 미궁",
+    "detail": "해소의 보구, 생명의 샘, 심연의 조율 - 상쇄, 심연의 조율 - 해방 유물에 최종 데미지 증가 효과가",
+    "change_type": "추가"
+  }
+]
