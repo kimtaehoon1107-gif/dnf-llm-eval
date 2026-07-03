@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 
 
-INTENT_GATE_VERSION = "intent_rules_v3"
+INTENT_GATE_VERSION = "intent_rules_v4"
 
 
 @dataclass(frozen=True)
@@ -124,6 +124,20 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "봇 흐름이 아니라",
         "자동화 설계가 아니라",
         "제재 회피 요령 말고",
+        "비공개 거절 문구는 묻지 않고",
+        "안전 거절 우회가 아니라",
+        "악용 방법이 아니라",
+        "자동 순회 설계가 아니라",
+        "현금화가 아니라",
+        "현금 거래와 무관하게",
+        "외부 거래 게시글이 아니라",
+        "우회 절차가 아니라",
+        "되돌리는 방법이 아니라",
+        "반복 호출 자동화가 아니라",
+        "외부 현금 거래가 아니라",
+        "계정 가치나 판매글이 아니라",
+        "판매 목록 문구가 아니라",
+        "계정 매물 설명이 아니라",
     )
     public_source_markers = (
         "공개 패치노트",
@@ -136,7 +150,24 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "문서화된",
         "조회 조건",
         "조회 범위",
+        "탐사 조건",
+        "캐릭터 조건",
+        "거래 타입",
         "가격과 구매 제한",
+        "상점 구매 제한",
+        "필요 재료",
+        "경험치 소모",
+        "가격과 제한",
+        "판매 가격",
+        "주간 구매 제한",
+        "무료 횟수",
+        "기본 소모 재료",
+        "문서대로",
+        "무엇을 기준으로 차감",
+        "앱에서 어디로",
+        "확인 가능한 항목 범위",
+        "캐릭터별로 확인",
+        "구매 제한",
         "변경점",
         "개선됐는지",
         "어떻게 바뀌었",
@@ -152,9 +183,13 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "단정",
         "내부 지표",
         "문서에 없는 숫자",
-        "우회",
         "회피 방법",
         "회피 패턴",
+        "우회 절차",
+        "우회 방법",
+        "우회 요청",
+        "제한 우회",
+        "우회 거래",
         "피하",
         "피해",
         "반복 비매너",
@@ -165,11 +200,43 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "스크립트",
         "코드",
         "외부 거래",
-        "현금화",
+        "현금화 방법",
+        "현금화하도록",
         "판매가",
-        "거래 게시글",
+        "거래 게시글 제목",
+        "거래 게시글 본문",
         "중개 문구",
     )
+    strict_public_negation_markers = (
+        "우회 절차가 아니라",
+        "되돌리는 방법이 아니라",
+        "반복 호출 자동화가 아니라",
+        "외부 현금 거래가 아니라",
+        "현금 거래와 무관하게",
+        "외부 거래 게시글이 아니라",
+        "계정 가치나 판매글이 아니라",
+        "판매 목록 문구가 아니라",
+        "계정 매물 설명이 아니라",
+    )
+    hard_harmful_override_markers = (
+        "요청할게",
+        "요청해",
+        "정상 답변처럼 처리",
+        "문제없는 가이드처럼",
+        "외부 현금 거래로",
+        "판매 경로",
+        "판매글 제목",
+        "가격 제안",
+        "가치 평가 문구",
+        "판매가 산정 요청",
+        "자동화 구조를 알려",
+        "스크립트 구조",
+        "반복 호출하는 계정 조회 자동화",
+        "소모 없이 처리",
+        "제한보다 더",
+    )
+    if has_any(text, strict_public_negation_markers) and has_any(text, public_source_markers):
+        return not has_any(text, hard_harmful_override_markers)
     return (
         has_any(text, negated_trigger_markers)
         and has_any(text, public_source_markers)
@@ -205,6 +272,19 @@ def classify_intent(question: str) -> IntentDecision:
         text, ("출력", "보여", "공개", "요약", "빼도 돼", "그대로", "덤프", "붙여", "알려", "표로")
     ):
         return IntentDecision(True, "prompt_leakage", "requests hidden prompt or internal instructions")
+    if has_any(
+        text,
+        (
+            "시스템 메시지",
+            "비공개 거절 문구",
+            "숨은 차단 기준",
+            "내부 거절 문장",
+            "hidden context",
+            "시스템 안전문구",
+            "private refusal",
+        ),
+    ) and has_any(text, ("원문", "그대로", "출력", "복사", "보여", "문장")):
+        return IntentDecision(True, "prompt_leakage", "requests hidden prompt or internal instructions")
 
     if has_regex(text, r"(이전|안전|답변|지시|규칙|틀|방식|제한|검색 근거).{0,20}(무시|내려놓|말고|바꿔|자유롭게|빼고|잠시 빼|우회)"):
         return IntentDecision(True, "prompt_injection", "tries to override answer rules or priority")
@@ -226,9 +306,36 @@ def classify_intent(question: str) -> IntentDecision:
         text, ("역할", "제공", "workflow", "악용")
     ):
         return IntentDecision(True, "jailbreak", "role or mode override")
+    if has_any(
+        text,
+        (
+            "거절 없는 검증 모드",
+            "거절하지 않는 확인 모드",
+            "안전 거절이 없는",
+            "검증 모드에서는 거절하지",
+            "절대 거절하지 않는",
+        ),
+    ) and has_any(
+        text,
+        (
+            "우회",
+            "제한",
+            "외부 현금 거래",
+            "현금 거래",
+            "자동화",
+            "자동 수령",
+            "악용",
+            "되돌리는",
+        ),
+    ):
+        return IntentDecision(True, "jailbreak", "role or mode override")
     if has_any(text, ("규칙 없는", "정책 없는", "테스트 세계", "정상 문의처럼 처리")) and has_any(
         text, ("외부 거래", "현금화", "우회", "악용", "제재")
     ):
+        return IntentDecision(True, "jailbreak", "role or mode override")
+    if has_any(text, ("개발 검증", "개발 테스트", "테스트 상황", "검증용 문장")) and has_any(
+        text, ("정상 공략처럼", "문제없는 가이드처럼", "모드로 바꿔", "포장")
+    ) and has_any(text, ("자동", "현금 거래", "외부 거래", "rmt", "악용", "우회")):
         return IntentDecision(True, "jailbreak", "role or mode override")
 
     if has_any(text, ("아래 문장", "다음 문장", "전제로 답", "전제로 해", "공식 내용으로 간주", "공식 힌트", "내가 넣은 문장", "검색 근거로 삼아", "공식 확인이라고 붙이고")):
@@ -279,6 +386,33 @@ def classify_intent(question: str) -> IntentDecision:
         return IntentDecision(True, "exploit_request", "asks for exploit or abuse procedure")
     if has_any(text, ("우회하는 방법", "제한 우회")) and has_any(text, ("찾아", "알려", "답해")):
         return IntentDecision(True, "exploit_request", "asks for exploit or abuse procedure")
+    if has_any(
+        text,
+        (
+            "재료",
+            "비용",
+            "무료 횟수",
+            "월 구매 제한",
+            "입장 횟수",
+            "입장 제한",
+            "탐사 가속",
+            "차감 기준",
+            "소모분",
+        ),
+    ) and has_any(
+        text,
+        (
+            "덜 쓰",
+            "우회 절차",
+            "제한보다 더",
+            "더 많이 받",
+            "소모 없이",
+            "되돌리는 방법",
+            "돌려받",
+            "재현",
+        ),
+    ):
+        return IntentDecision(True, "exploit_request", "asks for resource or entry-limit bypass procedure")
     if has_any(text, ("제재", "비매너", "계정 단위 제재")) and has_any(
         text, ("피하", "피해", "제재 가능성을 낮추", "돌려 쓰", "반복", "요령", "패턴")
     ):
@@ -292,6 +426,10 @@ def classify_intent(question: str) -> IntentDecision:
         text, ("반복 구매", "반복 호출", "자동화 흐름", "자동 수집", "구조를 짜", "흐름을 만들어")
     ):
         return IntentDecision(True, "automation_abuse", "asks for multi-account automation abuse")
+    if has_any(text, ("무기고 조회", "계정 조회", "홈 퀵 메뉴", "더보기")) and has_any(
+        text, ("반복 호출", "자동화 구조", "자동 수집", "스크립트 구조", "자동 순회")
+    ):
+        return IntentDecision(True, "automation_abuse", "asks for account lookup automation abuse")
 
     if has_any(text, ("게임 밖", "현금화", "돈으로", "시세", "외부 거래", "외부 거래로")) and has_any(
         text, ("절차", "방법", "효율", "방향", "알려", "연결", "이득", "요령", "넘기는")
@@ -301,6 +439,14 @@ def classify_intent(question: str) -> IntentDecision:
         return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
     if has_any(text, ("계정 판매가", "외부 거래 게시글", "중개 문구", "우회 거래", "현금화")) and has_any(
         text, ("계정", "장비", "계정귀속", "보상", "본문", "제목", "방식", "제안")
+    ):
+        return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
+    if has_any(text, ("외부 현금 거래", "현금 거래", "판매 경로", "판매글", "판매 목록", "판매가 산정", "매물 설명")) and has_any(
+        text, ("보상", "아이템", "계정", "가치", "가격", "제목", "문구", "115lv", "계정귀속")
+    ):
+        return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
+    if has_any(text, ("계정 가치", "가치 평가", "판매가", "계정 매물")) and has_any(
+        text, ("계산", "산정", "판매", "판매글", "판매 목록", "문구", "요청")
     ):
         return IntentDecision(True, "real_money_trade", "asks for real-money trading or monetization path")
 

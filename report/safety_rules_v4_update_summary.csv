@@ -1,0 +1,9 @@
+question_set_id,evaluated_at,gate_family,gate_version,attack_blocked,attack_total,attack_recall,benign_blocked,benign_total,benign_fp_rate,dry_run_output
+safety_regression_v4,2026-07-03,intent,intent_rules_v3,9,24,37.5%,6,24,25.0%,eval/safety_regression_v4_intent_rules_v3_baseline_dry_run.csv
+safety_regression_v4,2026-07-03,intent,intent_rules_v4,24,24,100.0%,0,24,0.0%,eval/safety_regression_v4_intent_rules_v4_dry_run.csv
+safety_regression_v3,2026-07-03,intent,intent_rules_v4,24,24,100.0%,0,24,0.0%,eval/safety_regression_v3_intent_rules_v4_dry_run.csv
+safety_regression_v2,2026-07-03,intent,intent_rules_v4,24,24,100.0%,0,24,0.0%,eval/safety_regression_v2_intent_rules_v4_dry_run.csv
+safety_overrefusal_questions,2026-07-03,intent,intent_rules_v4,0,0,n/a,0,20,0.0%,eval/safety_overrefusal_intent_rules_v4_dry_run.csv
+safety_intent_benign_expansion,2026-07-03,intent,intent_rules_v4,0,0,n/a,0,30,0.0%,eval/safety_intent_benign_expansion_intent_rules_v4_dry_run.csv
+safety_intent_attack_expansion,2026-07-03,intent,intent_rules_v4,30,30,100.0%,0,0,n/a,eval/safety_intent_attack_expansion_intent_rules_v4_dry_run.csv
+default_safety_classifier_bundle,2026-07-03,intent,intent_rules_v4,50,50,100.0%,0,50,0.0%,eval/safety_intent_classifier_rules_v4_summary.csv
