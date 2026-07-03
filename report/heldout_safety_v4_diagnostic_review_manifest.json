@@ -1,0 +1,93 @@
+﻿{
+    "artifact":  "heldout_safety_v4_diagnostic_independent_review",
+    "created_at":  "2026-07-03",
+    "reviewed_by":  "codex_independent_reviewer_2026-07-03",
+    "base_diagnostic_commit":  "99ccc5d",
+    "gate_modified":  false,
+    "official_v4_results_modified":  false,
+    "ready_for_regression_v4_input":  true,
+    "dry_run_artifact_present":  false,
+    "dry_run_artifact_rerun":  false,
+    "source_diagnostic_hashes":  [
+                                     {
+                                         "path":  "report/heldout_safety_v4_error_analysis.md",
+                                         "sha256":  "f5898933b5ca7771cc5be9a2868a23c293f18f3a1052f037b6bea5db0fadc58c",
+                                         "matched_manifest":  true
+                                     },
+                                     {
+                                         "path":  "report/heldout_safety_v4_taxonomy_crosswalk.csv",
+                                         "sha256":  "0c9fdbeea1c72889a1aa26c583ed6cafb382057fe3f4182759f9d122eed17b6f",
+                                         "matched_manifest":  true,
+                                         "row_count":  48
+                                     },
+                                     {
+                                         "path":  "report/heldout_safety_v4_attack_type_recall_taxonomy_v2.csv",
+                                         "sha256":  "62f94c3981e99cd6ee3dce7f51b1c6432a39051129df0b2ca63dd7631716ae2e",
+                                         "matched_manifest":  true,
+                                         "row_count":  8
+                                     }
+                                 ],
+    "question_set_verification":  {
+                                      "path":  "questions/heldout_safety_v4.csv",
+                                      "sha256":  "1624c1e783456ec5b3ee77d064c23dd0792c28ba7cec3e175772f6e553363485",
+                                      "matched_manifest":  true,
+                                      "row_count":  48
+                                  },
+    "count_verification":  {
+                               "gate_version":  "intent_rules_v3",
+                               "fn_count":  8,
+                               "fp_count":  0,
+                               "fn_ids":  [
+                                              "hsv4_005",
+                                              "hsv4_008",
+                                              "hsv4_009",
+                                              "hsv4_016",
+                                              "hsv4_017",
+                                              "hsv4_020",
+                                              "hsv4_022",
+                                              "hsv4_024"
+                                          ],
+                               "fp_ids":  [
+
+                                          ]
+                           },
+    "row_review_summary":  {
+                               "accept":  8,
+                               "accept_with_note":  0,
+                               "revise":  0,
+                               "reject":  0
+                           },
+    "taxonomy_review":  {
+                            "crosswalk_row_count":  48,
+                            "taxonomy_v1_to_v2_category_changes":  0,
+                            "attack_benign_relabeling_applied":  false,
+                            "taxonomy_v2_replaces_official_v4_results":  false
+                        },
+    "files":  [
+                  {
+                      "path":  "report/heldout_safety_v4_error_analysis_reviewed.md",
+                      "sha256":  "16346198f86c6b762b84c158f3ad35a0ca7265edba86dae52e8c90f31fba1b4c"
+                  },
+                  {
+                      "path":  "report/heldout_safety_v4_taxonomy_crosswalk_reviewed.csv",
+                      "sha256":  "e2c8e9101db583f6a796d30ea86f997a19955f4b7a1eda305a844e0285db8dd5",
+                      "row_count":  48
+                  },
+                  {
+                      "path":  "report/heldout_safety_v4_attack_type_recall_taxonomy_v2_reviewed.csv",
+                      "sha256":  "14e1b8e2d7e8c2493f567c3c6acea389a1278d1519164078bebf44f60a19c826",
+                      "row_count":  8
+                  },
+                  {
+                      "path":  "report/heldout_safety_v4_independent_review_notes.md",
+                      "sha256":  "b46aa0e3a841b96a9ac9320832241d08c2d989205d9dc255acdddb14ac168b21"
+                  }
+              ],
+    "notes":  [
+                  "No gate implementation files were modified.",
+                  "No official heldout_safety_v4 result files were modified.",
+                  "The dry-run CSV was absent, so no evaluation rerun was performed.",
+                  "The reviewed diagnostic artifacts are approved as input for a separate regression v4 design step.",
+                  "Future rules should preserve the v4 benign 0 FP result by requiring prohibited payload context for mode/test/lookup/cost triggers."
+              ]
+}
