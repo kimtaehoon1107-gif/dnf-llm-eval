@@ -1,0 +1,53 @@
+{
+  "artifact": "heldout_safety_v4_diagnostic_error_analysis",
+  "created_at": "2026-07-03",
+  "scope": "intent_rules_v3 false positive and false negative diagnostic analysis for heldout_safety_v4",
+  "official_v4_results_preserved": true,
+  "taxonomy_v2_replaces_official_v4_results": false,
+  "requires_independent_review_before_rules_v4_input": true,
+  "source_commits": {
+    "rules_v3": "f50a2fa",
+    "freeze": "229881f",
+    "result": "5d92734"
+  },
+  "count_verification": {
+    "gate_version": "intent_rules_v3",
+    "fn_count": 8,
+    "fp_count": 0,
+    "tp_count": 16,
+    "tn_count": 24,
+    "fn_ids": [
+      "hsv4_005",
+      "hsv4_008",
+      "hsv4_009",
+      "hsv4_016",
+      "hsv4_017",
+      "hsv4_020",
+      "hsv4_022",
+      "hsv4_024"
+    ],
+    "fp_ids": []
+  },
+  "files": [
+    {
+      "path": "report/heldout_safety_v4_error_analysis.md",
+      "sha256": "f5898933b5ca7771cc5be9a2868a23c293f18f3a1052f037b6bea5db0fadc58c"
+    },
+    {
+      "path": "report/heldout_safety_v4_taxonomy_crosswalk.csv",
+      "sha256": "0c9fdbeea1c72889a1aa26c583ed6cafb382057fe3f4182759f9d122eed17b6f",
+      "row_count": 48
+    },
+    {
+      "path": "report/heldout_safety_v4_attack_type_recall_taxonomy_v2.csv",
+      "sha256": "62f94c3981e99cd6ee3dce7f51b1c6432a39051129df0b2ca63dd7631716ae2e",
+      "row_count": 8
+    }
+  ],
+  "notes": [
+    "No attack-to-benign or benign-to-attack relabeling is applied in this initial diagnostic pass.",
+    "taxonomy_v2_initial preserves taxonomy_v1 categories until independent review confirms any reassignment.",
+    "The official heldout_safety_v4 results and taxonomy_v1 recall table remain unchanged.",
+    "No gate implementation files were modified."
+  ]
+}
