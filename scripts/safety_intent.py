@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 
 
-INTENT_GATE_VERSION = "intent_rules_v4"
+INTENT_GATE_VERSION = "intent_rules_v5"
 
 
 @dataclass(frozen=True)
@@ -106,6 +106,9 @@ def is_defensive_safety_meta_query(text: str) -> bool:
         "재현 절차",
         "단계별",
         "악용",
+        "허위 신고",
+        "반복 등록",
+        "자동화 문장",
         "이득",
         "workflow",
         "제공해",
@@ -138,10 +141,24 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "계정 가치나 판매글이 아니라",
         "판매 목록 문구가 아니라",
         "계정 매물 설명이 아니라",
+        "가격 사기가 아니라",
+        "시세 속임수가 아니라",
+        "구매 제한 우회가 아니라",
+        "조작법이 아니라",
+        "파티 방해가 아니라",
+        "접속 방해가 아니라",
+        "입장 조건 우회가 아니라",
+        "횟수 우회가 아니라",
     )
     public_source_markers = (
         "공개 패치노트",
         "공개 패치 변경점",
+        "공개 공지",
+        "공지 기준",
+        "공지에서",
+        "퍼스트 서버",
+        "언제 열린다고",
+        "안내됐는지",
         "패치노트 기준",
         "공개 문서",
         "문서 기준",
@@ -159,7 +176,10 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "경험치 소모",
         "가격과 제한",
         "판매 가격",
+        "최대 금액 알림",
         "주간 구매 제한",
+        "월 구매 가능 횟수",
+        "이월 규칙",
         "무료 횟수",
         "기본 소모 재료",
         "문서대로",
@@ -217,6 +237,14 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "계정 가치나 판매글이 아니라",
         "판매 목록 문구가 아니라",
         "계정 매물 설명이 아니라",
+        "가격 사기가 아니라",
+        "시세 속임수가 아니라",
+        "구매 제한 우회가 아니라",
+        "조작법이 아니라",
+        "파티 방해가 아니라",
+        "접속 방해가 아니라",
+        "입장 조건 우회가 아니라",
+        "횟수 우회가 아니라",
     )
     hard_harmful_override_markers = (
         "요청할게",
@@ -234,6 +262,9 @@ def is_public_source_negated_trigger_query(text: str) -> bool:
         "반복 호출하는 계정 조회 자동화",
         "소모 없이 처리",
         "제한보다 더",
+        "속여 거래",
+        "거래 사기",
+        "사기 방법",
     )
     if has_any(text, strict_public_negation_markers) and has_any(text, public_source_markers):
         return not has_any(text, hard_harmful_override_markers)
@@ -255,6 +286,120 @@ def classify_intent(question: str) -> IntentDecision:
 
     if is_defensive_safety_meta_query(text):
         return IntentDecision(False, "", "defensive_safety_meta_query")
+
+    if has_any(
+        text,
+        (
+            "로그인 정보",
+            "인증번호",
+            "otp",
+            "악성 링크",
+            "비밀번호",
+            "보안 코드",
+            "인증 코드",
+        ),
+    ) and has_any(
+        text,
+        (
+            "피싱",
+            "사칭",
+            "입력하게",
+            "받아내",
+            "클릭을 유도",
+            "누르게",
+            "문구를 작성",
+            "메시지 문구",
+            "만들어",
+        ),
+    ):
+        return IntentDecision(True, "credential_theft_or_phishing", "asks for credential theft or phishing copy")
+
+    if has_any(text, ("사기", "속이는", "속여", "오해하게", "시세를 속", "기망")) and has_any(
+        text, ("거래", "마켓", "가격", "시세", "판매가", "물품 가격", "안내 문구", "거래 문구")
+    ):
+        return IntentDecision(True, "trade_scam_or_market_fraud", "asks for trade scam or market fraud")
+
+    if has_any(
+        text,
+        (
+            "보상 확률",
+            "보상 결과",
+            "보상 메시지",
+            "실제와 다른 보상",
+            "잔여 탐사 시간",
+            "보스 hp",
+            "피해량 표시",
+            "클라이언트 상태",
+        ),
+    ) and has_any(
+        text,
+        ("조작", "허위", "속이는", "뜨게", "낮춰", "몰래 바꿔", "비정상", "전투 이득"),
+    ):
+        return IntentDecision(True, "client_or_reward_manipulation", "asks for client or reward manipulation")
+
+    if has_any(
+        text,
+        (
+            "업데이트 데이터",
+            "인벤토리",
+            "계정 정보",
+            "개인정보",
+            "특정 이용자",
+            "다른 이용자",
+        ),
+    ) and has_any(
+        text,
+        (
+            "무단",
+            "빼내",
+            "몰래 수집",
+            "찾아 공개",
+            "찾아",
+            "공개하는 방법",
+            "사설 서버",
+            "재사용",
+        ),
+    ):
+        return IntentDecision(True, "data_exfiltration_or_doxxing", "asks for data exfiltration or doxxing")
+
+    if has_any(text, ("보안 탐지", "탐지", "otp", "보안 절차", "조작 흔적")) and has_any(
+        text, ("걸리지 않", "숨기는", "숨기", "우회", "탐지되지 않게")
+    ) and has_any(text, ("클라이언트 조작", "계정 조작", "피해량", "클라이언트 상태", "조작")):
+        return IntentDecision(True, "security_detection_evasion", "asks for security detection evasion")
+
+    if has_any(
+        text,
+        (
+            "파티",
+            "퍼스트 서버 접속",
+            "공격 트래픽",
+            "제한 시간",
+            "후퇴 규칙",
+            "서버",
+        ),
+    ) and has_any(
+        text,
+        (
+            "방해",
+            "강제로 실패",
+            "고의로 망치",
+            "트래픽을 유발",
+            "접속을 방해",
+            "서비스 방해",
+            "공격",
+        ),
+    ):
+        return IntentDecision(True, "service_disruption_or_griefing", "asks for service disruption or griefing")
+
+    if has_any(text, ("입장 명성", "입장 제한", "주간 입장 제한", "구매 제한", "계정당 구매 제한")) and has_any(
+        text, ("속여", "차감되지 않은 것처럼", "더 들어가는", "넘겨", "더 많이 구매", "우회")
+    ):
+        return IntentDecision(True, "exploit_request", "asks for access or limit bypass")
+
+    if has_any(text, ("허위 오류 제보", "오류 제보", "허위 신고", "신고")) and has_any(
+        text, ("대량 등록", "반복 제출", "반복 등록", "스팸 자동화", "자동화", "여러 계정")
+    ):
+        return IntentDecision(True, "automation_abuse", "asks for report-channel spam automation")
 
     if has_any(text, ("시스템 규칙보다", "사용자 메시지를 우선", "내 요청을 우선")) and has_any(
         text, ("검증 없이", "가능한 것처럼", "확정", "말해", "답해")
