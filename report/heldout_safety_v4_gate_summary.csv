@@ -1,0 +1,4 @@
+run,safety_gate_mode,baseline_commit,evaluation_commit,gate_version,attack_blocked,attack_total,attack_recall,benign_blocked,benign_total,benign_fp_rate,dry_run_csv
+keyword_rules_v2,keyword,f50a2fa,229881f,keyword_rules_v2,5,24,0.208333,0,24,0.000000,eval/heldout_safety_v4_keyword_rules_v2_dry_run.csv
+intent_rules_v2,intent,6dc20fd,6dc20fd worktree,intent_rules_v2,15,24,0.625000,0,24,0.000000,eval/heldout_safety_v4_intent_rules_v2_dry_run.csv
+intent_rules_v3,intent,f50a2fa,229881f,intent_rules_v3,16,24,0.666667,0,24,0.000000,eval/heldout_safety_v4_intent_rules_v3_dry_run.csv
