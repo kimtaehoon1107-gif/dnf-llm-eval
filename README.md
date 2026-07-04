@@ -469,7 +469,23 @@ python scripts\run_rag_local_llm_eval.py `
 
 별도 진단 실험은 [`report/structured_record_probe_v1.md`](report/structured_record_probe_v1.md)에 정리했다. 이 실험은 새 held-out이 아니라 structured record가 실제로 발동하도록 만든 diagnostic/probe이며, no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. 해석은 "구조화 메커니즘은 record가 붙으면 도움이 된다"와 "blind held-out에서는 hand-authored record가 붙지 않았다"를 분리하는 것이다. 따라서 다음 개선 방향은 손으로 쓴 hint를 늘리는 것이 아니라, 원문 패치노트에서 atomic before/after/unchanged record를 blind 또는 자동으로 추출하는 coverage/extractor 검증이다.
 
-Safety 최종 라운드는 [`report/safety_eval_final_report_v6.md`](report/safety_eval_final_report_v6.md)와 [`report/safety_eval_process_summary_for_main_project.md`](report/safety_eval_process_summary_for_main_project.md)에 정리했다. 개발용 regression에서는 intent_rules_v5가 24/24를 달성했지만, 최종 보고는 사전 선언한 fresh v6 결과만 기준으로 삼았다. v6에서 intent_rules_v5는 intent_rules_v4 대비 attack block rate를 10/24에서 12/24로 올렸고 benign false positive는 0/24로 유지했다. 별도 재검산에서는 과거 진단 공격 스타일 유지력은 90/120(75.0%)이지만, 신규 fresh v6 대응은 12/24(50.0%)로 분리해 보고했다.
+### 4. Safety 평가
+
+Safety는 단순히 "막았다/못 막았다"가 아니라, `공격 recall`, `정상 질문 false positive`, `dev/regression`, `fresh held-out`, `retrospective prototype`을 분리해 평가했다. 핵심은 개발 중 맞춘 세트의 100%를 최종 성능처럼 쓰지 않고, 사전 선언한 fresh v6 결과를 headline으로 낮춰 보고한 점이다.
+
+| 평가 단계 | 결과 | 해석 |
+|---|---:|---|
+| 초기 adversarial 질문 | 10 / 10 차단 | 명시적 공격에는 규칙 기반 gate가 작동 |
+| Paraphrase safety | 0 / 10 -> 10 / 10 | 실패 문항을 본 뒤 보강한 test-informed 개선 |
+| Stealth safety 사전 차단 | 0 / 10 | 직접 키워드를 피하면 keyword gate가 약함 |
+| Stealth end-to-end strict pass | 6 / 10 | system prompt가 일부 방어하지만 완전하지 않음 |
+| Intent gate dev/regression | 공격 50 / 50, 정상 FP 0 / 50 | 기존 세트 기준 개발 성과. 최종 일반화 headline 아님 |
+| Final safety v6 `keyword_rules_v2` | attack 1 / 24, FP 0 / 24 | keyword baseline의 fresh 한계 |
+| Final safety v6 `intent_rules_v5` | attack 12 / 24, FP 0 / 24 | 최종 fresh headline. 제한적 개선으로 보고 |
+| Backward compatibility | attack 90 / 120, FP 1 / 120 | 과거 진단 공격 스타일 유지력. 신규 공격 일반화와 분리 |
+| Semantic classifier prototype | v6 attack 20 / 24, FP 0 / 24 | BGE-M3 1-NN retrospective prototype. 정식 headline은 v7 이후 |
+
+Safety 최종 라운드는 [`report/safety_eval_final_report_v6.md`](report/safety_eval_final_report_v6.md)와 [`report/safety_eval_process_summary_for_main_project.md`](report/safety_eval_process_summary_for_main_project.md)에 정리했다. v6에서 `intent_rules_v5`는 `intent_rules_v4` 대비 attack block rate를 10/24에서 12/24로 올렸고 benign false positive는 0/24로 유지했다. 별도 재검산에서는 과거 진단 공격 스타일 유지력은 90/120(75.0%)이지만, 신규 fresh v6 대응은 12/24(50.0%)로 분리해 보고했다.
 
 BGE-M3 embedding 기반 semantic safety classifier 프로토타입은 [`report/semantic_safety_classifier_prototype_v1.md`](report/semantic_safety_classifier_prototype_v1.md)에 정리했다. 이 프로토타입은 held-out 문항을 학습/프로토타입 구성에 쓰지 않았고 v6에서 20/24, FP 0/24를 재현했지만, 분류기 아이디어 선택 자체가 v6 결과 이후 이뤄졌을 수 있으므로 retrospective 결과로만 해석한다. 정식 headline은 future work로 남긴다.
 
