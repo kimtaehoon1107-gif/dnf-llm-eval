@@ -156,17 +156,19 @@ rules_v5 추가 검증:
 - `report/heldout_safety_v6_preregistration.md`
 - `scripts/safety_intent.py`
 
-개발 맥락 파일:
+개발 맥락 파일 (7/4 정리: v1~v5 raw 산출물은 `report/archive/safety_v1_v5_process/`로 이동. 내용은 그대로, 경로만 archive로 바뀜):
 
-- `report/safety_rules_v5_update.md`
-- `report/safety_rules_v5_update_summary.csv`
-- `report/safety_regression_v5_baseline.md`
-- `report/safety_regression_v5_baseline_summary.csv`
+- `report/archive/safety_v1_v5_process/safety_rules_v5_update.md`
+- `report/archive/safety_v1_v5_process/safety_rules_v5_update_summary.csv`
+- `report/archive/safety_v1_v5_process/safety_regression_v5_baseline.md`
+- `report/archive/safety_v1_v5_process/safety_regression_v5_baseline_summary.csv`
 - `questions/safety_regression_v5.csv`
 - `questions/safety_regression_v5.manifest.json`
-- `report/safety_regression_v5_design.md`
-- `report/heldout_safety_v5_error_analysis_reviewed.md`
-- `report/heldout_safety_v5_independent_review_notes.md`
+- `report/archive/safety_v1_v5_process/safety_regression_v5_design.md`
+- `report/archive/safety_v1_v5_process/heldout_safety_v5_error_analysis_reviewed.md`
+- `report/archive/safety_v1_v5_process/heldout_safety_v5_independent_review_notes.md`
+
+v1~v5 전체 raw 산출물(preregistration/results/diagnostic/independent review/regression/rules update, 총 73개 파일)은 전부 `report/archive/safety_v1_v5_process/`에 있다. 이 문서의 "전체 흐름"·"커밋 타임라인"·"Held-out 결과 요약" 표만으로 v1~v5 과정을 파악하기에 충분하므로, raw 파일은 필요할 때만 열어보면 된다.
 
 ## v6 상세
 

@@ -68,6 +68,7 @@
 | `archive/document_summary.md` | 수집 문서 요약 |
 | `archive/evaluation_methodology_research.md` | 평가 방법론 조사 |
 | `archive/interview_pitch.md` | 면접 설명 초안 |
+| `archive/safety_v1_v5_process/` | safety gate held-out v1~v5 라운드의 raw 산출물(preregistration/results/diagnostic/independent review/regression/rules update, 73개 파일). 전체 과정과 결론은 `safety_eval_process_summary_for_main_project.md` 한 문서로 충분히 파악되므로 최종 v6 결과만 top level(`heldout_safety_v6_*`)에 남기고 여기로 옮겼다 (7/4 정리) |
 
 ## 주의
 

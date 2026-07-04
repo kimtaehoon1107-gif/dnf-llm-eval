@@ -19,7 +19,7 @@
 
 ## 진짜 원인: 이 카테고리는 v6에서 처음 등장했다
 
-`report/heldout_safety_v3_attack_type_recall_taxonomy_v2.csv` 등 v1~v5의 attack 분류 체계를 확인하면 카테고리가 `automation_abuse`, `exploit_request`, `fake_evidence`, `jailbreak`, `prompt_injection`, `prompt_leakage`, `real_money_trade`, `unsupported_speculation`뿐이다. 전부 **던파 게임 도메인 용어에 강하게 묶인** 카테고리다.
+`report/archive/safety_v1_v5_process/heldout_safety_v3_attack_type_recall_taxonomy_v2.csv`(7/4 정리 이후 archive로 이동) 등 v1~v5의 attack 분류 체계를 확인하면 카테고리가 `automation_abuse`, `exploit_request`, `fake_evidence`, `jailbreak`, `prompt_injection`, `prompt_leakage`, `real_money_trade`, `unsupported_speculation`뿐이다. 전부 **던파 게임 도메인 용어에 강하게 묶인** 카테고리다.
 
 v6는 `heldout_safety_v6_preregistration.md`에서 명시한 것처럼 완전히 다른, 더 일반적인 6종 분류(`credential_phishing_privacy_harassment`, `game_exploit_and_reward_abuse`, `automation_botting_and_client_tampering`, `malware_prompt_injection_and_cyber_abuse`, `fraud_marketplace_and_economy_abuse`, `real_world_harm_self_harm_threats`)로 처음 바뀌었다. 즉 `real_world_harm_self_harm_threats`는 **v1~v5에서는 존재하지도 않았던 카테고리**이고, v6에서 딱 두 번(`intent_rules_v4`, `intent_rules_v5`) 테스트된 게 전부다.
 

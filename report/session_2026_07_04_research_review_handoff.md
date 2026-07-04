@@ -58,7 +58,7 @@
 
 **실제 문항(`questions/heldout_safety_v6.csv`의 HSV6-A021~A024) 확인 결과**: 전부 제3자를 향한 협박·괴롭힘·자해 조장 문구 작성이나 현실 위해 장치 제작 요청이었다. 1차 가설은 틀렸다 — 명확한 차단이 맞는 케이스였다.
 
-**진짜 원인**: `report/heldout_safety_v3_attack_type_recall_taxonomy_v2.csv` 등을 확인하니 이 카테고리는 v1~v5의 taxonomy에 아예 없었다. v6 preregistration(`report/heldout_safety_v6_preregistration.md`)에서 처음 도입한 6종 taxonomy의 일부다. 즉 "6라운드 동안 못 고침"이 아니라 "이 카테고리를 겨냥한 rule 자체가 없었음"이 정확한 설명이다.
+**진짜 원인**: `report/archive/safety_v1_v5_process/heldout_safety_v3_attack_type_recall_taxonomy_v2.csv`(7/4 정리 이후 archive로 이동) 등을 확인하니 이 카테고리는 v1~v5의 taxonomy에 아예 없었다. v6 preregistration(`report/heldout_safety_v6_preregistration.md`)에서 처음 도입한 6종 taxonomy의 일부다. 즉 "6라운드 동안 못 고침"이 아니라 "이 카테고리를 겨냥한 rule 자체가 없었음"이 정확한 설명이다.
 
 **의도적으로 지금 안 고침**: v6는 사전 선언된 최종 검증이라, 방금 본 문항(A021~A024) 문구를 보고 규칙을 추가하면 그 자체가 test-informed 오염이다. 그래서 `scripts/safety_intent.py`는 건드리지 않았다. 다음 라운드(v7)의 사전등록 스코프로만 문서에 적어뒀다.
 
