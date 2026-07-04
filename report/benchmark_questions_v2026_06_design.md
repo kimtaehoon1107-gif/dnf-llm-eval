@@ -42,7 +42,7 @@ python scripts\run_rag_local_llm_eval.py `
   --dry-run
 ```
 
-이 실행은 모델을 호출하지 않고 검색 결과만 확인한다. 실제 답변 평가를 실행할 때는 `--dry-run`을 제거하고, 모델/검색기/서비스 톤 설정을 run manifest와 함께 기록한다.
+이 실행은 모델을 호출하지 않고 검색 결과만 확인한다. 실제 답변 평가를 실행할 때는 `--dry-run`을 제거하고, 모델/검색기/생성 설정을 run manifest와 함께 기록한다.
 
 ```powershell
 python scripts\run_rag_local_llm_eval.py `

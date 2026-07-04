@@ -72,8 +72,8 @@ def main() -> None:
     parser.add_argument("--min-score", type=float, default=2.0)
     parser.add_argument("--timeout", type=int, default=120)
     parser.add_argument("--num-predict", type=int, default=220)
+    parser.add_argument("--num-ctx", type=int, default=0)
     parser.add_argument("--use-structured-data", action="store_true")
-    parser.add_argument("--service-tone", action="store_true")
     parser.add_argument("--disable-thinking", action="store_true")
     parser.add_argument("--dry-run", action="store_true", help="모델 호출 없이 검색 근거만 확인합니다.")
     parser.add_argument(
@@ -166,10 +166,11 @@ def main() -> None:
         row=row,
         context=context,
         timeout=args.timeout,
-        service_tone=args.service_tone,
-        service_tone_examples=False,
         num_predict=args.num_predict,
+        num_ctx=args.num_ctx,
         disable_thinking=args.disable_thinking,
+        structured_source_relation=True,
+        structured_completeness_rules=True,
     )
 
     print("\n[답변]")

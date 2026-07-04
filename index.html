@@ -520,7 +520,7 @@
         <table class="comparison-table">
           <thead><tr><th>공고 요구사항</th><th>프로젝트에서 보여준 방식</th></tr></thead>
           <tbody>
-            <tr><td>게임 도메인 LLM 벤치마크 구성</td><td>던파 공식 업데이트 문서를 수집하고, 실제 모험가가 물어볼 법한 문서 기반 질문 22개와 OOD/공격 질문 세트를 설계했습니다.</td></tr>
+            <tr><td>게임 도메인 LLM 벤치마크 구성</td><td>던파 공식 업데이트 문서를 수집하고, 실제 유저가 물어볼 법한 문서 기반 질문 22개와 OOD/공격 질문 세트를 설계했습니다.</td></tr>
             <tr><td>평가 지표와 스코어링 기준 개발</td><td>검색 지표, factual/format proxy, safety block rate, 수동 루브릭, binary critical gate, held-out 감사 규칙을 분리해 설계했습니다.</td></tr>
             <tr><td>LLM 응답 품질 평가</td><td>Non-RAG, BM25 heuristic, BGE-M3, structured data, Qwen3 instruct 조합을 비교하고, dev/test-informed 결과를 blind held-out으로 재검증했습니다.</td></tr>
             <tr><td>결과 분석과 개선 의견 공유</td><td>검색 실패, 표형 정보 혼입, 영어 추론 출력, record 비전이, safety gate 우회 같은 실패 유형을 보고서로 정리하고 후속 개선 방향까지 제시했습니다.</td></tr>
@@ -575,11 +575,9 @@
 
         <div class="panel" style="margin-top: 16px;">
           <h3>BGE-M3 고정 생성 설정 요소별 비교</h3>
-          <table class="comparison-table"><thead><tr><th>Setting</th><th>Factual Proxy</th><th>Format Proxy</th><th>Meta Reasoning</th><th>Avg Latency</th></tr></thead><tbody>
+            <table class="comparison-table"><thead><tr><th>Setting</th><th>Factual Proxy</th><th>Format Proxy</th><th>Meta Reasoning</th><th>Avg Latency</th></tr></thead><tbody>
             <tr><td>BGE-M3 + qwen3:4b</td><td>17 / 22</td><td>9 / 22</td><td>13</td><td>11.635s</td></tr>
             <tr><td>BGE-M3 + instruct</td><td>18 / 22</td><td>22 / 22</td><td>0</td><td>4.625s</td></tr>
-            <tr><td>BGE-M3 + instruct + service tone</td><td>16 / 22</td><td>22 / 22</td><td>0</td><td>4.989s</td></tr>
-            <tr><td>BGE-M3 + instruct + service tone + structured</td><td>17 / 22</td><td>22 / 22</td><td>0</td><td>5.130s</td></tr>
           </tbody></table>
         </div>
 
@@ -602,7 +600,7 @@
         <div class="grid">
           <article class="card"><span class="tag">Benchmark</span><h3>문서 기반 질문 22개</h3><p>패치노트, 상점표, 조건 판단, 비교 질문을 섞어 실제 이용자 질문에 가깝게 구성했습니다.</p></article>
           <article class="card"><span class="tag">Difficulty</span><h3>난이도 수동 라벨링</h3><p>easy는 단일 근거 추출, medium은 조건·비교·계산·요약, hard는 근거 기반 판단이 필요한 문항으로 수동 라벨링했습니다.</p></article>
-          <article class="card"><span class="tag">Proxy Metrics</span><h3>factual / format proxy</h3><p>factual proxy는 답변이 기준 정답·근거의 핵심 정보를 포함하는지, format proxy는 영어 추론·메타 발화 없이 서비스 답변 형식을 지켰는지 자동 확인한 대리 지표입니다.</p></article>
+          <article class="card"><span class="tag">Proxy Metrics</span><h3>factual / format proxy</h3><p>factual proxy는 답변이 기준 정답·근거의 핵심 정보를 포함하는지, format proxy는 영어 추론·메타 발화 없이 한국어 답변 형식을 지켰는지 자동 확인한 대리 지표입니다.</p></article>
           <article class="card"><span class="tag">Rubric</span><h3>수동 루브릭과 Critical Gate</h3><p>정확성, 근거성, 완전성, 의도 적합성, 표현 품질, 최신성은 점수화하고 환각/과잉추론과 중대 오류는 별도 gate로 봅니다.</p></article>
           <article class="card"><span class="tag">Structured Data</span><h3>표형 정보 보완</h3><p>상점표처럼 행 단위 관계가 중요한 정보는 JSON record로 추가 제공하되, held-out에서는 record 발동 여부까지 따로 확인했습니다.</p></article>
           <article class="card"><span class="tag">Safety</span><h3>OOD와 공격 질문 통제</h3><p>날씨, 투자, 다른 게임, 현금화, 버그 악용, prompt leakage 질문을 범위 밖으로 제한하고, regression 결과와 fresh v6 결과를 분리해 보고했습니다.</p></article>
@@ -617,7 +615,7 @@
           <tr><td>표형 정보 혼입</td><td>상점표에서 인접 상품의 가격, 구매 제한이 섞이는 문제가 있었습니다.</td><td><code>shop_items.json</code>을 만들어 표 행 단위 근거를 별도 제공했습니다.</td></tr>
           <tr><td>Dev 점수 과신 위험</td><td>2026-06 structured fix는 dev 20/20이었지만, held-out에서는 record가 25문항 중 0건 발동했습니다.</td><td>freeze, manifest, ablation으로 dev/test-informed 결과와 held-out 일반화 주장을 분리했습니다.</td></tr>
           <tr><td>Record coverage 병목</td><td>held-out은 record 0/25, diagnostic probe는 record 발동 시 24/35 -> 32/35였습니다.</td><td>구조화 메커니즘과 coverage 문제를 분리하고, 다음 개선을 자동 extractor 검증으로 좁혔습니다.</td></tr>
-          <tr><td>서비스 답변 형식 실패</td><td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td><td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td></tr>
+          <tr><td>답변 형식 실패</td><td>BGE-M3 고정 요소별 비교에서 <code>qwen3:4b</code>는 format proxy가 9 / 22였고 meta reasoning이 13건 발생했습니다.</td><td>instruct variant 적용 후 format proxy를 22 / 22로 개선하고 meta reasoning을 0건으로 줄였습니다.</td></tr>
           <tr><td>Safety gate 우회</td><td>dev/regression에서는 intent gate가 50 / 50을 통과했지만, 최종 fresh v6에서는 12 / 24, FP 0 / 24였습니다.</td><td>높은 regression 수치를 headline으로 쓰지 않고, backward compatibility 90 / 120과 fresh v6 12 / 24를 분리해 보고했습니다.</td></tr>
         </tbody></table>
       </div>

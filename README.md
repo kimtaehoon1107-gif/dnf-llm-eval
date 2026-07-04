@@ -23,7 +23,7 @@
 | record가 발동하면 구조화가 도움 되나? | diagnostic probe 24/35 -> 30/35 -> 32/35 | 새 held-out이 아니라 메커니즘 진단이다. record가 붙으면 품질은 오르지만, 다음 병목은 coverage/extractor다. |
 | Safety는 어디까지 됐나? | fresh v6 12/24, FP 0/24 | regression 100%를 최종 성능처럼 쓰지 않고, 사전 선언한 fresh blind 결과를 그대로 보고했다. |
 
-**읽는 법:** 이 프로젝트의 숫자는 한 가지 점수가 아니라 `검색 품질`, `답변 생성 품질`, `서비스 답변 형식`, `safety 한계`를 따로 측정한 결과입니다. 예를 들어 `BGE-M3 top-1 hit 21/22`는 검색기가 정답 근거를 잘 찾는지를 본 값이고, `최종 factual proxy 17/22`는 그 근거를 받은 LLM이 최종 답변을 얼마나 맞게 생성했는지를 본 값입니다.
+**읽는 법:** 이 프로젝트의 숫자는 한 가지 점수가 아니라 `검색 품질`, `답변 생성 품질`, `답변 형식`, `safety 한계`를 따로 측정한 결과입니다. 예를 들어 `BGE-M3 top-1 hit 21/22`는 검색기가 정답 근거를 잘 찾는지를 본 값이고, `최종 factual proxy 17/22`는 그 근거를 받은 LLM이 최종 답변을 얼마나 맞게 생성했는지를 본 값입니다.
 
 <details>
 <summary>상세 실험 수치 보기</summary>
@@ -75,14 +75,13 @@ flowchart LR
   R --> C["Context Builder"]
   D["Structured Shop Data"] --> C
   C --> G["Generator: qwen3:4b-instruct-2507-q4_K_M"]
-  T["Service-tone Prompt and Examples"] --> G
   G --> E["Evaluator and Logger"]
   E --> P["Reports"]
 ```
 
-최종 조합은 `BGE-M3 retriever + structured shop data + qwen3:4b-instruct-2507-q4_K_M + service-tone prompt + few-shot examples + safety gate`입니다.
+최종 조합은 `BGE-M3 retriever + structured shop data + qwen3:4b-instruct-2507-q4_K_M + safety gate`입니다.
 
-최종 생성 모델은 로컬 실행 가능한 4.0B Qwen3 계열 모델이며, `Q4_K_M` 양자화로 실행 부담을 줄인 구성을 사용했습니다. 기존 `qwen3:4b`는 검색 근거를 받은 뒤에도 영어 추론 과정과 메타 발화를 출력했기 때문에, 최종 단계에서는 instruction following이 더 안정적인 instruct variant를 사용해 서비스 답변 형식을 개선했습니다.
+최종 생성 모델은 로컬 실행 가능한 4.0B Qwen3 계열 모델이며, `Q4_K_M` 양자화로 실행 부담을 줄인 구성을 사용했습니다. 기존 `qwen3:4b`는 검색 근거를 받은 뒤에도 영어 추론 과정과 메타 발화를 출력했기 때문에, 최종 단계에서는 instruction following이 더 안정적인 instruct variant를 사용해 한국어 답변 형식을 개선했습니다.
 
 ## What Was Designed
 
@@ -91,18 +90,15 @@ flowchart LR
 | 설계 요소 | 의미 | 사용 위치 |
 |---|---|---|
 | Benchmark questions | 던파 업데이트 문서에서 실제 유저가 물어볼 만한 질문, 기준 정답, 근거 문장을 함께 만든 평가셋 | `questions/benchmark_questions.csv` |
-| Service tone | 답변을 게임 서비스 안내처럼 만들기 위한 프롬프트 규칙. 핵심 답변 선제시, 조건/수치 분리, 퍼스트 서버 단정 방지, 문서 밖 추측 금지를 포함 | `report/service_tone_guideline.md` |
 | Structured data | 상점표처럼 행/열 관계가 중요한 정보를 JSON으로 따로 추출한 보조 근거. 가격, 구매 제한, 이월 조건처럼 표에서 섞이기 쉬운 정보를 보완 | `data/structured/shop_items.json` |
 | Safety gate | 프롬프트 유출, 가짜 근거, 버그 악용, 현금화, 매크로 요청, OOD 질문을 답변 전에 차단하는 규칙 기반 baseline | `questions/adversarial_*.csv` |
 | Manual rubric | 기존 대표 채점은 7개 항목 legacy 루브릭으로 기록했고, 현재 운영 루브릭은 점수 항목과 binary critical gate를 분리 | `eval/evaluation_rubric.md` |
-
-`Service tone`은 단순히 말투를 부드럽게 만드는 옵션이 아닙니다. 게임 유저가 바로 행동할 수 있도록 답변 구조를 정리하는 장치입니다. 예를 들어 `모험가님` 호칭은 모든 답변에 강제로 넣지 않고, 안내나 주의사항이 필요한 경우에만 자연스럽게 사용하도록 설계했습니다.
 
 `Structured data`는 LoRA나 adapter가 아니라, RAG context builder에 추가로 넣는 구조화 근거입니다. 일반 chunk 검색은 긴 표 안에서 인접 행 정보를 섞을 수 있으므로, 상점 아이템명, 가격, 구매 제한, 이월 조건을 별도 record로 만들어 표형 정보 질문에서 보조 근거로 사용했습니다.
 
 ## Evaluation Design
 
-정량 평가는 여러 설정을 빠르게 비교하기 위한 자동 지표이며, 그중 factual proxy와 format proxy는 사람이 직접 평가하기 전의 대리 지표입니다. 정성 평가는 실제 서비스 답변으로 볼 수 있는지를 확인하기 위한 수동 기준입니다.
+정량 평가는 여러 설정을 빠르게 비교하기 위한 자동 지표이며, 그중 factual proxy와 format proxy는 사람이 직접 평가하기 전의 대리 지표입니다. 정성 평가는 실제 최종 답변으로 볼 수 있는지를 확인하기 위한 수동 기준입니다.
 
 | 지표 | 유형 | 무엇을 보는가 |
 |---|---|---|
@@ -110,7 +106,7 @@ flowchart LR
 | Retrieval token recall / phrase hit | 정량 | 검색된 context가 기준 evidence의 핵심 token/phrase를 얼마나 포함하는가 |
 | Answer token recall / phrase hit | 정량 | 모델 답변이 gold answer 또는 evidence의 핵심 token/phrase를 얼마나 포함하는가 |
 | Factual proxy | 정량 | 답변이 기준 정답의 핵심 정보를 포함하는지 자동으로 근사 판정 |
-| Format proxy | 정량 | 영어 추론, 메타 발화, 비한국어 잡음 없이 서비스 답변처럼 나오는가 |
+| Format proxy | 정량 | 영어 추론, 메타 발화, 비한국어 잡음 없이 한국어 답변 형식을 지키는가 |
 | Latency | 정량 | 로컬 모델이 실제 질의응답에 쓸 만한 속도로 답하는가 |
 | Manual rubric + critical gates | 정성 | 정확성, 근거성, 완전성, 의도 적합성, 표현 품질, 최신성을 채점하고 환각/과잉추론, 중대 수치 오류, 라이브 서버 기준 오인, 범위 통제는 binary gate로 확인 |
 
@@ -124,12 +120,11 @@ flowchart LR
 
 | 설정 | 실제 답변 경향 | 해석 |
 |---|---|---|
-| BGE-M3 + `qwen3:4b` | 영어로 "Okay, let's tackle this question..."처럼 추론 과정을 길게 출력하고, 중간에 "Wait" 같은 메타 발화가 섞임 | 근거는 찾았지만 서비스 답변 형식으로는 부적합 |
+| BGE-M3 + `qwen3:4b` | 영어로 "Okay, let's tackle this question..."처럼 추론 과정을 길게 출력하고, 중간에 "Wait" 같은 메타 발화가 섞임 | 근거는 찾았지만 최종 답변 형식으로는 부적합 |
 | BGE-M3 + instruct variant | `태초 광휘의지는 광휘의 잔영 790개로 구매할 수 있으며, 계정당 1회로 제한됩니다.` | 짧고 한국어 중심이며 핵심 답변을 바로 제시 |
-| BGE-M3 + instruct + service tone | `태초 광휘의 의지는 광휘의 잔영 790개로 구매할 수 있습니다. 구매 제한은 계정당 1회입니다.` | 문장성이 좋아지고 안내형 답변에 가까워짐 |
-| BGE-M3 + instruct + service tone + structured | 가격, 구매 제한, 이월 조건 같은 표형 정보를 구조화 근거로 함께 제공 | 표형 정보 보완에는 도움이 되지만, 인접 조건 혼입 여부는 수동 검토 필요 |
+| BGE-M3 + instruct + structured evidence | 가격, 구매 제한, 이월 조건 같은 표형 정보를 구조화 근거로 함께 제공 | 표형 정보 보완에는 도움이 되지만, 인접 조건 혼입 여부는 수동 검토 필요 |
 
-이 예시에서 핵심 개선은 "모델이 더 많이 말한다"가 아니라, 근거 기반 답변을 짧고 확인 가능한 서비스 답변 형태로 바꾼 것입니다.
+이 예시에서 핵심 개선은 "모델이 더 많이 말한다"가 아니라, 근거 기반 답변을 짧고 확인 가능한 한국어 답변 형태로 바꾼 것입니다.
 
 ## Start Here
 
@@ -144,7 +139,7 @@ flowchart LR
 | [`report/safety_eval_final_report_v6.md`](report/safety_eval_final_report_v6.md) | safety 최종 fresh v6 결과: 12/24, benign FP 0/24 |
 | [`report/safety_eval_process_summary_for_main_project.md`](report/safety_eval_process_summary_for_main_project.md) | safety v1~v6 개선 라운드와 regression/held-out 분리 과정 |
 | [`docs/PROJECT_REVIEW_BRIEF.md`](docs/PROJECT_REVIEW_BRIEF.md) | 리뷰어/면접관용 1-page 핵심 설명 |
-| [`report/ablation_study_report.md`](report/ablation_study_report.md) | BGE-M3 고정 후 모델/톤/구조화 데이터 효과를 분리한 추가 실험 |
+| [`report/ablation_study_report.md`](report/ablation_study_report.md) | BGE-M3 고정 후 생성 모델 변경 효과를 분리한 추가 실험 |
 | [`report/README.md`](report/README.md) | 보고서 폴더의 권장 읽기 순서 |
 | [`report/application_summary.md`](report/application_summary.md) | 지원서와 면접에서 바로 설명할 수 있는 요약문 |
 | [`report/model_selection_and_benchmark_rationale.md`](report/model_selection_and_benchmark_rationale.md) | 모델, 검색기, 평가 방법 선택 근거 |
@@ -196,7 +191,6 @@ dnf-llm-eval/
     adversarial_questions.csv
     adversarial_paraphrase_questions.csv
     adversarial_stealth_questions.csv
-    service_tone_sample_questions.csv
   scripts/
     collect_dnf_updates_selenium.py
     build_structured_shop_data.py
@@ -232,7 +226,6 @@ dnf-llm-eval/
     paraphrase_safety_gate_test.md
     stealth_safety_gate_test.md
     safety_design_rationale.md
-    service_tone_guideline.md
     archive/                    # 초기 계획서와 오래된 중간 결과 보관
 ```
 
@@ -372,7 +365,7 @@ python scripts\run_rag_local_llm_eval.py `
 
 ### 3. BGE-M3 고정 생성 설정 요소별 비교 실험
 
-최종 조합을 한 번에 비교하면 어떤 요소가 개선에 기여했는지 분리하기 어렵습니다. 그래서 검색기를 BGE-M3로 고정하고, 모델 변경, 서비스 톤 프롬프트, 구조화 데이터를 단계적으로 추가한 4개 실험을 실행했습니다.
+최종 조합을 한 번에 비교하면 어떤 요소가 개선에 기여했는지 분리하기 어렵습니다. 그래서 검색기를 BGE-M3로 고정하고, 모델 변경과 구조화 데이터 보강 효과를 분리해 비교했습니다.
 
 ```powershell
 python scripts\run_rag_local_llm_eval.py `
@@ -391,31 +384,9 @@ python scripts\run_rag_local_llm_eval.py `
   --disable-thinking `
   --num-predict 512
 
-python scripts\run_rag_local_llm_eval.py `
-  --questions questions\benchmark_questions.csv `
-  --output eval\ablation_03_bge_qwen3_4b_instruct_service_tone.csv `
-  --model qwen3:4b-instruct-2507-q4_K_M `
-  --retriever bge-m3 `
-  --service-tone `
-  --service-tone-examples `
-  --disable-thinking `
-  --num-predict 512
 ```
 
-```powershell
-python scripts\run_rag_local_llm_eval.py `
-  --questions questions\benchmark_questions.csv `
-  --output eval\ablation_04_bge_qwen3_4b_instruct_service_tone_structured.csv `
-  --model qwen3:4b-instruct-2507-q4_K_M `
-  --retriever bge-m3 `
-  --use-structured-data `
-  --service-tone `
-  --service-tone-examples `
-  --disable-thinking `
-  --num-predict 512
-```
-
-이 요소별 비교 실험은 `--restrict-to-question-doc`를 사용하지 않고 전체 5개 문서 corpus에서 검색했습니다. 결과 해석은 [`report/ablation_study_report.md`](report/ablation_study_report.md)에 정리했습니다.
+이 요소별 비교 실험은 `--restrict-to-question-doc`를 사용하지 않고 전체 5개 문서 corpus에서 검색했습니다. 결과 해석은 [`report/ablation_study_report.md`](report/ablation_study_report.md)에 정리했습니다. 답변 형식 개선은 최종적으로 instruct 모델의 format proxy 개선으로 설명합니다.
 
 ## 주요 결과
 
@@ -439,10 +410,8 @@ python scripts\run_rag_local_llm_eval.py `
 |---|---:|---:|---:|---:|
 | BGE-M3 + `qwen3:4b` | 17 / 22 | 9 / 22 | 13 | 11.635s |
 | BGE-M3 + `qwen3:4b-instruct-2507` | 18 / 22 | 22 / 22 | 0 | 4.625s |
-| BGE-M3 + instruct + service-tone | 16 / 22 | 22 / 22 | 0 | 4.989s |
-| BGE-M3 + instruct + service-tone + structured | 17 / 22 | 22 / 22 | 0 | 5.130s |
 
-가장 큰 변화는 생성 모델을 instruct variant로 바꿨을 때 발생했습니다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었습니다. Service-tone과 structured data는 최종 사용자 경험과 표형 정보 보완을 위한 구성 요소이며, token 기반 factual proxy의 false negative 가능성을 함께 고려해 해석했습니다.
+가장 큰 변화는 생성 모델을 instruct variant로 바꿨을 때 발생했습니다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었습니다. 구조화 데이터는 표형 정보 보완을 위한 별도 근거로 해석하며, token 기반 factual proxy의 false negative 가능성도 함께 고려했습니다.
 
 ### 2026-06 staged corpus 후속 검증
 
@@ -493,8 +462,6 @@ BGE-M3 embedding 기반 semantic safety classifier 프로토타입은 [`report/s
 
 - Q002: `태초 광휘의 의지`의 가격과 계정 제한은 맞혔지만, 인접 상품인 `태초 소울 1개 상자`의 월 4회/이월 조건이 섞였습니다. 구조화 근거가 있어도 generator가 인접 행 정보를 혼합할 수 있음을 보여줍니다.
 - Q016: 답변은 사실상 정답이었지만 자동 factual proxy에서는 실패로 잡혔습니다. token 기반 proxy는 빠른 비교에는 유용하지만 최종 판단에는 수동 rubric이 필요합니다.
-- 서비스 톤: 공식 안내체와 한국어 출력은 개선됐지만, 모든 답변에 `모험가님` 호칭을 강제하는 톤은 후속 개선으로 남겼습니다.
-
 ## 한계 및 후속 개선
 
 | 한계 | 개선 방향 |
@@ -504,7 +471,6 @@ BGE-M3 embedding 기반 semantic safety classifier 프로토타입은 [`report/s
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
 | Safety gate 일반화 한계 | v6 12/24를 최종 fresh 결과로 유지하고, semantic classifier는 retrospective prototype으로만 보고 |
-| 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set으로 확장 |
 | 운영 로그 미연동 | 질문, 검색 chunk, 답변, latency, safety decision, user feedback을 추적하는 observability layer 추가 |
@@ -513,4 +479,4 @@ BGE-M3 embedding 기반 semantic safety classifier 프로토타입은 [`report/s
 
 ## 결론
 
-이 프로젝트는 던파 공식 문서를 기반으로 게임 도메인 LLM 평가 과정을 작게 구현한 작업입니다. RAG는 baseline 대비 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았습니다. 추가 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적임을 확인했습니다. 최종 제출용 조합은 factual proxy 단독 최고값이 아니라, 검색 근거성, 서비스 답변 형식, 표형 정보 보완을 함께 고려한 균형 조합입니다.
+이 프로젝트는 던파 공식 문서를 기반으로 게임 도메인 LLM 평가 과정을 작게 구현한 작업입니다. RAG는 baseline 대비 문서 기반 질문 성능을 크게 개선했고, BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았습니다. 추가 요소별 비교 실험에서는 `qwen3:4b-instruct-2507-q4_K_M`이 기존 `qwen3:4b`보다 답변 형식, meta reasoning 억제, 평균 응답 시간에서 더 안정적임을 확인했습니다. 최종 제출용 조합은 factual proxy 단독 최고값이 아니라, 검색 근거성, 답변 형식, 표형 정보 보완을 함께 고려한 균형 조합입니다.

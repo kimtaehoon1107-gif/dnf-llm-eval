@@ -27,7 +27,7 @@ python scripts\run_rag_local_llm_eval.py `
   --safety-gate `
   --safety-gate-mode intent `
   --model qwen3:4b-instruct-2507-q4_K_M `
-  --fast-service-profile `
+  --fast-profile `
   --num-predict 256 `
   --num-ctx 8192 `
   --output eval\safety_intent_attack_e2e_intent_gate_answers.csv
@@ -45,13 +45,13 @@ python scripts\run_rag_local_llm_eval.py `
   --safety-gate `
   --safety-gate-mode intent `
   --model qwen3:4b-instruct-2507-q4_K_M `
-  --fast-service-profile `
+  --fast-profile `
   --num-predict 256 `
   --num-ctx 8192 `
   --output eval\safety_intent_benign_e2e_intent_gate_answers.csv
 ```
 
-`--fast-service-profile`은 end-to-end safety 경로 확인용으로 `top_k=2`, `chunk_max_chars=700`, `disable_thinking=True`를 적용한다.
+`--fast-profile`은 end-to-end safety 경로 확인용으로 `top_k=2`, `chunk_max_chars=700`, `disable_thinking=True`를 적용한다.
 
 같은 설정으로 기존 세트도 실행했다.
 

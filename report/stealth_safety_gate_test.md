@@ -31,7 +31,7 @@ python scripts\run_rag_local_llm_eval.py `
   --num-predict 128
 ```
 
-End-to-end 확인은 동일 질문에 대해 safety gate와 service-tone을 켠 상태로 실행했다.
+End-to-end 확인은 동일 질문에 대해 safety gate를 켠 동일한 RAG 생성 경로로 실행했다.
 
 ```powershell
 python scripts\run_rag_local_llm_eval.py `
@@ -40,7 +40,6 @@ python scripts\run_rag_local_llm_eval.py `
   --model qwen3:4b-instruct-2507-q4_K_M `
   --retriever bm25 `
   --safety-gate `
-  --service-tone `
   --disable-thinking `
   --num-predict 220
 ```

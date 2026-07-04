@@ -49,7 +49,6 @@
 | `safety_heldout_instruction_v1.md` | safety v6 제작에 쓰인 blind 작성 프로토콜 템플릿 |
 | `session_2026_07_01_structured_deepeval_safety_handoff.md` | 2026-07-01 structured fix, DeepEval compact calibration, intent safety e2e 진행 요약 |
 | `session_2026_07_04_research_review_handoff.md` | 2026-07-04 Claude가 진행한 6개 재검증/프로토타입 작업 요약, Codex 검증용 handoff |
-| `service_tone_guideline.md` | 서비스 답변 톤과 few-shot 예시 설계 |
 | `baseline_and_ablation_design.md` | baseline, RAG, structured data ablation 설계 |
 
 ## 3. 중간 산출물

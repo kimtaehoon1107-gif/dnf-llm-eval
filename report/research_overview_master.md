@@ -37,7 +37,6 @@
 | 자산 | 의미 | 위치 |
 |---|---|---|
 | Benchmark questions | 유저가 물을 만한 문서 기반 질문 + 기준 정답 + 근거 문장 | `questions/benchmark_questions*.csv` |
-| Service tone | 핵심 선제시, 조건/수치 분리, 퍼스트 서버 단정 방지 등 답변 구조 규칙 | `report/service_tone_guideline.md` |
 | Structured data | 표형 정보(상점, 패치 변경표)를 JSON record로 별도 추출한 보조 근거 | `data/**/structured/*.json` |
 | Safety gate | 인젝션·유출·악용·현금화·OOD 등을 답변 전에 차단하는 규칙 baseline | `questions/adversarial_*.csv`, `scripts/safety_intent.py` |
 | Manual rubric | 6항목 점수 + 4개 binary critical gate | `eval/evaluation_rubric.md`, `eval/bias_safety_evaluation_rubric.md` |
@@ -80,10 +79,9 @@ BGE-M3가 top-1 근거 회수에서 앞서 최종 검색기로 채택했다.
 |---|---|---|---|---|
 | BGE-M3 + `qwen3:4b` | 17 / 22 | 9 / 22 | 13 | 11.635s |
 | BGE-M3 + instruct variant | 18 / 22 | 22 / 22 | 0 | 4.625s |
-| + service tone | 16 / 22 | 22 / 22 | 0 | 4.989s |
 | + structured data | 17 / 22 | 22 / 22 | 0 | 5.130s |
 
-가장 큰 변화는 생성 모델을 instruct variant로 바꿨을 때다. 영어 추론·메타 발화가 13건에서 0건으로 줄고 format proxy가 9/22에서 22/22로 올랐다. Service tone과 structured data는 사용자 경험과 표형 정보 보완용이다.
+가장 큰 변화는 생성 모델을 instruct variant로 바꿨을 때다. 영어 추론·메타 발화가 13건에서 0건으로 줄고 format proxy가 9/22에서 22/22로 올랐다. Structured data는 표형 정보 보완용으로 별도 해석한다.
 
 ### 3-5. Safety gate (키워드 baseline)
 
@@ -223,7 +221,7 @@ v6의 12/24가 n=24로 너무 작다는 우려를 검증하려고 두 가지를 
 
 1. 1차 목표(제출용): 카카오뱅크 지원(마감 2026-07-13, 과제전형 7/21~25)에 쓸 수 있도록, 평가 방법론과 정직한 한계 보고가 드러나는 실험 결과와 보고서를 완성한다.
 2. 2차 목표(내용 완성도): 최근 수치의 test-informed 오염을 held-out 검증으로 정량화하고, "test-informed vs held-out"을 나란히 보고하는 구조로 전환한다.
-3. 서술 목표: 완벽한 점수가 아니라 "검색 품질, 생성 사실성, 서비스 형식, 안전 recall·precision, 편향, 자동 judge 한계"를 각각 분리 측정하고 실패를 분석하는 흐름을 보여준다.
+3. 서술 목표: 완벽한 점수가 아니라 "검색 품질, 생성 사실성, 답변 형식, 안전 recall·precision, 편향, 자동 judge 한계"를 각각 분리 측정하고 실패를 분석하는 흐름을 보여준다.
 
 ---
 

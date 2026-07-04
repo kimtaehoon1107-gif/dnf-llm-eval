@@ -27,7 +27,7 @@
 2. RAG를 붙이면 문서 기반 정확성이 얼마나 개선되는가?
 3. 키워드 검색 BM25와 dense 검색 BGE-M3 중 어떤 방식이 더 적합한가?
 4. 표형 데이터는 일반 chunk 검색만으로 충분한가?
-5. 검색 근거가 좋아도 최종 답변 형식이 서비스 품질에 맞는가?
+5. 검색 근거가 좋아도 최종 답변 형식이 사용자에게 바로 보여줄 수 있는 수준인가?
 6. 게임 외 질문, 프롬프트 공격, 허위 근거 유도는 통제되는가?
 
 ## 3. 데이터 및 벤치마크
@@ -89,8 +89,8 @@ Question
 | Retriever 비교 | `qwen3:4b + BM25 heuristic/BGE-M3` | 키워드 검색과 dense 검색 비교 |
 | Structured ablation | `qwen3:4b + BGE-M3 + structured` | 상점표 행 단위 정보 보완 효과 확인 |
 | Safety 평가 | `safety-gate + adversarial set` | 공격성 질문 및 범위 밖 질문 차단 확인 |
-| 생성 설정 ablation | `BGE-M3` 고정 후 모델, service-tone, structured를 단계적으로 추가 | 변수별 개선 효과 분리 |
-| 최종 통합 설정 | `BGE-M3 + structured + qwen3:4b-instruct-2507 + service-tone` | 서비스 답변 형식과 표형 정보 보완을 함께 확인 |
+| 생성 설정 ablation | `BGE-M3` 고정 후 모델과 structured 근거를 단계적으로 비교 | 변수별 개선 효과 분리 |
+| 최종 통합 설정 | `BGE-M3 + structured + qwen3:4b-instruct-2507` | 답변 형식과 표형 정보 보완을 함께 확인 |
 
 초기 retriever 비교에서는 `--restrict-to-question-doc`를 사용했다. 이는 실제 서비스용 옵션이 아니라, 정답 문서 안에서의 검색과 답변 생성 능력을 분리해 보기 위한 평가용 ablation이다. 최종 실험에서는 이 제한을 제거하고 전체 문서 corpus에서 검색했다.
 
@@ -116,18 +116,16 @@ BGE-M3가 top-1 evidence hit에서 더 안정적이었기 때문에 최종 검�
 
 ### 7.3 답변 생성 ablation
 
-검색기를 BGE-M3로 고정하고 전체 5개 문서 corpus에서 검색한 뒤, 생성 모델, 서비스 톤 프롬프트, 구조화 데이터를 단계적으로 추가했다. 이 실험에서는 `--restrict-to-question-doc`를 사용하지 않았다.
+검색기를 BGE-M3로 고정하고 전체 5개 문서 corpus에서 검색한 뒤, 생성 모델과 구조화 데이터 효과를 단계적으로 비교했다. 이 실험에서는 `--restrict-to-question-doc`를 사용하지 않았다.
 
 | 설정 | Factual proxy | Format proxy | Meta reasoning | Avg latency |
 |---|---:|---:|---:|---:|
 | BGE-M3 + `qwen3:4b` | 17 / 22 | 9 / 22 | 13 | 11.635s |
 | BGE-M3 + `qwen3:4b-instruct-2507` | 18 / 22 | 22 / 22 | 0 | 4.625s |
-| BGE-M3 + instruct + service-tone | 16 / 22 | 22 / 22 | 0 | 4.989s |
-| BGE-M3 + instruct + service-tone + structured | 17 / 22 | 22 / 22 | 0 | 5.130s |
 
-가장 큰 개선은 모델만 instruct variant로 바꿨을 때 발생했다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었다. Service-tone과 structured data는 최종 사용자 경험과 표형 정보 보완을 위한 구성 요소이며, factual proxy 변화는 token 기반 자동 지표의 false negative 가능성을 함께 고려해 해석했다.
+가장 큰 개선은 모델만 instruct variant로 바꿨을 때 발생했다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었다. Structured data는 표형 정보 보완을 위한 별도 근거이며, factual proxy 변화는 token 기반 자동 지표의 false negative 가능성을 함께 고려해 해석했다.
 
-최종 모델은 "가장 큰 모델"이 아니라 "제한된 게임 문서 QA에 맞는 경량 instruct 모델"로 선택했다. 로컬 `ollama show` 기준 이 모델은 Qwen3 architecture, 4.0B parameters, Q4_K_M quantization을 사용한다. 따라서 BGE-M3와 structured data가 최신 문서 근거를 제공하고, `qwen3:4b-instruct-2507-q4_K_M`은 그 근거를 서비스 답변 형식으로 정리하는 역할을 맡는다. 이 선택은 로컬 실행 가능성, 한국어 답변 형식 안정성, 평균 응답 시간, 재현성을 함께 고려한 결과다.
+최종 모델은 "가장 큰 모델"이 아니라 "제한된 게임 문서 QA에 맞는 경량 instruct 모델"로 선택했다. 로컬 `ollama show` 기준 이 모델은 Qwen3 architecture, 4.0B parameters, Q4_K_M quantization을 사용한다. 따라서 BGE-M3와 structured data가 최신 문서 근거를 제공하고, `qwen3:4b-instruct-2507-q4_K_M`은 그 근거를 한국어 답변 형식으로 정리하는 역할을 맡는다. 이 선택은 로컬 실행 가능성, 한국어 답변 형식 안정성, 평균 응답 시간, 재현성을 함께 고려한 결과다.
 
 ### 7.4 구조화 데이터
 
@@ -135,8 +133,8 @@ BGE-M3가 top-1 evidence hit에서 더 안정적이었기 때문에 최종 검�
 
 | 설정 | 평가 범위 | 질문 수 | Factual proxy | Format proxy |
 |---|---|---:|---:|---:|
-| BGE-M3 + instruct + service-tone | 상점표 관련 Q001~Q004 | 4 | 3 / 4 | 4 / 4 |
-| BGE-M3 + instruct + service-tone + structured | 상점표 관련 Q001~Q004 | 4 | 4 / 4 | 4 / 4 |
+| BGE-M3 + instruct | 상점표 관련 Q001~Q004 | 4 | 3 / 4 | 4 / 4 |
+| BGE-M3 + instruct + structured | 상점표 관련 Q001~Q004 | 4 | 4 / 4 | 4 / 4 |
 
 구조화 데이터는 `태초 소울 1개 상자`처럼 가격과 구매 제한이 같은 표에 붙어 있는 질문에서 필요한 값을 함께 회수하는 데 도움이 되었다. 이 결과는 전체 22문항 효과가 아니라 상점표 관련 문항에 대한 부분 ablation으로 해석한다.
 
@@ -149,10 +147,6 @@ Q002의 정답 근거는 `태초 광휘의 의지 / 광휘의 잔영 790개 / �
 ### Q016: 자동 proxy의 한계
 
 Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`로 사실상 정답이다. 그러나 token recall 기준에서는 factual proxy 실패로 잡혔다. 자동 지표는 빠른 비교에는 유용하지만, 최종 판단에는 수동 rubric 또는 LLM-as-judge가 필요하다.
-
-### 서비스 톤
-
-최종 모델은 한국어 공식 안내체와 형식 통제에는 성공했다. 다만 모든 답변을 `모험가님`으로 시작하는 던파식 호칭 톤은 아직 강하게 반영하지 않았다. 이는 후속 개선으로 제시하는 편이 자연스럽다.
 
 ### Safety gate paraphrase test
 
@@ -175,7 +169,6 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
 | Safety gate 일반화 한계 | 최종 fresh v6는 12/24, FP 0/24로 보고하고, semantic classifier/output checker는 v7 이후 사전등록 실험으로 검증 |
-| 서비스 호칭 톤 미반영 | `모험가님` 톤 프롬프트 추가 후 재평가 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문/정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
 | 운영 로그 미연동 | 질문, 검색 chunk, 답변, latency, safety decision, user feedback을 추적하는 observability layer 추가 |
@@ -193,7 +186,7 @@ Q016 답변은 `라이브 서버 HP는 90, 성화 작열 감소 HP는 30이다`�
 1. RAG는 최신 게임 문서 질문에서 baseline 대비 성능을 크게 개선했다.
 2. BGE-M3는 BM25 heuristic보다 top-1 근거 회수 성능이 높았다.
 3. 상점표처럼 행 단위 관계가 중요한 문서는 구조화 데이터 보완이 필요했다.
-4. 기존 `qwen3:4b`는 사실성은 개선했지만 서비스 답변 형식에는 부적합했다.
+4. 기존 `qwen3:4b`는 사실성은 개선했지만 최종 답변 형식에는 부적합했다.
 5. `qwen3:4b-instruct-2507-q4_K_M`은 format proxy 22/22, meta reasoning 0건으로 답변 형식 문제를 해결했다.
 6. Keyword safety gate는 기존 adversarial 질문 10/10은 차단했지만 stealth set에서 한계를 보였다. 후속 intent gate는 dev/regression 100문항에서는 공격 50/50 차단, 정상 50/50 통과를 기록했으나, 최종 fresh v6 결과는 12/24 attack recall, benign FP 0/24로 보고한다.
 

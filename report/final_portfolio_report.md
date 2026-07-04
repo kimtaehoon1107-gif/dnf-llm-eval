@@ -6,7 +6,7 @@
 
 이 프로젝트는 넥슨 게임 도메인 LLM 평가 어시스턴트 직무를 목표로, 던전앤파이터 공식 업데이트 문서를 기반으로 로컬 LLM의 답변 품질을 평가하는 과정을 구현한 것이다.
 
-핵심 목표는 단순 챗봇 구현이 아니라, 패치노트와 공지 문서에서 실제 유저가 물어볼 수 있는 질문을 만들고, 답변 정확성, 근거 충실성, 환각 억제, 범위 통제, 서비스 톤을 기준으로 평가 체계를 설계하는 것이다.
+핵심 목표는 단순 챗봇 구현이 아니라, 패치노트와 공지 문서에서 실제 유저가 물어볼 수 있는 질문을 만들고, 답변 정확성, 근거 충실성, 환각 억제, 범위 통제, 답변 형식을 기준으로 평가 체계를 설계하는 것이다.
 
 2026-07-01 후속 실험에서는 2026-06 staged corpus 20문항을 추가해 structured RAG를 재검증했다. Snapshot 구조화 근거와 답변 완전성 규칙을 보강한 뒤 factual proxy와 format proxy가 모두 20/20을 통과했고, 이후 diagnostic/probe에서는 record가 실제 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록했다. Safety는 개발용 regression과 fresh held-out을 분리했고, 최종 v6에서 `intent_rules_v5`가 12/24 attack recall, benign FP 0/24를 기록했다.
 
@@ -34,7 +34,7 @@ Selenium 기반 수집 스크립트로 던전앤파이터 업데이트 목록을
 | 의도 적합성 | 유저 질문의 초점에 맞게 답했는가 |
 | 환각 억제 | 문서에 없는 내용을 만들지 않았는가 |
 | 범위 통제 | 게임 외 질문과 공격성 질문을 제한하는가 |
-| 표현 품질 | 실제 게임 서비스 답변처럼 읽히는가 |
+| 표현 품질 | 최종 사용자 답변으로 읽히는가 |
 
 현재 운영 루브릭은 `eval/evaluation_rubric.md`에서 최신성 점수 항목을 추가하고, 환각/과잉추론, 중대 수치 오류, 라이브 서버 기준 오인, 범위 통제를 binary critical gate로 분리한다. 따라서 총점은 품질 비교용 보조 지표이고, critical gate FAIL은 총점과 별개로 수동 재검토 대상으로 본다.
 
@@ -90,43 +90,37 @@ BGE-M3는 top-1 근거 적중에서 더 좋았다. 모든 검색기가 top-8 안
 
 ### 5.3 BGE-M3 고정 생성 설정 요소별 비교 실험
 
-기존 최종 실험은 `BGE-M3 + structured data + service-tone prompt + qwen3:4b-instruct-2507-q4_K_M`을 한 번에 적용했기 때문에, 어떤 요소가 어떤 개선을 만들었는지 분리해 설명하기 어려웠다. 이를 보완하기 위해 검색기를 BGE-M3로 고정하고 전체 5개 문서 corpus에서 검색한 뒤, 생성 모델, 서비스 톤 프롬프트, 구조화 데이터를 단계적으로 추가한 요소별 비교 실험을 다시 실행했다.
+기존 최종 실험은 검색기, 생성 모델, 구조화 데이터가 한 번에 바뀌어 어떤 요소가 어떤 개선을 만들었는지 분리해 설명하기 어려웠다. 이를 보완하기 위해 검색기를 BGE-M3로 고정하고 전체 5개 문서 corpus에서 검색한 뒤, 생성 모델과 구조화 데이터 효과를 단계적으로 비교했다.
 
 공통 조건은 `questions/benchmark_questions.csv` 22문항, BGE-M3 retriever, top-k 8, thinking disabled, `--num-predict 512`, `--restrict-to-question-doc` 미사용이다.
 
-여기서 service-tone은 단순히 친절한 말투를 적용하는 설정이 아니다. 영어 추론 과정과 메타 발화를 줄이고, 한국어로 핵심 답변을 먼저 제시하며, 조건·수치·제한을 유저가 읽기 쉽게 정리하도록 하는 프롬프트 설정이다.
-
-factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정을 빠르게 비교하기 위한 자동 대리 지표다. factual proxy는 답변이 기준 정답 또는 근거 문서의 핵심 정보를 충분히 포함하는지 확인하고, format proxy는 영어 추론 과정, 메타 발화, 비한국어 잡음 없이 서비스 답변 형식을 지켰는지 확인한다.
+factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정을 빠르게 비교하기 위한 자동 대리 지표다. factual proxy는 답변이 기준 정답 또는 근거 문서의 핵심 정보를 충분히 포함하는지 확인하고, format proxy는 영어 추론 과정, 메타 발화, 비한국어 잡음 없이 한국어 답변 형식을 지켰는지 확인한다.
 
 | 설정 | Factual proxy | Format proxy | Meta reasoning | Avg latency |
 |---|---:|---:|---:|---:|
 | BGE-M3 + `qwen3:4b` | 17 / 22 | 9 / 22 | 13 | 11.635s |
 | BGE-M3 + `qwen3:4b-instruct-2507` | 18 / 22 | 22 / 22 | 0 | 4.625s |
-| BGE-M3 + instruct + service-tone | 16 / 22 | 22 / 22 | 0 | 4.989s |
-| BGE-M3 + instruct + service-tone + structured | 17 / 22 | 22 / 22 | 0 | 5.130s |
 
 가장 큰 변화는 `qwen3:4b`에서 `qwen3:4b-instruct-2507-q4_K_M`으로 모델만 바꿨을 때 발생했다. Format proxy는 9/22에서 22/22로 개선됐고, meta reasoning 출력은 13건에서 0건으로 줄었다. 평균 응답 시간도 11.635초에서 4.625초로 줄었다.
 
-서비스 톤 프롬프트와 few-shot 예시는 format proxy를 유지했지만, factual proxy는 18/22에서 16/22로 낮아졌다. 이는 실제 사실성이 반드시 낮아졌다는 의미라기보다, 답변이 서비스 안내체로 바뀌면서 token 기반 factual proxy가 false negative를 낸 가능성을 함께 고려해야 한다. Q016처럼 사람이 보면 사실상 정답인 답변도 자동 proxy에서는 실패로 잡힌 사례가 있었다.
-
-구조화 데이터를 추가한 최종 통합 설정은 factual proxy가 16/22에서 17/22로 소폭 회복됐고, evidence token recall도 개선됐다. 다만 구조화 데이터의 효과는 전체 22문항보다 상점표 관련 Q001~Q004에서 더 직접적으로 해석하는 것이 타당하다. 상세 결과는 `report/ablation_study_report.md`에 별도로 정리했다.
+Q016처럼 사람이 보면 사실상 정답인 답변도 자동 proxy에서는 실패로 잡힌 사례가 있었다. 따라서 format proxy와 factual proxy는 빠른 비교에는 유용하지만, 최종 해석에서는 수동 rubric과 함께 읽어야 한다.
 
 ### 5.4 최종 생성 모델 선택
 
 최종 생성 모델은 `qwen3:4b-instruct-2507-q4_K_M`으로 정했다. 이 모델을 선택한 이유는 세 가지다. 첫째, 4.0B 규모의 Qwen3 계열 모델이라 개인 PC에서 재현 가능한 경량 로컬 실험이라는 프로젝트 목적에 맞다. 둘째, `Q4_K_M` 양자화 모델이므로 모델 크기와 실행 부담을 줄일 수 있다. 셋째, 기존 `qwen3:4b`에서 드러난 영어 추론 과정과 메타 발화 문제를 줄이기 위해 instruction following이 더 안정적인 instruct variant가 필요했다.
 
-따라서 최종 모델 선택은 단순히 더 큰 모델을 고른 것이 아니라, `BGE-M3가 근거를 찾고`, `structured data가 표형 정보를 보완하며`, `qwen3:4b-instruct-2507-q4_K_M이 근거를 한국어 서비스 답변으로 정리하는` 역할 분리 전략이었다. 최종 통합 설정은 factual proxy 단독 최고값이 아니라, 서비스 답변 형식, meta reasoning 억제, 평균 응답 시간, 표형 정보 보완까지 고려한 제출용 균형 조합으로 해석한다.
+따라서 최종 모델 선택은 단순히 더 큰 모델을 고른 것이 아니라, `BGE-M3가 근거를 찾고`, `structured data가 표형 정보를 보완하며`, `qwen3:4b-instruct-2507-q4_K_M이 근거를 한국어 답변으로 정리하는` 역할 분리 전략이었다. 최종 통합 설정은 factual proxy 단독 최고값이 아니라, 답변 형식, meta reasoning 억제, 평균 응답 시간, 표형 정보 보완까지 고려한 제출용 균형 조합으로 해석한다.
 
 ### 5.5 구조화 데이터 개선
 
 상점표 질문은 일반 chunk 검색만으로 `아이템명-가격-구매 제한` 관계를 안정적으로 보존하기 어려웠다. 이를 해결하기 위해 DOC-01, DOC-02의 켈돈 자비 상점 표를 `data/structured/shop_items.json`으로 추출했다.
 
-구조화 데이터 실험은 전체 22문항이 아니라 상점표 관련 Q001~Q004에 한정한 부분 비교 실험이다. 새 요소별 비교 실험 기준으로 `BGE-M3 + instruct + service-tone` 설정은 Q001~Q004에서 factual proxy 3/4였고, 여기에 structured data를 추가하면 4/4로 개선됐다.
+구조화 데이터 실험은 전체 22문항이 아니라 상점표 관련 Q001~Q004에 한정한 부분 비교 실험이다. 같은 검색기와 instruct 모델 조건에서 structured data를 추가하면 Q001~Q004 factual proxy가 3/4에서 4/4로 개선됐다.
 
 | 설정 | 평가 범위 | Factual proxy | Format proxy |
 |---|---|---:|---:|
-| BGE-M3 + instruct + service-tone | 상점표 관련 Q001~Q004 | 3 / 4 | 4 / 4 |
-| BGE-M3 + instruct + service-tone + structured | 상점표 관련 Q001~Q004 | 4 / 4 | 4 / 4 |
+| BGE-M3 + instruct | 상점표 관련 Q001~Q004 | 3 / 4 | 4 / 4 |
+| BGE-M3 + instruct + structured | 상점표 관련 Q001~Q004 | 4 / 4 | 4 / 4 |
 
 대표적으로 Q003에서 구조화 데이터가 없을 때는 가격/구매 제한 관계가 누락되거나 약하게 반영됐지만, structured 설정에서는 가격과 월 4회 제한을 함께 회수했다. 따라서 structured data는 전체 문항의 만능 개선책이라기보다, 표의 행 단위 관계가 중요한 질문에서 근거 보존을 보완하는 장치로 해석한다.
 
@@ -159,7 +153,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 
 1. BGE-M3는 BM25 heuristic보다 의미 기반 top-1 근거 회수에 강했다.
 2. 상점표처럼 셀 관계가 중요한 문서는 구조화 데이터가 필요했다.
-3. 기존 `qwen3:4b`는 사실 근거를 받아도 최종 서비스 답변 형식 제어가 약했다.
+3. 기존 `qwen3:4b`는 사실 근거를 받아도 최종 답변 형식 제어가 약했다.
 
 정성 오류 분석에서는 자동 proxy 점수만으로는 보이지 않는 실패 원인을 따로 확인했다.
 
@@ -167,7 +161,7 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 |---|---|---|
 | Q002 상점표 질문 | 정답 아이템의 가격은 맞혔지만 인접 상품의 구매 제한이 섞임 | 표형 정보는 일반 chunk만으로 부족하며 structured data가 필요함 |
 | Q016 계산형 질문 | 사람이 보면 정답에 가까웠지만 factual proxy는 실패로 처리 | token 기반 자동 지표는 false negative가 있어 수동 rubric이 필요함 |
-| `qwen3:4b` 기본 모델 | 근거는 찾았지만 영어 추론 과정과 meta reasoning이 출력됨 | 검색 품질과 서비스 답변 형식은 별도 평가해야 함 |
+| `qwen3:4b` 기본 모델 | 근거는 찾았지만 영어 추론 과정과 meta reasoning이 출력됨 | 검색 품질과 답변 형식은 별도 평가해야 함 |
 | stealth/fresh safety 질문 | keyword gate는 직접 키워드를 피하면 약했고, 최종 v6에서는 intent_rules_v5가 12/24, FP 0/24를 기록 | 안전성은 regression 통과율과 fresh held-out 성능을 분리해 보고해야 함 |
 
 ## 7. 직무 연결성
@@ -189,7 +183,6 @@ factual proxy와 format proxy는 사람이 직접 채점하기 전 여러 설정
 | BM25 heuristic 영향 | 순수 BM25 점수를 별도 산출해 검색 비교를 더 엄밀하게 검증 |
 | reranker 미적용 | BGE-M3 top-k 결과에 cross-encoder reranker 추가 |
 | Safety gate 일반화 한계 | v6 fresh 결과는 12/24, FP 0/24로 제한적이며, semantic classifier/output checker는 v7 이후 사전등록 실험으로 검증 |
-| 서비스 호칭 톤 미반영 | `모험가님` 호칭을 명시한 서비스 톤 프롬프트 재실험 |
 | 문서 수 5개 중심 | 더 많은 패치노트, 이벤트, 가이드 문서로 확장 |
 | 고정된 offline benchmark | 패치노트 갱신 주기에 맞춰 질문과 기준 정답을 자동 갱신하는 dynamic refreshed evaluation set 구성 |
 | 운영 로그 미연동 | 질문, 검색 chunk, 답변, latency, safety decision, user feedback을 추적하는 observability layer 추가 |

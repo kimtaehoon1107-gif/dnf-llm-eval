@@ -2,7 +2,7 @@
 
 ## 자기소개서용 요약
 
-던전앤파이터 공식 업데이트 문서를 기반으로 게임 도메인 LLM 평가 벤치마크를 직접 구성했습니다. Selenium으로 패치노트를 수집하고 Markdown과 metadata로 정리한 뒤, 실제 유저가 물어볼 수 있는 문서 기반 질문 22개와 게임 외 질문, 프롬프트 공격 질문을 설계했습니다. 초기 대표 수동 채점은 정확성, 근거 충실성, 완전성, 의도 적합성, 환각 억제, 범위 통제, 표현 품질의 legacy 7개 항목 0~3점 루브릭으로 기록했고, 현재 운영 기준은 점수 항목과 환각/과잉추론, 중대 수치 오류, 라이브 서버 기준 오인, 범위 통제 critical gate를 분리했습니다. 이후 qwen3:4b 로컬 모델에 baseline, BM25 heuristic RAG, BGE-M3 RAG, 구조화 데이터 보강 방식을 적용해 성능 변화를 비교했고, RAG 적용 후 문서 기반 질문 평균이 11.27점에서 18.86점으로 개선되는 것을 확인했습니다. 추가 ablation에서는 BGE-M3를 고정한 뒤 모델, service-tone, structured data를 단계적으로 바꿔 비교했고, `qwen3:4b-instruct-2507-q4_K_M`으로 모델만 바꿔도 format proxy가 9/22에서 22/22로 개선되고 meta reasoning 출력이 13건에서 0건으로 줄어드는 것을 확인했습니다.
+던전앤파이터 공식 업데이트 문서를 기반으로 게임 도메인 LLM 평가 벤치마크를 직접 구성했습니다. Selenium으로 패치노트를 수집하고 Markdown과 metadata로 정리한 뒤, 실제 유저가 물어볼 수 있는 문서 기반 질문 22개와 게임 외 질문, 프롬프트 공격 질문을 설계했습니다. 초기 대표 수동 채점은 정확성, 근거 충실성, 완전성, 의도 적합성, 환각 억제, 범위 통제, 표현 품질의 legacy 7개 항목 0~3점 루브릭으로 기록했고, 현재 운영 기준은 점수 항목과 환각/과잉추론, 중대 수치 오류, 라이브 서버 기준 오인, 범위 통제 critical gate를 분리했습니다. 이후 qwen3:4b 로컬 모델에 baseline, BM25 heuristic RAG, BGE-M3 RAG, 구조화 데이터 보강 방식을 적용해 성능 변화를 비교했고, RAG 적용 후 문서 기반 질문 평균이 11.27점에서 18.86점으로 개선되는 것을 확인했습니다. 추가 ablation에서는 BGE-M3를 고정한 뒤 모델과 structured data를 단계적으로 바꿔 비교했고, `qwen3:4b-instruct-2507-q4_K_M`으로 모델만 바꿔도 format proxy가 9/22에서 22/22로 개선되고 meta reasoning 출력이 13건에서 0건으로 줄어드는 것을 확인했습니다.
 
 후속으로 2026-06 staged corpus 20문항을 추가해 snapshot 구조화 근거와 답변 완전성 규칙을 보강했고, `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정에서 factual proxy와 format proxy 20/20을 확인했습니다. 이후 blind held-out 25문항을 freeze해 ablation을 재실행했고, structured record가 dev 9/20 문항에는 발동했지만 held-out에서는 0/25 문항에 발동해 모든 조건이 23/25로 동률임을 확인했습니다. 별도 diagnostic/probe에서는 record가 의도적으로 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록해 구조화 메커니즘 자체와 record coverage 문제를 분리했습니다. Safety는 keyword gate의 stealth 한계를 확인한 뒤 intent gate를 붙였고, dev/regression 100문항에서는 공격 50/50 차단, 정상 50/50 통과를 기록했습니다. 다만 최종 fresh v6에서는 `intent_rules_v5`가 12/24 attack recall, benign FP 0/24를 기록해 제한적 개선으로 보고했습니다.
 
@@ -10,7 +10,7 @@
 
 ## 30초 면접 답변
 
-이 프로젝트는 던파 업데이트 문서를 기반으로 LLM 답변 품질을 평가하는 포트폴리오입니다. 단순히 챗봇을 만든 것이 아니라, 실제 유저 질문을 벤치마크로 만들고, 정답 근거와 평가 루브릭을 붙여 모델 답변을 채점했습니다. baseline에서는 긴 문서 안에서 근거를 못 찾아 평균 11.27점이었지만, RAG를 붙인 뒤 18.86점까지 개선됐습니다. 이후 BGE-M3 검색과 상점표 구조화 데이터를 추가해 검색과 표 기반 질문의 병목을 따로 분석했고, 최종 instruct 모델과 서비스 톤 프롬프트로 답변 형식 문제를 개선했습니다. 후속 2026-06 staged corpus에서는 structured fix로 dev factual/format proxy 20/20을 만들었지만, blind held-out에서는 record가 전이되지 않는다는 점을 검출해 높은 점수를 과장하지 않도록 라벨링했습니다. 이어 diagnostic probe로 record가 실제 발동하면 structured data가 24/35에서 32/35까지 개선됨을 확인해, 다음 병목이 자동 record coverage임을 분리했습니다. safety는 dev/regression 100문항 통과와 fresh v6 12/24, FP 0/24를 분리해 보고했고, semantic classifier는 retrospective prototype으로만 남겼습니다.
+이 프로젝트는 던파 업데이트 문서를 기반으로 LLM 답변 품질을 평가하는 포트폴리오입니다. 단순히 챗봇을 만든 것이 아니라, 실제 유저 질문을 벤치마크로 만들고, 정답 근거와 평가 루브릭을 붙여 모델 답변을 채점했습니다. baseline에서는 긴 문서 안에서 근거를 못 찾아 평균 11.27점이었지만, RAG를 붙인 뒤 18.86점까지 개선됐습니다. 이후 BGE-M3 검색과 상점표 구조화 데이터를 추가해 검색과 표 기반 질문의 병목을 따로 분석했고, 최종 instruct 모델로 영어 추론과 meta reasoning이 섞이던 답변 형식 문제를 개선했습니다. 후속 2026-06 staged corpus에서는 structured fix로 dev factual/format proxy 20/20을 만들었지만, blind held-out에서는 record가 전이되지 않는다는 점을 검출해 높은 점수를 과장하지 않도록 라벨링했습니다. 이어 diagnostic probe로 record가 실제 발동하면 structured data가 24/35에서 32/35까지 개선됨을 확인해, 다음 병목이 자동 record coverage임을 분리했습니다. safety는 dev/regression 100문항 통과와 fresh v6 12/24, FP 0/24를 분리해 보고했고, semantic classifier는 retrospective prototype으로만 남겼습니다.
 
 ## 깊게 물어봤을 때 설명
 
@@ -20,7 +20,7 @@
 
 다만 상점표 질문에서는 dense retrieval만으로도 부족했습니다. 예를 들어 특정 아이템의 가격과 월간 구매 제한을 묻는 질문은 표의 셀 관계가 중요합니다. 그래서 상점 데이터를 `shop_items.json`으로 구조화했고, Q003에서 누락되던 가격 120개와 월 4회 제한을 함께 회수하는 개선을 확인했습니다.
 
-가장 중요한 발견은 검색만 좋아져도 최종 답변 품질이 자동으로 좋아지는 것은 아니라는 점입니다. BGE-M3를 고정한 ablation에서 qwen3:4b는 근거를 받아도 영어식 사고 과정이나 메타 추론을 출력해 format proxy가 9/22에 그쳤습니다. 모델만 `qwen3:4b-instruct-2507-q4_K_M`으로 바꾸자 format proxy는 22/22, meta reasoning은 0건으로 개선됐습니다. 이후 `--service-tone`, `--service-tone-examples`, `--use-structured-data`를 추가해 서비스 답변 형식과 표형 정보 보완을 함께 확인했습니다. 다만 factual proxy는 token 기반 자동 지표라 false negative가 가능하기 때문에, 최종 결론은 “검색 정확도, 사실성, 표현 형식은 서로 다른 축으로 따로 평가해야 한다”입니다.
+가장 중요한 발견은 검색만 좋아져도 최종 답변 품질이 자동으로 좋아지는 것은 아니라는 점입니다. BGE-M3를 고정한 ablation에서 qwen3:4b는 근거를 받아도 영어식 사고 과정이나 메타 추론을 출력해 format proxy가 9/22에 그쳤습니다. 모델만 `qwen3:4b-instruct-2507-q4_K_M`으로 바꾸자 format proxy는 22/22, meta reasoning은 0건으로 개선됐습니다. 이후 구조화 데이터를 추가해 표형 정보 보완을 따로 확인했습니다. 다만 factual proxy는 token 기반 자동 지표라 false negative가 가능하기 때문에, 최종 결론은 “검색 정확도, 사실성, 표현 형식은 서로 다른 축으로 따로 평가해야 한다”입니다.
 
 ## 한계까지 말하는 답변
 
@@ -46,7 +46,7 @@ BM25 heuristic은 정확한 키워드가 들어간 질문에는 강하지만, �
 
 ### format proxy가 0점이면 실패 아닌가요?
 
-서비스 답변 품질 관점에서는 중요한 실패가 맞습니다. 다만 이 프로젝트에서는 그 실패를 숨기지 않고 병목으로 분리했습니다. 새 ablation 기준으로 기존 qwen3:4b는 format proxy가 9/22였고 meta reasoning 출력도 13건 있었습니다. 이후 `qwen3:4b-instruct-2507-q4_K_M`을 적용하자 format proxy가 22/22로 개선됐습니다. 남은 과제는 모든 답변에 `모험가님` 호칭을 안정적으로 반영하는 톤 세부 조정과, 자동 proxy를 보완할 수동/LLM-as-judge 평가 확대입니다.
+답변 품질 관점에서는 중요한 실패가 맞습니다. 다만 이 프로젝트에서는 그 실패를 숨기지 않고 병목으로 분리했습니다. 새 ablation 기준으로 기존 qwen3:4b는 format proxy가 9/22였고 meta reasoning 출력도 13건 있었습니다. 이후 `qwen3:4b-instruct-2507-q4_K_M`을 적용하자 format proxy가 22/22로 개선됐습니다. 남은 과제는 자동 proxy를 보완할 수동/LLM-as-judge 평가 확대입니다.
 
 ### 이 프로젝트가 직무와 어떻게 연결되나요?
 

@@ -15,7 +15,7 @@
 | ① 수집·벤치마크 설계 | 던파 공식 문서 수집 → Markdown corpus, 벤치마크 22문항, 안정 ID·snapshot·manifest | 재현 가능한 평가 기반 | 높음 |
 | ② Baseline vs RAG | RAG 없이 vs 있이 문서 질문 정확도 비교 | 문서 질문 11.27 → 18.86 / 21 | 높음 |
 | ③ Retriever 비교 | BM25 heuristic vs BGE-M3 | Top-1 hit 19/22 vs 21/22 → BGE-M3 채택 | 높음 |
-| ④ 생성 ablation | `qwen3:4b` → instruct, +service tone, +structured | format 9/22 → 22/22, 메타발화 13 → 0 | 높음 |
+| ④ 생성 ablation | `qwen3:4b` → instruct, +structured | format 9/22 → 22/22, 메타발화 13 → 0 | 높음 |
 | ⑤ Safety gate (키워드) | 인젝션·유출·악용·현금화·OOD 차단 규칙 | 명시적 10/10, stealth 0/10 (한계 기록) | 중간 |
 | ⑥ 2026-06 재평가 | 최신 문서 staging, 20문항 신규 세트로 재실험 | hybrid+structured 16/20, reranker 제외(latency 4.5배) | 높음 |
 | ⑦ 6/30 확장 | 마무리 리뷰 + 편향셋 24 + 과차단셋 20, 정밀도 축 추가 | 편향 24/24 gate PASS, 과차단 1/20 | 중간 |
@@ -68,7 +68,7 @@
 
 1. 제출용: 카카오뱅크 'AI 서비스 품질 및 안전성 평가' 지원(마감 2026-07-13, 과제전형 7/21~25)에 쓸 실험 결과와 보고서 완성.
 2. 내용 완성도: 최신 수치의 test-informed 오염을 held-out 검증으로 정량화하고, "dev vs held-out"을 나란히 보고하는 구조로 전환.
-3. 서술: 완벽한 점수가 아니라 검색 품질·생성 사실성·서비스 형식·안전 recall/precision·편향·자동 judge 한계를 각각 분리 측정하고 실패를 분석하는 흐름을 보여준다.
+3. 서술: 완벽한 점수가 아니라 검색 품질·생성 사실성·답변 형식·안전 recall/precision·편향·자동 judge 한계를 각각 분리 측정하고 실패를 분석하는 흐름을 보여준다.
 
 ---
 

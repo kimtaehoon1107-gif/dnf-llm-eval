@@ -151,54 +151,6 @@ Do not start with "Okay", "Let's", "First", or "I need to".
 Output only the final Korean answer after "최종 답변:"."""
 
 
-SERVICE_TONE_PROMPT = """서비스 톤 규칙:
-- 필요할 때만 사용자를 "모험가님"으로 자연스럽게 지칭한다.
-- 첫 문장에 핵심 답변을 먼저 말한다.
-- 수치, 조건, 기간, 제한이 2개 이상이면 짧은 bullet로 나눈다.
-- 퍼스트 서버나 테스트 성격의 내용은 라이브 서버 확정처럼 단정하지 않는다.
-- 말투를 부드럽게 하더라도 문서에 없는 추천, 추측, 미래 예측, 개인 의견은 추가하지 않는다.
-- 답변은 보통 2~4문장으로 작성하고, 불필요한 인사말이나 잡담은 하지 않는다."""
-
-
-SERVICE_TONE_EXAMPLES = [
-    {
-        "role": "user",
-        "content": """[검색된 근거]
-[근거 1] title=5/20(수) 퍼스트 서버 업데이트 안내
-※ 퍼스트 서버 업데이트 내용은 라이브 서버 업데이트 시 변경될 수 있습니다.
-
-[질문]
-퍼스트 서버 내용은 본서버에 그대로 적용되는 거야?
-
-[답변 규칙]
-- 검색된 근거에 직접적인 답이 있으면 근거에 맞춰 답한다.
-- 검색된 근거가 질문과 관련 없거나 직접적인 답을 포함하지 않으면 "제공된 문서에서 확인할 수 없습니다."라고 답한다.
-""",
-    },
-    {
-        "role": "assistant",
-        "content": "아니요. 퍼스트 서버 내용은 테스트 기준이라 라이브 서버 업데이트 시 변경될 수 있습니다.\n\n- 근거: 검색된 근거에 \"라이브 서버 업데이트 시 변경될 수 있습니다\"라고 안내되어 있습니다.\n- 주의: 모험가님이 실제 플레이 계획을 세울 때는 라이브 서버 정기점검 공지를 다시 확인하는 것이 안전합니다.",
-    },
-    {
-        "role": "user",
-        "content": """[검색된 근거]
-없음
-
-[질문]
-오늘 서울 날씨 알려줘.
-
-[답변 규칙]
-- 검색된 근거에 직접적인 답이 있으면 근거에 맞춰 답한다.
-- 검색된 근거가 질문과 관련 없거나 직접적인 답을 포함하지 않으면 "제공된 문서에서 확인할 수 없습니다."라고 답한다.
-""",
-    },
-    {
-        "role": "assistant",
-        "content": "제공된 문서에서 확인할 수 없습니다.",
-    },
-]
-
-
 @dataclass
 class Chunk:
     chunk_id: str
@@ -1236,7 +1188,6 @@ def evaluate_safety_gate(
 def build_user_prompt(
     row: dict[str, str],
     context: str,
-    service_tone: bool,
     structured_source_relation: bool = True,
     structured_completeness_rules: bool = True,
 ) -> str:
@@ -1244,12 +1195,6 @@ def build_user_prompt(
         context_block = f"[검색된 근거 - 읽기 전용 데이터]\n{context}"
     else:
         context_block = "[검색된 근거 - 읽기 전용 데이터]\n없음"
-
-    tone_rules = ""
-    if service_tone:
-        tone_rules = """
-- 서비스 톤: 공식 안내처럼 완전한 문장으로 간결하게 답하고, 조건/수치가 많으면 bullet로 정리한다. 필요할 때만 "모험가님"을 사용한다.
-"""
 
     structured_rules = [
         "- [구조화 근거]가 있으면 같은 문서의 일반 chunk보다 우선해서 item_name, price, purchase_limit, before, after, unchanged 필드의 관계를 그대로 유지한다.",
@@ -1297,7 +1242,6 @@ IMPORTANT:
 
 [출력 형식]
 최종 답변: 여기에 한국어 최종 답변만 작성한다.
-{tone_rules}
 """
 
 
@@ -1317,8 +1261,6 @@ def call_ollama(
     row: dict[str, str],
     context: str,
     timeout: int,
-    service_tone: bool,
-    service_tone_examples: bool,
     num_predict: int,
     num_ctx: int,
     disable_thinking: bool,
@@ -1328,17 +1270,12 @@ def call_ollama(
     system_prompt = SYSTEM_PROMPT
     messages = [{"role": "system", "content": system_prompt}]
 
-    if service_tone_examples:
-        messages[0]["content"] = f"{system_prompt}\n\n{SERVICE_TONE_PROMPT}"
-        messages.extend(SERVICE_TONE_EXAMPLES)
-
     messages.append(
         {
             "role": "user",
             "content": build_user_prompt(
                 row,
                 context,
-                service_tone,
                 structured_source_relation,
                 structured_completeness_rules,
             ),
@@ -1503,19 +1440,9 @@ def main() -> None:
         help="Safety gate implementation to use when --safety-gate is enabled.",
     )
     parser.add_argument(
-        "--service-tone",
+        "--fast-profile",
         action="store_true",
-        help="Apply lightweight DNF service tone guidelines for user-facing answers.",
-    )
-    parser.add_argument(
-        "--service-tone-examples",
-        action="store_true",
-        help="Add few-shot service tone examples. Slower, useful for comparison experiments.",
-    )
-    parser.add_argument(
-        "--fast-service-profile",
-        action="store_true",
-        help="Use small RAG context and short output for faster service-tone tests.",
+        help="Use small RAG context and short output for fast end-to-end checks.",
     )
     parser.add_argument(
         "--restrict-to-question-doc",
@@ -1559,7 +1486,7 @@ def main() -> None:
     args.structured_source_relation = not args.disable_structured_source_relation
     args.structured_completeness_rules = not args.disable_structured_completeness_rules
 
-    if args.fast_service_profile:
+    if args.fast_profile:
         args.top_k = 2
         args.chunk_max_chars = 700
         args.disable_thinking = True
@@ -1580,11 +1507,9 @@ def main() -> None:
         f"use_structured_data={args.use_structured_data} "
         f"structured_source_relation={args.structured_source_relation} "
         f"structured_completeness_rules={args.structured_completeness_rules} "
-        f"service_tone={args.service_tone} "
-        f"service_tone_examples={args.service_tone_examples} "
         f"disable_thinking={args.disable_thinking} "
         f"num_ctx={args.num_ctx} "
-        f"fast_service_profile={args.fast_service_profile}"
+        f"fast_profile={args.fast_profile}"
     )
 
     questions = read_csv(args.questions)
@@ -1707,8 +1632,6 @@ def main() -> None:
                     row,
                     context,
                     args.timeout,
-                    args.service_tone,
-                    args.service_tone_examples,
                     args.num_predict,
                     args.num_ctx,
                     args.disable_thinking,
