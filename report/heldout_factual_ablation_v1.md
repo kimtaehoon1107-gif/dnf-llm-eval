@@ -45,7 +45,7 @@
 
 held-out 모든 조건이 23/25로 동일한 것은 우연이 아니다. held-out 답변 로그의 `structured_record_ids`를 확인한 결과, **held-out 25문항 중 structured record가 발동한 문항은 0건**이다. 즉 held-out에서는 structured on/off 토글이 no-op이었고, 그래서 조건 간 차이가 나타날 수 없었다.
 
-이것은 "구조화 RAG 기법이 held-out에서 효과가 없다"가 아니라, **"손으로 만든 structured record가 dev 벤치마크 문항에는 붙지만, blind로 만든 새 문항 25개에는 하나도 매칭되지 않는다"**는 뜻이다. record는 dev에서 9/20 문항에 발동했고(unique record id 5개), held-out에서는 0/25 문항에 발동했다. 이 차이는 이 프로젝트에서 관찰한 test-informed 오염을 가장 직접적으로 정량화한 수치다.
+이것은 "구조화 RAG 기법이 held-out에서 효과가 없다"가 아니라, **"손으로 만든 structured record가 dev 벤치마크 문항에는 붙지만, blind로 만든 새 문항 25개에는 하나도 매칭되지 않는다"**는 뜻이다. record는 dev에서 9/20 문항에 발동했고(unique record id 7개: `change_records.json`의 hand-authored 5건 + `shop_items.json`의 기존 상점 record 2건), held-out에서는 0/25 문항에 발동했다. 이 차이는 이 프로젝트에서 관찰한 test-informed 오염을 가장 직접적으로 정량화한 수치다.
 
 따라서 dev의 structured 이득(+3)은 held-out 일반화가 아니라 dev 문항에 매칭된 hand-authored record 효과로 해석하는 편이 안전하다. 구조화 RAG가 기법으로서 일반화되는지는 이 실험으로 답하지 못했으며, 그것을 확인하려면 held-out 문항에 대해서도 blind로 작성했거나 자동 추출한 record가 발동하는 조건에서 재측정해야 한다.
 
