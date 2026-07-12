@@ -127,9 +127,9 @@
 
 (7/4 갱신) "제출 필수" 항목은 모두 끝났고, 애초에 "문서화로 대체"하려 했던 safety held-out도 실제로 v1~v6까지 실행 완료됐다. README/final_*/Pages의 headline도 held-out 실측값 중심으로 갱신했다. 남은 스코프는 백업과 공개 반영이다.
 
-- 완료: 라벨링, factual held-out 1개(v1) 제작·freeze·2×2 ablation, safety held-out v1~v6 전체 사이클, held-out 실측값 문서 반영, review brief 작성.
-- 남음(7/13 전): 지정 파일만 커밋하고 push해 GitHub/Pages를 최신화한다.
-- future work: judge validation, semantic safety v7 사전등록, atomic record extractor 정식 검증. 이번 제출 마무리에서는 새 모델/규칙 튜닝을 하지 않는다.
+- 완료: 라벨링, factual held-out 1개(v1) 제작·freeze·2×2 ablation, safety held-out v1~v6 전체 사이클, held-out 실측값 문서 반영, review brief 작성, `data/README.md`(두 corpus 매핑 문서) 작성, 전부 push 완료(7/4, `35f7088`까지).
+- 남음(7/13 전): 없음. 제출용 문서·수치는 확정 상태.
+- future work(v7 후보, 이번 제출 마무리에서는 진행하지 않음): judge validation, semantic safety v7 사전등록, atomic record extractor 정식 검증, Qwen3Guard(공식 HF `Qwen/Qwen3Guard-Gen-0.6B`) regex 캐스케이드 프로토타입, 학습 없는 게임 도메인 지식 그래프 프로토타입. 전부 사전등록 + fresh blind 검증을 거쳐야 headline으로 쓸 수 있다는 원칙은 동일하게 적용한다.
 
 ---
 
@@ -138,6 +138,7 @@
 - 라벨링: README/final_*/Pages 포함 전부 완료 확인(7/4).
 - factual held-out: v1 완료(`report/heldout_factual_ablation_v1.md`). 구조화 record가 held-out에서 0/25 발동 — 다음은 v2 반복이 아니라 atomic record 자동 extractor.
 - safety held-out: v1~v6 완료, v6를 최종 결과로 라운드 종료(`report/safety_eval_final_report_v6.md`).
-- push: 아직 대기(로컬 커밋 백업 안 됨). public 포트폴리오(main/Pages)는 push 전까지 안 바뀜.
+- push: 완료(7/4, `origin/main` = 로컬 HEAD `35f7088`). public 포트폴리오(main/Pages)에 전부 반영됨.
+- 레포 정리: safety v1~v5 raw 산출물 73개 archive 이동, 회사명 특정 표현 제거, record 개수 오기재 정정, 리뷰어용 문서(PROJECT_REVIEW_BRIEF/application_summary) 최신화, `data/README.md` 신규 작성 — 전부 완료.
 
-다음 액션 순서: (1) 지정 파일만 커밋 → (2) 브랜치 push로 백업 및 GitHub Pages 최신화 → (3) 제출 전 링크/README 최종 확인. custom judge validation, semantic safety v7, atomic record extractor 정식화는 future work로 보류.
+**현재 상태: 제출 준비 완료.** 다음 액션은 필수가 아니라 선택: custom judge validation, semantic safety v7(Qwen3Guard/그래프 프로토타입 포함), atomic record extractor 정식화는 모두 future work로 명시적으로 보류하고, 진행하더라도 새 사전등록 라운드로 시작한다.
