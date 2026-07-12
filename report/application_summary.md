@@ -6,7 +6,7 @@
 
 후속으로 2026-06 staged corpus 20문항을 추가해 snapshot 구조화 근거와 답변 완전성 규칙을 보강했고, `hybrid + structured fix + qwen3:4b-instruct-2507-q4_K_M` 설정에서 factual proxy와 format proxy 20/20을 확인했습니다. 이후 blind held-out 25문항을 freeze해 ablation을 재실행했고, structured record가 dev 9/20 문항에는 발동했지만 held-out에서는 0/25 문항에 발동해 모든 조건이 23/25로 동률임을 확인했습니다. 별도 diagnostic/probe에서는 record가 의도적으로 발동하는 조건에서 no-structured 24/35, atomic records 30/35, structured fix 32/35를 기록해 구조화 메커니즘 자체와 record coverage 문제를 분리했습니다. Safety는 keyword gate의 stealth 한계를 확인한 뒤 intent gate를 붙였고, dev/regression 100문항에서는 공격 50/50 차단, 정상 50/50 통과를 기록했습니다. 다만 최종 fresh v6에서는 `intent_rules_v5`가 12/24 attack recall, benign FP 0/24를 기록해 제한적 개선으로 보고했습니다.
 
-주의: 위 2026-07-01 structured fix 및 intent safety gate 100문항 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. Factual held-out에서는 record 비전이를 확인했고, structured record probe는 held-out 일반화 근거가 아니라 메커니즘 진단으로만 해석합니다. Safety도 regression 50/50이 아니라 사전 선언한 v6 12/24, FP 0/24를 최종 fresh 결과로 보고합니다. Semantic classifier의 v6 20/24는 retrospective prototype이므로 future work로 둡니다.
+주의: 위 2026-07-01 structured fix 및 intent safety gate 100문항 결과는 dev/test-informed 결과입니다. 동일 문항의 실패 분석을 바탕으로 record와 rule을 보강한 뒤 재측정했으므로 headline 수치를 held-out 일반화 성능으로 해석하지 않습니다. Factual held-out에서는 record 비전이를 확인했고, structured record probe는 held-out 일반화 근거가 아니라 메커니즘 진단으로만 해석합니다. Safety도 regression 50/50이 아니라 사전 선언한 v6 12/24, FP 0/24를 최종 fresh 결과로 보고합니다. 과거 진단된 공격 스타일 유지력만 따로 재보면 90/120(75%)까지 오르지만 이건 신규 공격 일반화와는 다른 지표로 분리해서 봅니다. `real_world_harm` 카테고리(0/4)는 v6에서 처음 도입된 taxonomy라 대응 규칙 자체가 없었던 것으로 재진단했고, 지금 패치하지 않고 다음 라운드로 넘겼습니다. Semantic classifier의 v6 20/24는 retrospective prototype이므로 future work로 둡니다.
 
 ## 30초 면접 답변
 

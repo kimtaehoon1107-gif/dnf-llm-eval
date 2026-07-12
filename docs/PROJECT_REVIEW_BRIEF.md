@@ -27,6 +27,7 @@
 | Factual blind held-out | 23 / 25 | 모든 ablation 조건 동률. record가 held-out 0/25 발동 |
 | Structured record probe | 24 / 35 -> 30 / 35 -> 32 / 35 | record가 실제 발동하면 구조화 데이터가 도움. 단, held-out 일반화 근거는 아님 |
 | Safety fresh v6 | 12 / 24, FP 0 / 24 | regression 50/50 대신 사전 선언한 fresh 결과를 최종 safety headline으로 사용 |
+| Safety backward-compat | 90 / 120, FP 1 / 120 | 과거 진단된 공격 스타일 유지력. 신규 공격 일반화(v6)와 분리해서 봄 |
 | Semantic safety prototype | v6 20 / 24, FP 0 / 24 | retrospective prototype. 정식 headline은 v7 사전등록 이후 |
 
 ## 3. 꼭 조심해서 읽을 부분
@@ -35,7 +36,7 @@
 
 `structured record probe 32/35`도 새 held-out이 아닙니다. 이 실험의 목적은 “record가 실제로 발동하는 조건에서는 structured data가 답변 품질에 도움이 되는가?”를 확인하는 diagnostic입니다.
 
-Safety도 같은 원칙을 적용했습니다. intent gate는 dev/regression 100문항에서 50/50을 통과했지만, 최종 성능 headline은 fresh v6의 12/24, FP 0/24로 낮춰 보고합니다. semantic classifier 20/24는 가능성을 보여준 retrospective prototype이지 최종 성능 주장이 아닙니다.
+Safety도 같은 원칙을 적용했습니다. intent gate는 dev/regression 100문항에서 50/50을 통과했지만, 최종 성능 headline은 fresh v6의 12/24, FP 0/24로 낮춰 보고합니다. `real_world_harm` 카테고리(0/4)는 규칙이 약해서가 아니라 v6에서 처음 도입된 taxonomy라 대응 rule 자체가 없었기 때문임을 원문 대조로 재진단했고, 지금 패치하지 않고 v7 스코프로 넘겼습니다. semantic classifier 20/24는 가능성을 보여준 retrospective prototype이지 최종 성능 주장이 아닙니다. 또한 DeepEval faithfulness fail 6건의 자기판정도 독립적으로 재검증해 5/6은 확정, 1/6은 경계 사례로 재분류했습니다.
 
 ## 4. 읽는 순서
 
@@ -48,7 +49,11 @@ Safety도 같은 원칙을 적용했습니다. intent gate는 dev/regression 100
 | 5 | `report/structured_record_probe_v1.md` | record 발동 조건 diagnostic |
 | 6 | `report/safety_eval_final_report_v6.md` | final safety fresh v6 |
 | 7 | `report/safety_eval_process_summary_for_main_project.md` | safety v1~v6 과정 추적 |
-| 8 | `report/session_2026_07_04_research_review_handoff.md` | 7/4 보정 사항과 후속 연구 후보 |
+| 8 | `report/safety_heldout_backward_compat_analysis_v1.md` | 구식 공격 유지력(75~90%) vs 신규 공격 대응(v6, 50%) 분리 재검산 |
+| 9 | `report/heldout_safety_v6_real_world_harm_category_note.md` | real_world_harm 0/4가 규칙 약점이 아니라 taxonomy 신규 도입 때문임을 재진단 |
+| 10 | `report/heldout_factual_v1_manual_rubric_review.md` | factual held-out 25문항 수동 rubric 재채점 |
+| 11 | `report/deepeval_faithfulness_independent_recheck_v1.md` | DeepEval fail 6건 독립 재검증 |
+| 12 | `report/session_2026_07_04_research_review_handoff.md` | 7/4 보정 사항과 후속 연구 후보 |
 
 ## 5. 최종 포지션
 
